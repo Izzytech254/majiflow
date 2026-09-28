@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
+import waterLiquid from "@/assets/images/backdrops/water-liquid.webp";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
@@ -24,6 +26,14 @@ export function Hero() {
 
   return (
     <section className="relative overflow-hidden">
+      <Image
+        src={waterLiquid}
+        alt=""
+        fill
+        sizes="100vw"
+        aria-hidden
+        className="pointer-events-none scale-110 object-cover opacity-20 blur-3xl"
+      />
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-radial-glow" />
       <div
         aria-hidden

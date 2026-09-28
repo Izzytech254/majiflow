@@ -1,4 +1,6 @@
+import Image from "next/image";
 import { ArrowDownRight, ArrowUpRight, Droplets } from "lucide-react";
+import nightWater from "@/assets/images/backdrops/night-water.webp";
 import { Container } from "@/components/ui/container";
 import { SectionLabel } from "@/components/ui/section-label";
 import { Stagger, StaggerItem } from "@/components/ui/animated-section";
@@ -13,6 +15,14 @@ const stats = [
 export function DarkStats() {
   return (
     <section className="relative overflow-hidden bg-ink py-24 text-white lg:py-32">
+      <Image
+        src={nightWater}
+        alt=""
+        fill
+        sizes="100vw"
+        aria-hidden
+        className="pointer-events-none scale-110 object-cover opacity-25 blur-3xl"
+      />
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-dot-pattern opacity-70" />
       <div
         aria-hidden

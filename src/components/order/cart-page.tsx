@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Droplets, Minus, Plus, ShoppingCart, Trash2, Truck } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/feedback";
-import { WaterIcon } from "@/components/shared/water-icon";
+import { productImage } from "@/lib/product-images";
 import { useCart } from "@/components/order/cart-provider";
 import { businesses } from "@/lib/data/businesses";
 import { formatKES } from "@/lib/format";
@@ -75,8 +76,12 @@ export function CartPage() {
               key={`${line.businessId}-${line.productId}`}
               className="flex items-center gap-4 rounded-2xl border border-border bg-white p-4 shadow-card sm:p-5"
             >
-              <span className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-muted text-[#0052FF]/50">
-                <WaterIcon kind={product!.image} className="size-7" />
+              <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted">
+                <Image
+                  src={productImage(product!.image)}
+                  alt=""
+                  className="size-full object-cover"
+                />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[15px] font-semibold text-foreground">{product!.name}</p>
