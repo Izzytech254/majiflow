@@ -28,9 +28,7 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-40 h-14 border-b border-border bg-background/80 backdrop-blur-md sm:h-16">
         <div className="mx-auto flex w-full max-w-[80rem] items-center justify-between gap-3 px-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <Link href="/" aria-label="MajiFlow home" className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand-gradient text-white shadow-accent">
-              <BrandMark className="scale-85" />
-            </Link>
+            <BrandMark className="shrink-0" />
             <nav aria-label="Account" className="hidden overflow-x-auto flex gap-1 px-1 sm:flex">
               {TABS.map((tab) => (
                 <Link

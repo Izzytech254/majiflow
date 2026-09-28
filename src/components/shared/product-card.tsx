@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Minus, Plus, ShoppingCart } from "lucide-react";
 import type { BusinessProduct } from "@/lib/types";
 import { formatKES } from "@/lib/format";
@@ -8,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { WaterIcon } from "@/components/shared/water-icon";
+import { productImage } from "@/lib/product-images";
 import { useCart } from "@/components/order/cart-provider";
 
 interface ProductCardProps {
@@ -31,10 +32,13 @@ export function ProductCard({ product, businessId, className }: ProductCardProps
 
   return (
     <Card className={cn("group flex h-full flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-layered", className)}>
-      <div className="relative flex h-28 items-center justify-center overflow-hidden bg-gradient-to-br from-slate-100 via-white to-[#0052FF]/5" aria-hidden>
-        <WaterIcon
-          kind={product.image}
-          className="size-12 text-[#0052FF]/40 transition-transform duration-500 group-hover:scale-110"
+      <div className="relative h-28 overflow-hidden bg-gradient-to-br from-slate-100 via-white to-[#0052FF]/5" aria-hidden>
+        <Image
+          src={productImage(product.image)}
+          alt=""
+          fill
+          sizes="(min-width: 1280px) 14rem, (min-width: 1024px) 18rem, (min-width: 640px) 45vw, 92vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
         <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-radial-glow" />
         {product.popular && (

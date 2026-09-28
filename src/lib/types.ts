@@ -1,3 +1,5 @@
+import type { StaticImageData } from "next/image";
+
 export type PlanName = "starter" | "growth" | "pro";
 
 export interface Plan {
@@ -94,6 +96,7 @@ export interface Business {
   description: string;
   products: BusinessProduct[];
   accent: string;
+  cover: StaticImageData;
 }
 
 export interface Testimonial {

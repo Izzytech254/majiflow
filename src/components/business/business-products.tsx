@@ -1,18 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { Boxes, Pause, Plus, Trash2, Wrench } from "lucide-react";
+import Image from "next/image";
+import { Pause, Plus, Trash2, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatKES } from "@/lib/format";
+import { productImage } from "@/lib/product-images";
 import { cn } from "@/lib/utils";
 
 const PRODUCTS = [
-  { id: "p1", name: "Refill — 20L can", desc: "Borehole water, refilled on existing can", price: 400, stock: 220, unit: "cans", on: true },
-  { id: "p2", name: "5L bottle", desc: "Chilled, sealed, for fridges", price: 120, stock: 96, unit: "bottles", on: true },
-  { id: "p3", name: "Replacement 20L can — full", desc: "Swap-in full can, keep yours as spare", price: 650, stock: 6, unit: "cans", on: true },
-  { id: "p4", name: "10L bottle (chilled)", desc: "Best for small offices — Nyali favorite", price: 180, stock: 34, unit: "bottles", on: false },
-  { id: "p5", name: "Tabletop dispenser — rental", desc: "Monthly rental with free refills", price: 600, stock: 3, unit: "units", on: true },
+  { id: "p1", name: "Refill — 20L can", desc: "Borehole water, refilled on existing can", price: 400, stock: 220, unit: "cans", image: "can", on: true },
+  { id: "p2", name: "5L bottle", desc: "Chilled, sealed, for fridges", price: 120, stock: 96, unit: "bottles", image: "bottle", on: true },
+  { id: "p3", name: "Replacement 20L can — full", desc: "Swap-in full can, keep yours as spare", price: 650, stock: 6, unit: "cans", image: "can", on: true },
+  { id: "p4", name: "10L bottle (chilled)", desc: "Best for small offices — Nyali favorite", price: 180, stock: 34, unit: "bottles", image: "bottle", on: false },
+  { id: "p5", name: "Tabletop dispenser — rental", desc: "Monthly rental with free refills", price: 600, stock: 3, unit: "units", image: "dispenser", on: true },
 ];
 
 export function BusinessProducts() {
@@ -64,8 +66,8 @@ export function BusinessProducts() {
             )}
           >
             <div className="flex items-start justify-between gap-3">
-              <span className="flex size-10 items-center justify-center rounded-xl bg-[#0052FF]/10 text-[#0052FF]">
-                <Boxes className="size-5" aria-hidden />
+              <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#0052FF]/10">
+                <Image src={productImage(p.image)} alt="" className="size-full object-cover" />
               </span>
               <div className="flex items-center gap-2">
                 <Badge variant={p.on ? "softAccent" : "muted"}>{p.on ? "Live" : "Hidden"}</Badge>

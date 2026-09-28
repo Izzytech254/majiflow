@@ -1,4 +1,10 @@
 import type { Business, BusinessProduct } from "@/lib/types";
+import bioWaterCover from "@/assets/images/business/bio-water-kasarani.webp";
+import truFlowCover from "@/assets/images/business/truflow-nyali.webp";
+import aquaSpringCover from "@/assets/images/business/aqua-spring-kisumu.webp";
+import pureBlueCover from "@/assets/images/business/pure-blue-nakuru.webp";
+import highlandsCover from "@/assets/images/business/highlands-eldoret.webp";
+import dianiCover from "@/assets/images/business/diani-pure.webp";
 
 const product = (
   p: Omit<BusinessProduct, "stockLow">
@@ -24,6 +30,7 @@ export const businesses: Business[] = [
     description:
       "Family-run refill station serving Kasarani and Roysambu for eight years. Every 20-litre can goes through a 12-stage filtration process and is sealed in front of you. Same-day delivery across the estate clusters we serve.",
     accent: "#0052FF",
+    cover: bioWaterCover,
     products: [
       product({
         id: "bw-refill-20",
@@ -98,6 +105,7 @@ export const businesses: Business[] = [
     description:
       "Mombasa's fastest refill delivery network. Chilled options for the coast heat, office contracts for entire office blocks, and a fleet that rides rain or shine.",
     accent: "#0ea5e9",
+    cover: truFlowCover,
     products: [
       product({
         id: "tf-refill-20",
@@ -161,6 +169,7 @@ export const businesses: Business[] = [
     description:
       "The most reviewed refill station in Kisumu. Known for stringent testing — we publish results every month — and friendly riders who call before arrival.",
     accent: "#0891b2",
+    cover: aquaSpringCover,
     products: [
       product({
         id: "as-refill-20",
@@ -214,6 +223,7 @@ export const businesses: Business[] = [
     description:
       "A young, growing station with big ambitions. Clean refills at honest prices for the Milimani and Lanet neighbourhoods.",
     accent: "#2563eb",
+    cover: pureBlueCover,
     products: [
       product({
         id: "pb-refill-20",
@@ -267,6 +277,7 @@ export const businesses: Business[] = [
     description:
       "Bottled from a protected aquifer, treated, and delivered across Eldoret town. Popular with new learner housing in Elgon View.",
     accent: "#4d7cff",
+    cover: highlandsCover,
     products: [
       product({
         id: "ha-refill-20",
@@ -310,6 +321,7 @@ export const businesses: Business[] = [
     description:
       "Serving beach villas and hotels south of Mombasa with premium glass-bottled and can refills, scheduled to your routine.",
     accent: "#0d9488",
+    cover: dianiCover,
     products: [
       product({
         id: "dp-glass",
@@ -319,7 +331,7 @@ export const businesses: Business[] = [
         description: "Premium glass, reusable.",
         category: "bottled",
         stock: 18,
-        image: "bottle",
+        image: "glass",
       }),
       product({
         id: "dp-refill-20",

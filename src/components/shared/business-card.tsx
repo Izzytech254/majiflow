@@ -1,11 +1,11 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, BadgeCheck, MapPin, Star, Truck } from "lucide-react";
 import type { Business } from "@/lib/types";
 import { formatKES } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { WaterIcon } from "@/components/shared/water-icon";
 
 interface BusinessCardProps {
   business: Business;
@@ -30,7 +30,13 @@ export function BusinessCard({ business, className, layout = "vertical" }: Busin
           style={{ backgroundImage: `radial-gradient(ellipse at 20% 20%, ${business.accent}14, transparent 60%)` }}
           aria-hidden
         >
-          <WaterIcon kind="can" className={cn("text-[#0052FF]/50 transition-transform duration-500 group-hover:scale-110", layout === "horizontal" ? "size-14" : "size-16")} />
+          <Image
+            src={business.cover}
+            alt=""
+            fill
+            sizes={layout === "horizontal" ? "13rem" : "(min-width: 1024px) 19rem, (min-width: 640px) 45vw, 92vw"}
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
           {business.verified && (
             <Badge variant="softAccent" className="absolute left-3 top-3">
               <BadgeCheck className="size-3.5" aria-hidden /> Verified
