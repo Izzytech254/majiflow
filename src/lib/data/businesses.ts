@@ -30,6 +30,8 @@ export const businesses: Business[] = [
     description:
       "Family-run refill station serving Kasarani and Roysambu for eight years. Every 20-litre can goes through a 12-stage filtration process and is sealed in front of you. Same-day delivery across the estate clusters we serve.",
     accent: "#0052FF",
+    lat: -1.2305,
+    lng: 36.895,
     cover: bioWaterCover,
     products: [
       product({
@@ -105,6 +107,8 @@ export const businesses: Business[] = [
     description:
       "Mombasa's fastest refill delivery network. Chilled options for the coast heat, office contracts for entire office blocks, and a fleet that rides rain or shine.",
     accent: "#0ea5e9",
+    lat: -4.0305,
+    lng: 39.7215,
     cover: truFlowCover,
     products: [
       product({
@@ -169,6 +173,8 @@ export const businesses: Business[] = [
     description:
       "The most reviewed refill station in Kisumu. Known for stringent testing — we publish results every month — and friendly riders who call before arrival.",
     accent: "#0891b2",
+    lat: -0.0985,
+    lng: 34.7605,
     cover: aquaSpringCover,
     products: [
       product({
@@ -223,6 +229,8 @@ export const businesses: Business[] = [
     description:
       "A young, growing station with big ambitions. Clean refills at honest prices for the Milimani and Lanet neighbourhoods.",
     accent: "#2563eb",
+    lat: -0.286,
+    lng: 36.07,
     cover: pureBlueCover,
     products: [
       product({
@@ -277,6 +285,8 @@ export const businesses: Business[] = [
     description:
       "Bottled from a protected aquifer, treated, and delivered across Eldoret town. Popular with new learner housing in Elgon View.",
     accent: "#4d7cff",
+    lat: 0.5143,
+    lng: 35.2698,
     cover: highlandsCover,
     products: [
       product({
@@ -321,6 +331,8 @@ export const businesses: Business[] = [
     description:
       "Serving beach villas and hotels south of Mombasa with premium glass-bottled and can refills, scheduled to your routine.",
     accent: "#0d9488",
+    lat: -4.2845,
+    lng: 39.5925,
     cover: dianiCover,
     products: [
       product({

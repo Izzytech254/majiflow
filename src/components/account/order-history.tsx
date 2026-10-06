@@ -9,17 +9,19 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState, LoadingState } from "@/components/ui/feedback";
 import { Button } from "@/components/ui/button";
 import { fetchOrders } from "@/lib/orders";
+import { useCustomer } from "@/components/order/customer-provider";
 import { formatKES } from "@/lib/format";
 import type { Order } from "@/lib/types";
 
 const statusOrder = ["pending", "accepted", "out_for_delivery", "delivered", "rejected", "cancelled"] as const;
 
 export function OrderHistoryPage() {
+  const { profile } = useCustomer();
   const [orders, setOrders] = useState<Order[] | null>(null);
 
   useEffect(() => {
-    fetchOrders().then(setOrders);
-  }, []);
+    fetchOrders(profile.phone ? { phone: profile.phone } : {}).then(setOrders);
+  }, [profile.phone]);
 
   return (
     <Container className="py-14 lg:py-20">

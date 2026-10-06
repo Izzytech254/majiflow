@@ -21,6 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { BrandMark } from "@/components/layout/brand-mark";
+import { BusinessProvider, useBusiness } from "@/components/business/business-provider";
 import { Badge } from "@/components/ui/badge";
 import { businesses } from "@/lib/data/businesses";
 import { cn } from "@/lib/utils";
@@ -43,9 +44,17 @@ const LOWER: NavItem[] = [
 ];
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
+  return (
+    <BusinessProvider>
+      <DashboardShellInner>{children}</DashboardShellInner>
+    </BusinessProvider>
+  );
+}
+
+function DashboardShellInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [business, setBusiness] = useState(businesses[1]);
+  const { business, setBusinessId } = useBusiness();
   const [picker, setPicker] = useState(false);
 
   useEffect(() => setOpen(false), [pathname]);
@@ -106,7 +115,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                     role="option"
                     aria-selected={b.slug === business.slug}
                     onMouseDown={() => {
-                      setBusiness(b);
+                      setBusinessId(b.id);
                       setPicker(false);
                     }}
                     className={cn(

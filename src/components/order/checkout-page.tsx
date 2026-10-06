@@ -26,7 +26,7 @@ import { CITIES, ESTATES } from "@/lib/constants";
 import { formatKES } from "@/lib/format";
 import { createOrder, generateOrderNumber } from "@/lib/orders";
 import { easeOut } from "@/lib/constants";
-import type { Order, PaymentMethod, PaymentState } from "@/lib/types";
+import type { Order, PaymentMethod } from "@/lib/types";
 
 type PayState = "idle" | "pending" | "success" | "failed";
 
@@ -102,46 +102,63 @@ export function CheckoutPage() {
 
   const paymentSucceeded = async () => {
     setPayState("success");
-    const order: Order = {
-      id: `order-${Date.now()}`,
-      orderNumber: generateOrderNumber(),
-      businessId: rows[0].business!.id,
-      businessName: rows[0].business!.name,
-      customerName: name,
-      customerPhone: phone,
-      items: rows.map((r) => ({
-        productId: r.product!.id,
-        name: r.product!.name,
-        quantity: r.line.quantity,
-        unitPrice: r.product!.price,
-      })),
-      subtotal,
-      deliveryFee,
-      total,
-      payment: method,
-      paymentState: "success",
-      status: "accepted",
-      address: {
-        label: "Delivery",
-        estate: estate || building || "Estate on file",
-        street: estate,
-        building,
-        floor,
-        notes,
-        phone,
-      },
-      placedAt: new Date().toISOString(),
-      eta: "≈ 50 min",
-    };
-    await createOrder(order);
+    // One order per station so each vendor receives (and tracks) their own.
+    const groups = new Map<string, typeof rows>();
+    for (const r of rows) {
+      const list = groups.get(r.business!.id) ?? [];
+      list.push(r);
+      groups.set(r.business!.id, list);
+    }
+    const created: Order[] = [];
+    for (const group of groups.values()) {
+      const station = group[0].business!;
+      const groupSubtotal = group.reduce((s, r) => s + (r.product?.price ?? 0) * r.line.quantity, 0);
+      const groupFee = groupSubtotal >= station.freeDeliveryAbove ? 0 : station.deliveryFee;
+      const order: Order = {
+        id: `order-${Date.now()}-${station.id}`,
+        orderNumber: generateOrderNumber(),
+        businessId: station.id,
+        businessName: station.name,
+        customerName: name,
+        customerPhone: phone,
+        items: group.map((r) => ({
+          productId: r.product!.id,
+          name: r.product!.name,
+          quantity: r.line.quantity,
+          unitPrice: r.product!.price,
+        })),
+        subtotal: groupSubtotal,
+        deliveryFee: groupFee,
+        total: groupSubtotal + groupFee,
+        payment: method,
+        paymentState: "success",
+        status: "pending",
+        address: {
+          label: "Delivery",
+          estate: estate || building || "Estate on file",
+          street: estate,
+          building,
+          floor,
+          notes,
+          phone,
+        },
+        placedAt: new Date().toISOString(),
+        eta: "≈ 50 min",
+      };
+      created.push(await createOrder(order));
+    }
+    const first = created[0];
     clear();
     saveCustomer({ name, phone });
     toast({
       kind: "success",
       title: "Payment received",
-      message: `Order ${order.orderNumber} is with ${order.businessName}. Track it now.`,
+      message:
+        created.length > 1
+          ? `${created.length} orders placed from ${formatKES(total)}. Start with ${first.orderNumber} — ${first.businessName}.`
+          : `Order ${first.orderNumber} is with ${first.businessName}. Track it now.`,
     });
-    window.setTimeout(() => router.push(`/order/${order.id}`), 900);
+    window.setTimeout(() => router.push(`/order/${first.id}`), 900);
   };
 
   const paymentFailed = () => {

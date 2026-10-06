@@ -1,24 +1,27 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { Check, Filter, MapPin, Phone, Truck, X } from "lucide-react";
 import { OrderStatusBadge } from "@/components/ui/order-status-badge";
 import { Button } from "@/components/ui/button";
-import { formatKES, formatPhone } from "@/lib/format";
-import { dashboardStats } from "@/lib/data/content";
-import type { OrderStatus } from "@/lib/types";
+import { useBusiness } from "@/components/business/business-provider";
+import { fetchOrders, updateOrder } from "@/lib/orders";
+import { nextStatus } from "@/lib/order-status";
+import { formatKES, formatPhone, formatRelativeTime } from "@/lib/format";
+import type { Order, OrderStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 type Tab = "all" | OrderStatus;
 
-const TABS: { id: Tab; label: string; count: number }[] = [
-  { id: "all", label: "All", count: 14 },
-  { id: "pending", label: "Pending", count: dashboardStats.pendingOrders },
-  { id: "accepted", label: "Accepted", count: 6 },
-  { id: "out_for_delivery", label: "Out for delivery", count: dashboardStats.outForDelivery },
-  { id: "delivered", label: "Delivered", count: 40 },
-  { id: "rejected", label: "Rejected", count: 2 },
-  { id: "cancelled", label: "Cancelled", count: 1 },
+const TAB_DEFS: { id: Tab; label: string }[] = [
+  { id: "all", label: "All" },
+  { id: "pending", label: "Pending" },
+  { id: "accepted", label: "Accepted" },
+  { id: "out_for_delivery", label: "Out for delivery" },
+  { id: "delivered", label: "Delivered" },
+  { id: "rejected", label: "Rejected" },
+  { id: "cancelled", label: "Cancelled" },
 ];
 
 type Row = {
@@ -34,39 +37,77 @@ type Row = {
   min: string;
 };
 
-const ROWS: Row[] = [
-  { id: "o1", orderNumber: "#MF-98112", customer: "Jane Wanjiku", phone: "+254 712 345 678", area: "Kasarani EBC", items: "2 × 20L refill", total: 820, status: "pending", time: "10:42", min: "3 min ago" },
-  { id: "o2", orderNumber: "#MF-98111", customer: "Moses Baraka", phone: "+254 733 555 101", area: "Roysambu, Pipeline", items: "1 × 5L bottle", total: 120, status: "pending", time: "10:35", min: "8 min ago" },
-  { id: "o3", orderNumber: "#MF-98110", customer: "Amina Yusuf", phone: "+254 722 111 222", area: "Nyali, Mombasa", items: "3 × 20L refill", total: 1260, status: "accepted", time: "10:28", min: "12 min ago" },
-  { id: "o4", orderNumber: "#MF-98109", customer: "Stephen Gachiri", phone: "+254 701 909 808", area: "Elgon View, Eldoret", items: "1 × dispenser rental", total: 600, status: "out_for_delivery", time: "10:02", min: "30 min ago" },
-  { id: "o5", orderNumber: "#MF-98108", customer: "Lilian Koech", phone: "+254 755 626 414", area: "Milimani, Nakuru", items: "2 × 20L refill", total: 700, status: "out_for_delivery", time: "09:56", min: "36 min ago" },
-  { id: "o6", orderNumber: "#MF-98107", customer: "David Kimani", phone: "+254 700 123 456", area: "Maua Close, Nakuru", items: "3 × 20L refill", total: 1050, status: "delivered", time: "09:31", min: "1h ago" },
-  { id: "o7", orderNumber: "#MF-98106", customer: "Fatuma Ali", phone: "+254 728 990 211", area: "Bamburi, Mombasa", items: "1 × 10L (chilled)", total: 180, status: "delivered", time: "09:18", min: "1h ago" },
-  { id: "o8", orderNumber: "#MF-98105", customer: "Peter Nyongesa", phone: "+254 733 444 555", area: "Highway Estate", items: "4 × 20L refill", total: 1400, status: "cancelled", time: "08:47", min: "2h ago" },
-];
+function toRow(o: Order): Row {
+  return {
+    id: o.id,
+    orderNumber: `#${o.orderNumber}`,
+    customer: o.customerName,
+    phone: o.customerPhone,
+    area: [o.address.estate, o.address.building].filter(Boolean).join(", "),
+    items: o.items.map((i) => `${i.quantity} × ${i.name}`).join(", "),
+    total: o.total,
+    status: o.status,
+    time: new Date(o.placedAt).toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit" }),
+    min: formatRelativeTime(o.placedAt),
+  };
+}
 
 export function BusinessOrders() {
+  const { business } = useBusiness();
   const [tab, setTab] = useState<Tab>("all");
-  const [rows, setRows] = useState(ROWS);
+  const [rows, setRows] = useState<Row[]>([]);
   const [note, setNote] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    const tick = async () => {
+      const orders = await fetchOrders({ businessId: business.id });
+      if (!alive) return;
+      setRows(orders.map(toRow));
+    };
+    void tick();
+    const poll = window.setInterval(() => void tick(), 4000);
+    return () => {
+      alive = false;
+      window.clearInterval(poll);
+    };
+  }, [business.id]);
+
+  const TABS = useMemo(
+    () =>
+      TAB_DEFS.map((t) => ({
+        ...t,
+        count: t.id === "all" ? rows.length : rows.filter((r) => r.status === t.id).length,
+      })),
+    [rows]
+  );
 
   const filtered = useMemo(() => (tab === "all" ? rows : rows.filter((r) => r.status === tab)), [rows, tab]);
 
+  const applyStatus = async (id: string, status: OrderStatus, message: string) => {
+    const updated = await updateOrder(id, { status });
+    if (updated) setRows((all) => all.map((r) => (r.id === id ? toRow(updated) : r)));
+    setNote(message);
+  };
+
   const advance = (id: string) => {
-    setRows((all) =>
-      all.map((r) => {
-        if (r.id !== id) return r;
-        const next: OrderStatus =
-          r.status === "pending" ? "accepted" : r.status === "accepted" ? "out_for_delivery" : r.status === "out_for_delivery" ? "delivered" : r.status;
-        setNote(next === "accepted" ? "Order accepted — customer notified by SMS." : next === "out_for_delivery" ? "Rider assigned and heading out." : next === "delivered" ? "Marked delivered. Payment already settled via M-Pesa." : "");
-        return { ...r, status: next };
-      })
+    const row = rows.find((r) => r.id === id);
+    if (!row) return;
+    const next = nextStatus(row.status);
+    if (next === row.status) return;
+    void applyStatus(
+      id,
+      next,
+      next === "accepted"
+        ? "Order accepted — customer notified by SMS."
+        : next === "out_for_delivery"
+          ? "Rider assigned and heading out."
+          : "Marked delivered. Payment already settled via M-Pesa."
     );
   };
 
   const reject = (id: string) => {
-    setRows((all) => all.map((r) => (r.id === id ? { ...r, status: "rejected" } : r)));
-    setNote("Order rejected — we return the customer's payment automatically.");
+    void applyStatus(id, "rejected", "Order rejected — we return the customer's payment automatically.");
   };
 
   return (
@@ -130,7 +171,12 @@ export function BusinessOrders() {
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-foreground">
                       {o.customer}
-                      <span className="ml-2 font-mono text-xs font-normal text-muted-foreground">{o.orderNumber}</span>
+                      <Link
+                        href={`/business/orders/${o.id}`}
+                        className="ml-2 font-mono text-xs font-normal text-muted-foreground hover:text-[#0052FF] hover:underline"
+                      >
+                        {o.orderNumber}
+                      </Link>
                     </p>
                     <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">

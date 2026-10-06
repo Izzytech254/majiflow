@@ -9,6 +9,7 @@ import {
   Building2,
   Check,
   Download,
+  Radio,
   Search,
   ShieldCheck,
   TrendingUp,
@@ -86,9 +87,17 @@ export function AdminOverview() {
             Every station, subscription and payment across Kenya — in one view.
           </p>
         </div>
-        <Button variant="secondary" className="gap-2" onClick={() => setNote("Platform report exported as CSV.")}>
-          <Download className="size-4" aria-hidden /> Export report
-        </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          <Link
+            href="/admin/orders"
+            className="inline-flex items-center gap-2 rounded-xl border border-[#0052FF]/30 bg-[#0052FF]/5 px-4 py-2.5 text-sm font-semibold text-[#0052FF] transition-colors hover:bg-[#0052FF]/10"
+          >
+            <Radio className="size-4" aria-hidden /> Live orders
+          </Link>
+          <Button variant="secondary" className="gap-2" onClick={() => setNote("Platform report exported as CSV.")}>
+            <Download className="size-4" aria-hidden /> Export report
+          </Button>
+        </div>
       </div>
 
       {note && (

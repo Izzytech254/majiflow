@@ -18,11 +18,16 @@ export function AccountPage() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    fetchOrders().then((o) => {
+    let alive = true;
+    fetchOrders(profile.phone ? { phone: profile.phone } : {}).then((o) => {
+      if (!alive) return;
       setOrders(o);
       setLoaded(true);
     });
-  }, []);
+    return () => {
+      alive = false;
+    };
+  }, [profile.phone]);
 
   const name = profile.name || "Customer";
   const firstName = name.split(" ")[0];

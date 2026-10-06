@@ -58,6 +58,18 @@ export interface DeliveryAddress {
   phone: string;
 }
 
+export interface OrderLocation {
+  lat: number;
+  lng: number;
+  accuracy?: number;
+  at: string;
+}
+
+export interface OrderTimelineEntry {
+  status: OrderStatus;
+  at: string;
+}
+
 export interface Order {
   id: string;
   orderNumber: string;
@@ -75,6 +87,9 @@ export interface Order {
   address: DeliveryAddress;
   placedAt: string;
   eta?: string;
+  timeline?: OrderTimelineEntry[];
+  location?: OrderLocation | null;
+  locationHistory?: OrderLocation[];
 }
 
 export interface Business {
@@ -97,6 +112,8 @@ export interface Business {
   products: BusinessProduct[];
   accent: string;
   cover: StaticImageData;
+  lat: number;
+  lng: number;
 }
 
 export interface Testimonial {
