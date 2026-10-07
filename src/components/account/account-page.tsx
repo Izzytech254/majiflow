@@ -36,37 +36,48 @@ export function AccountPage() {
   const totalSpent = orders.reduce((s, o) => s + o.total, 0);
 
   return (
-    <Container className="py-14 lg:py-20">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-success animate-pulse-dot" /> Signed in
-          </p>
-          <h1 className="mt-2 font-display text-3xl text-foreground sm:text-4xl">
-            Habari, {firstName}
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {profile.phone && <span className="font-medium text-foreground">{profile.phone}</span>}
-            {" · "}Manage your refills from one place.
-          </p>
+    <Container className="py-6 lg:py-8">
+      {/* Greeting hero */}
+      <section className="relative overflow-hidden rounded-2xl border border-border bg-white p-6 shadow-card sm:p-8">
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-radial-glow" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-20 -top-24 size-64 rounded-full bg-[#0052FF]/10 blur-3xl"
+        />
+        <div className="relative flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="inline-flex items-center gap-2 rounded-full border border-success/25 bg-success-soft px-3 py-1 font-mono text-[11px] uppercase tracking-[0.18em] text-success">
+              <span className="size-1.5 rounded-full bg-success animate-pulse-dot" /> Signed in
+            </p>
+            <h1 className="mt-3 font-display text-3xl text-foreground sm:text-4xl">
+              Habari, {firstName}
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {profile.phone && <span className="font-medium text-foreground">{profile.phone}</span>}
+              {" · "}Manage your refills from one place.
+            </p>
+          </div>
+          <Link href="/browse">
+            <Button className="group">
+              Order water
+              <ArrowRight className="size-4" aria-hidden />
+            </Button>
+          </Link>
         </div>
-        <Link href="/browse">
-          <Button className="group">
-            Order water
-            <ArrowRight className="size-4" aria-hidden />
-          </Button>
-        </Link>
-      </div>
+      </section>
 
       {/* Stats */}
-      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { icon: PackageCheck, label: "Active orders", value: String(inFlight.length) },
           { icon: Recycle, label: "Cans delivered", value: String(delivered.reduce((s, o) => s + o.items.reduce((x, i) => x + i.quantity, 0), 0)) },
           { icon: Wallet, label: "Total spent", value: formatKES(totalSpent) },
           { icon: Clock, label: "Orders placed", value: String(orders.length) },
         ].map((s) => (
-          <div key={s.label} className="rounded-2xl border border-border bg-white p-5 shadow-card">
+          <div
+            key={s.label}
+            className="rounded-2xl border border-border bg-white p-5 shadow-card transition-all hover:-translate-y-0.5 hover:shadow-layered"
+          >
             <span className="flex size-9 items-center justify-center rounded-lg bg-[#0052FF]/10 text-[#0052FF]">
               <s.icon className="size-4.5" aria-hidden />
             </span>
@@ -76,7 +87,7 @@ export function AccountPage() {
         ))}
       </div>
 
-      <div className="mt-12 grid gap-8 lg:grid-cols-[1.5fr_0.9fr]">
+      <div className="mt-8 grid gap-8 lg:grid-cols-[1.5fr_0.9fr]">
         {/* Recent orders */}
         <section>
           <div className="flex items-center justify-between">

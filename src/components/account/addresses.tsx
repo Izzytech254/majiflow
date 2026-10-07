@@ -28,8 +28,8 @@ export function AddressesPage() {
   };
 
   return (
-    <Container className="py-14 lg:py-20">
-      <div className="mb-8">
+    <Container className="py-6 lg:py-8">
+      <div className="mb-6">
         <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
           <MapPin className="size-3.5 text-[#0052FF]" aria-hidden /> Saved addresses
         </p>

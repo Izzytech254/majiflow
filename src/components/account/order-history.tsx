@@ -24,8 +24,8 @@ export function OrderHistoryPage() {
   }, [profile.phone]);
 
   return (
-    <Container className="py-14 lg:py-20">
-      <div className="mb-8">
+    <Container className="py-6 lg:py-8">
+      <div className="mb-6">
         <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
           <span className="size-1.5 rounded-full bg-[#0052FF] animate-pulse-dot" /> Order history
         </p>
