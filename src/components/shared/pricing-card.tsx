@@ -78,10 +78,14 @@ export function PricingCard({ plan, annual, onChoose, className }: PricingCardPr
   const CardWrap = plan.highlighted ? GradientBorderCard : "div";
 
   return (
-    <CardWrap className={className}>
-      <div className={cn("flex h-full flex-col p-7", plan.highlighted && "p-[calc(1.75rem-1px)]")}>
-        {inner}
-      </div>
+    <CardWrap
+      className={cn(
+        "flex h-full flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-layered",
+        plan.highlighted ? "p-[calc(1.75rem-1px)]" : "p-7",
+        className
+      )}
+    >
+      {inner}
     </CardWrap>
   );
 }

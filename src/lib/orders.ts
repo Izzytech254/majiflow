@@ -1,92 +1,105 @@
-import type { Order } from "@/lib/types";
+import type { Order, OrderLocation, OrderStatus } from "@/lib/types";
 
 /**
  * Order data layer.
  *
- * Currently persists orders to localStorage so the whole purchase flow
- * (checkout → payment → confirmation → tracking) works end to end without a
- * backend. Swap these functions for API calls when the backend lands — the
- * Order type is the contract.
+ * Thin client over the `/api/orders` route handlers (file-backed store in
+ * `.data/orders.json`), so orders persist across tabs and devices and are
+ * visible to the vendor dashboard and the platform admin in real time.
  */
 
-const ORDERS_KEY = "mf:orders";
+const BASE = "/api/orders";
 
-function readOrders(): Record<string, Order> {
-  if (typeof window === "undefined") return {};
-  try {
-    return JSON.parse(window.localStorage.getItem(ORDERS_KEY) ?? "{}") as Record<string, Order>;
-  } catch {
-    return {};
-  }
-}
-
-function writeOrders(orders: Record<string, Order>) {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
-  } catch {
-    /* noop */
-  }
+export interface OrderQuery {
+  businessId?: string;
+  status?: OrderStatus | string;
+  phone?: string;
 }
 
 export function generateOrderNumber() {
   return `MF-${Math.floor(10000 + Math.random() * 89999)}`;
 }
 
-/** Persist an order and return it as stored. */
+async function getJson<T>(url: string): Promise<T | null> {
+  try {
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) return null;
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
+/** Persist an order server-side and return it as stored. */
 export async function createOrder(input: Order): Promise<Order> {
-  const orders = readOrders();
-  orders[input.id] = input;
-  writeOrders(orders);
-  return input;
+  try {
+    const res = await fetch(BASE, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    if (!res.ok) return input;
+    const data = (await res.json()) as { order: Order };
+    return data.order;
+  } catch {
+    return input;
+  }
 }
 
 /** Fetch a single order. */
 export async function fetchOrder(id: string): Promise<Order | null> {
-  const orders = readOrders();
-  return orders[id] ?? null;
+  const data = await getJson<{ order: Order }>(`${BASE}/${encodeURIComponent(id)}`);
+  return data?.order ?? null;
 }
 
-/** Fetch all orders for the current device (mock customer order history). */
-export async function fetchOrders(): Promise<Order[]> {
-  const orders = readOrders();
-  return Object.values(orders).sort((a, b) => b.placedAt.localeCompare(a.placedAt));
+/** Fetch orders, optionally filtered by station / status / customer phone. */
+export async function fetchOrders(query: OrderQuery = {}): Promise<Order[]> {
+  const params = new URLSearchParams();
+  if (query.businessId) params.set("businessId", query.businessId);
+  if (query.status) params.set("status", query.status);
+  if (query.phone) params.set("phone", query.phone);
+  const qs = params.toString();
+  const data = await getJson<{ orders: Order[] }>(`${BASE}${qs ? `?${qs}` : ""}`);
+  return data?.orders ?? [];
 }
 
-/** Update order status / payment state (used by demo controls & tracking). */
+/** Update order status / payment state (demo controls, vendor actions). */
 export async function updateOrder(id: string, patch: Partial<Order>): Promise<Order | null> {
-  const orders = readOrders();
-  if (!orders[id]) return null;
-  orders[id] = { ...orders[id], ...patch };
-  writeOrders(orders);
-  return orders[id];
+  try {
+    const res = await fetch(`${BASE}/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(patch),
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { order: Order };
+    return data.order;
+  } catch {
+    return null;
+  }
 }
 
-export const DEMO_ORDER: Order = {
-  id: "demo-track",
-  orderNumber: "MF-98121",
-  businessId: "bio-water-kasarani",
-  businessName: "BioWater Refill Station",
-  customerName: "Jane Wanjiku",
-  customerPhone: "+254 712 345 678",
-  items: [
-    { productId: "bw-refill-20", name: "Refill — 20L can", quantity: 2, unitPrice: 350 },
-  ],
-  subtotal: 700,
-  deliveryFee: 120,
-  total: 820,
-  payment: "mpesa",
-  paymentState: "success",
-  status: "out_for_delivery",
-  address: {
-    label: "Home",
-    estate: "Kasarani",
-    street: "Mwiki Road",
-    building: "Singa Court, Block B",
-    floor: "3rd floor",
-    notes: "Call on arrival at the gate",
-    phone: "+254 712 345 678",
-  },
-  placedAt: "2026-09-21T10:42:00.000Z",
-  eta: "11:25",
-};
+/** Stream the customer's live GPS fix for an order. */
+export async function postLocation(id: string, location: OrderLocation): Promise<boolean> {
+  try {
+    const res = await fetch(`${BASE}/${encodeURIComponent(id)}/location`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(location),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+export interface OrderLocationSnapshot {
+  location: OrderLocation | null;
+  history: OrderLocation[];
+  status: OrderStatus;
+}
+
+/** Read the latest live location for an order (vendor / admin views). */
+export async function fetchOrderLocation(id: string): Promise<OrderLocationSnapshot | null> {
+  return getJson<OrderLocationSnapshot>(`${BASE}/${encodeURIComponent(id)}/location`);
+}

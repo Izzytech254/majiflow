@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, type Transition } from "framer-motion";
 import { Menu, ShoppingCart, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { BrandMark } from "@/components/layout/brand-mark";
 import { useCart } from "@/components/order/cart-provider";
 import { useCustomer } from "@/components/order/customer-provider";
-import { easeOut } from "@/lib/constants";
+import { useMotionSafe } from "@/lib/motion";
 
 export const NAV_LINKS = [
   { href: "/browse", label: "Browse water" },
@@ -26,6 +26,7 @@ export function SiteHeader() {
   const { count } = useCart();
   const { profile } = useCustomer();
   const isLoggedIn = Boolean(profile.name);
+  const { reduce, transition } = useMotionSafe();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -42,6 +43,9 @@ export function SiteHeader() {
       document.body.style.overflow = "";
     };
   }, [menuOpen]);
+
+  const navTransition: Transition = transition ?? { duration: 0.32, ease: [0.16, 1, 0.3, 1] };
+  const itemTransition: Transition = reduce ? { duration: 0 } : { delay: 0.04, duration: 0.3, ease: [0.16, 1, 0.3, 1] };
 
   return (
     <header
@@ -129,19 +133,19 @@ export function SiteHeader() {
           <motion.nav
             id="mobile-menu"
             aria-label="Mobile"
-            initial={{ opacity: 0, height: 0 }}
+            initial={reduce ? { opacity: 1, height: "auto" } : { opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.32, ease: easeOut }}
+            exit={reduce ? { opacity: 0, height: 0 } : { opacity: 0, height: 0 }}
+            transition={navTransition}
             className="overflow-hidden border-b border-border bg-background lg:hidden"
           >
             <div className="flex flex-col gap-1 px-5 pb-6 pt-2">
               {NAV_LINKS.map((link, i) => (
                 <motion.div
                   key={link.href}
-                  initial={{ opacity: 0, x: -12 }}
+                  initial={reduce ? { opacity: 1, x: 0 } : { opacity: 0, x: -12 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.04 * i, duration: 0.3, ease: easeOut }}
+                  transition={{ ...itemTransition, delay: 0.04 * i }}
                 >
                   <Link
                     href={link.href}

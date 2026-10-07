@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, type Transition } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { easeOut } from "@/lib/constants";
+import { useMotionSafe } from "@/lib/motion";
 
 interface AccordionItemProps {
   value: string;
@@ -17,6 +17,7 @@ export function AccordionItem({ value, question, children, defaultOpen }: Accord
   const [open, setOpen] = useState(Boolean(defaultOpen));
   const panelId = `panel-${value}`;
   const buttonId = `button-${value}`;
+  const { transition } = useMotionSafe();
 
   return (
     <div
@@ -55,7 +56,7 @@ export function AccordionItem({ value, question, children, defaultOpen }: Accord
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.32, ease: easeOut }}
+            transition={transition ?? { duration: 0.32, ease: [0.16, 1, 0.3, 1] } as Transition}
           >
             <div className="px-5 pb-5 text-sm leading-relaxed text-muted-foreground">{children}</div>
           </motion.div>

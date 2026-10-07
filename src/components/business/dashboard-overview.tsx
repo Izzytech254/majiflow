@@ -1,17 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AlertTriangle, ArrowDownRight, ArrowUpRight, BadgeCheck, Boxes, Package, Repeat, TrendingUp, Users } from "lucide-react";
 import { OrderStatusBadge } from "@/components/ui/order-status-badge";
 import { Button } from "@/components/ui/button";
 import { formatKES } from "@/lib/format";
 import { dashboardStats } from "@/lib/data/content";
 import { cn } from "@/lib/utils";
+import { motion, useInView } from "framer-motion";
 
 export function DashboardOverview() {
   const s = dashboardStats;
   const [toast, setToast] = useState<string | null>(null);
+  const chartRef = useRef<HTMLDivElement>(null);
+  const stockRef = useRef<HTMLDivElement>(null);
+  const popularRef = useRef<HTMLDivElement>(null);
+  const chartInView = useInView(chartRef, { once: true, amount: 0.3 });
+  const stockInView = useInView(stockRef, { once: true, amount: 0.3 });
+  const popularInView = useInView(popularRef, { once: true, amount: 0.3 });
 
   const maxRevenue = Math.max(...s.chart.map((c) => c.revenue));
 
@@ -86,7 +93,7 @@ export function DashboardOverview() {
 
       <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
         {/* Chart */}
-        <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
+        <section ref={chartRef} className="rounded-2xl border border-border bg-white p-6 shadow-card">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="font-display text-lg text-foreground">Revenue this week</h2>
@@ -97,12 +104,18 @@ export function DashboardOverview() {
             </span>
           </div>
           <div className="mt-8 flex h-44 items-end gap-3 sm:gap-4">
-            {s.chart.map((c) => (
+            {s.chart.map((c, i) => (
               <div key={c.period} className="group flex flex-1 flex-col items-center gap-2">
                 <div className="relative flex w-full flex-1 items-end">
-                  <div
+                  <motion.div
+                    style={{
+                      height: `${(c.revenue / maxRevenue) * 100}%`,
+                      transformOrigin: "bottom",
+                    }}
+                    initial={chartInView ? { scaleY: 0 } : false}
+                    animate={chartInView ? { scaleY: 1 } : { scaleY: 1 }}
+                    transition={{ delay: 0.08 * i, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                     className="w-full rounded-t-lg bg-brand-gradient opacity-90 transition-all group-hover:opacity-100 group-hover:shadow-accent"
-                    style={{ height: `${(c.revenue / maxRevenue) * 100}%` }}
                     title={`${formatKES(c.revenue)}`}
                   />
                   <span className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-foreground px-2 py-1 font-mono text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
@@ -116,7 +129,7 @@ export function DashboardOverview() {
         </section>
 
         {/* Stock alerts */}
-        <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
+        <section ref={stockRef} className="rounded-2xl border border-border bg-white p-6 shadow-card">
           <div className="flex items-center justify-between">
             <h2 className="flex items-center gap-2 font-display text-lg text-foreground">
               <AlertTriangle className="size-5 text-warning" aria-hidden /> Stock alerts
@@ -126,7 +139,7 @@ export function DashboardOverview() {
             </Link>
           </div>
           <ul className="mt-5 space-y-4">
-            {s.stockAlerts.map((a) => (
+            {s.stockAlerts.map((a, i) => (
               <li key={a.id} className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-foreground">{a.name}</p>
@@ -135,9 +148,15 @@ export function DashboardOverview() {
                   </p>
                 </div>
                 <div className="h-2 w-20 shrink-0 overflow-hidden rounded-full bg-muted">
-                  <div
+                  <motion.div
+                    style={{
+                      width: `${Math.min(100, (a.stock / a.threshold) * 100)}%`,
+                      transformOrigin: "left",
+                    }}
+                    initial={stockInView ? { scaleX: 0 } : false}
+                    animate={stockInView ? { scaleX: 1 } : { scaleX: 1 }}
+                    transition={{ delay: 0.06 * i, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                     className={cn("h-full rounded-full", a.stock / a.threshold < 0.6 ? "bg-danger" : "bg-warning")}
-                    style={{ width: `${Math.min(100, (a.stock / a.threshold) * 100)}%` }}
                   />
                 </div>
               </li>
@@ -188,7 +207,7 @@ export function DashboardOverview() {
         </section>
 
         {/* Popular products */}
-        <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
+        <section ref={popularRef} className="rounded-2xl border border-border bg-white p-6 shadow-card">
           <div className="flex items-center justify-between">
             <h2 className="flex items-center gap-2 font-display text-lg text-foreground">
               <BadgeCheck className="size-5 text-[#0052FF]" aria-hidden /> Best sellers
@@ -209,9 +228,15 @@ export function DashboardOverview() {
                 </div>
                 <div className="mt-1.5 flex items-center gap-2">
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                    <div
+                    <motion.div
+                      style={{
+                        width: `${(p.revenue / s.popularProducts[0].revenue) * 100}%`,
+                        transformOrigin: "left",
+                      }}
+                      initial={popularInView ? { scaleX: 0 } : false}
+                      animate={popularInView ? { scaleX: 1 } : { scaleX: 1 }}
+                      transition={{ delay: 0.06 * i, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                       className="h-full rounded-full bg-brand-gradient"
-                      style={{ width: `${(p.revenue / s.popularProducts[0].revenue) * 100}%` }}
                     />
                   </div>
                   <span className="font-mono text-[11px] text-muted-foreground">{p.orders} orders</span>

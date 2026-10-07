@@ -9,6 +9,7 @@ const buttonVariants = cva(
     "disabled:pointer-events-none disabled:opacity-50",
     "[&_svg]:shrink-0 [&_svg]:transition-transform [&_svg]:duration-200",
     "hover:[&_svg]:translate-x-0.5 group-hover:[&_svg]:translate-x-0.5",
+    "active:scale-[0.98]",
   ].join(" "),
   {
     variants: {

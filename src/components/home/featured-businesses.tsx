@@ -4,7 +4,7 @@ import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Button } from "@/components/ui/button";
 import { BusinessCard } from "@/components/shared/business-card";
-import { Stagger, StaggerItem } from "@/components/ui/animated-section";
+import { Stagger, StaggerItem, AnimatedSection } from "@/components/ui/animated-section";
 import { featuredBids } from "@/lib/data/businesses";
 import { CITIES } from "@/lib/constants";
 
@@ -42,7 +42,7 @@ export function FeaturedBusinesses() {
           ))}
         </Stagger>
 
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-2">
+        <AnimatedSection className="mt-12 flex flex-wrap items-center justify-center gap-2">
           <span className="inline-flex items-center gap-1.5 pr-1 font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
             <MapPin className="size-3.5 text-[#0052FF]" aria-hidden /> Also live in
           </span>
@@ -55,7 +55,7 @@ export function FeaturedBusinesses() {
               {c}
             </Link>
           ))}
-        </div>
+        </AnimatedSection>
       </Container>
     </section>
   );

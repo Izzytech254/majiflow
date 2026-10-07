@@ -82,10 +82,6 @@
   --animate-spin-slow: spin 32s linear infinite;
   --animate-pulse-dot: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-ping-slow: ping-slow 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
-  --animate-fade-up: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
-  --animate-scale-in: scale-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-  --animate-marquee: marquee 46s linear infinite;
-  --animate-dash: dash 1.6s ease-out both;
 
   @keyframes float {
     0%,
@@ -116,44 +112,6 @@
     100% {
       transform: scale(2.4);
       opacity: 0;
-    }
-  }
-  @keyframes fade-up {
-    from {
-      opacity: 0;
-      transform: translateY(24px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  @keyframes scale-in {
-    from {
-      opacity: 0;
-      transform: scale(0.96) translateY(8px);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
-  }
-  @keyframes marquee {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(-50%);
-    }
-  }
-  @keyframes dash {
-    from {
-      opacity: 0;
-      transform: translateX(32px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
     }
   }
 }

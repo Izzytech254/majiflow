@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Check, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { PricingCard } from "@/components/shared/pricing-card";
@@ -9,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { plans } from "@/lib/data/plans";
 import type { Plan } from "@/lib/types";
+import { AnimatedSection, Stagger, StaggerItem } from "@/components/ui/animated-section";
 
 export function PricingSection() {
   const [billing, setBilling] = useState<"monthly" | "annual">("annual");
@@ -37,7 +39,7 @@ export function PricingSection() {
           description="Flat SaaS pricing in Kenyan Shillings. No setup fees, no commission on orders — the KES you charge customers is the KES you keep."
         />
 
-        <div className="mt-10 flex items-center justify-center gap-3">
+        <AnimatedSection className="mt-10 flex items-center justify-center gap-3">
           <div className="flex items-center rounded-xl border border-border bg-white p-1 shadow-card" role="group" aria-label="Billing period">
             {(["monthly", "annual"] as const).map((b) => (
               <button
@@ -49,7 +51,11 @@ export function PricingSection() {
                 }`}
               >
                 {billing === b && (
-                  <span aria-hidden className="absolute inset-0 rounded-lg bg-brand-gradient shadow-accent" />
+                  <motion.span
+                    aria-hidden
+                    layoutId="billing-toggle"
+                    className="absolute inset-0 rounded-lg bg-brand-gradient shadow-accent"
+                  />
                 )}
                 <span className="relative">
                   {b === "monthly" ? "Monthly" : "Annual"}
@@ -62,17 +68,19 @@ export function PricingSection() {
               </button>
             ))}
           </div>
-        </div>
+        </AnimatedSection>
 
-        <div className="mt-12 grid gap-6 lg:grid-cols-3">
+        <Stagger className="mt-12 grid gap-6 lg:grid-cols-3" stagger={0.08}>
           {plans.map((plan) => (
-            <div key={plan.id} className={plan.highlighted ? "lg:-mt-4" : ""}>
-              <PricingCard plan={plan} annual={billing === "annual"} onChoose={handleChoose} />
-            </div>
+            <StaggerItem key={plan.id}>
+              <div className={plan.highlighted ? "lg:-mt-4" : ""}>
+                <PricingCard plan={plan} annual={billing === "annual"} onChoose={handleChoose} />
+              </div>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
 
-        <div className="mx-auto mt-12 flex max-w-2xl flex-col items-center gap-4 rounded-2xl border border-dashed border-[#0052FF]/30 bg-white/70 p-6 text-center shadow-card sm:flex-row sm:text-left">
+        <AnimatedSection className="mx-auto mt-12 flex max-w-2xl flex-col items-center gap-4 rounded-2xl border border-dashed border-[#0052FF]/30 bg-white/70 p-6 text-center shadow-card sm:flex-row sm:text-left">
           <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-warning-soft text-warning">
             <Sparkles className="size-5" aria-hidden />
           </span>
@@ -85,14 +93,14 @@ export function PricingSection() {
             Start free trial
             <Check className="size-4" aria-hidden />
           </Button>
-        </div>
+        </AnimatedSection>
 
-        <p className="mt-8 text-center text-sm text-muted-foreground">
+        <AnimatedSection className="mt-8 text-center text-sm text-muted-foreground">
           All prices in Kenyan Shillings. Annual billing saves two months per year.{" "}
           <a href="/contact" className="font-semibold text-[#0052FF] hover:underline">
             Talk to us for multi-branch quotes →
           </a>
-        </p>
+        </AnimatedSection>
       </Container>
     </section>
   );

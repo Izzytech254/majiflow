@@ -4,25 +4,30 @@ import nightWater from "@/assets/images/backdrops/night-water.webp";
 import { Container } from "@/components/ui/container";
 import { SectionLabel } from "@/components/ui/section-label";
 import { Stagger, StaggerItem } from "@/components/ui/animated-section";
+import { CountUp } from "@/components/ui/count-up";
+import { ParallaxBackdrop } from "@/components/ui/parallax-backdrop";
+import { AnimatedSection } from "@/components/ui/animated-section";
 
 const stats = [
-  { value: "2.8M+", label: "Cans delivered through the platform", delta: true, up: true },
-  { value: "34%", label: "Average revenue growth for online stations", delta: true, up: true },
-  { value: "68%", label: "Repeat rate from subscribed customers", delta: true, up: true },
-  { value: "98.2%", label: "Orders delivered within the service window", delta: true, up: true },
+  { value: 2.8, decimals: 1, suffix: "M+", label: "Cans delivered through the platform", delta: true, up: true },
+  { value: 34, suffix: "%", label: "Average revenue growth for online stations", delta: true, up: true },
+  { value: 68, suffix: "%", label: "Repeat rate from subscribed customers", delta: true, up: true },
+  { value: 98.2, decimals: 1, suffix: "%", label: "Orders delivered within the service window", delta: true, up: true },
 ];
 
 export function DarkStats() {
   return (
     <section className="relative overflow-hidden bg-ink py-24 text-white lg:py-32">
-      <Image
-        src={nightWater}
-        alt=""
-        fill
-        sizes="100vw"
-        aria-hidden
-        className="pointer-events-none scale-110 object-cover opacity-25 blur-3xl"
-      />
+      <ParallaxBackdrop strength={30} className="absolute inset-0">
+        <Image
+          src={nightWater}
+          alt=""
+          fill
+          sizes="100vw"
+          aria-hidden
+          className="pointer-events-none scale-110 object-cover opacity-25 blur-3xl"
+        />
+      </ParallaxBackdrop>
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-dot-pattern opacity-70" />
       <div
         aria-hidden
@@ -30,11 +35,11 @@ export function DarkStats() {
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-32 top-0 size-[26rem] rounded-full bg-[#4D7CFF]/15 blur-[110px]"
+        className="pointer-events-none absolute -right-32 top-0 size-[26rem] rounded-full bg-[#4D7CFF]/15 blur-[110px] animate-float-slow"
       />
 
       <Container className="relative">
-        <div className="flex flex-col items-start gap-5 md:flex-row md:items-end md:justify-between">
+        <AnimatedSection className="flex flex-col items-start gap-5 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
             <SectionLabel tone="dark" pulse>
               The network in numbers
@@ -47,7 +52,7 @@ export function DarkStats() {
             Metrics across the station network — from Kasarani's refill shops to Nyali's office
             water plans. Updated monthly, shared openly.
           </p>
-        </div>
+        </AnimatedSection>
 
         <Stagger className="mt-14 grid gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((s) => (
@@ -55,7 +60,9 @@ export function DarkStats() {
               <div className="flex h-full flex-col justify-between gap-10 bg-ink p-7 transition-colors duration-300 hover:bg-ink-soft">
                 <Droplets className="size-6 text-[#4D7CFF]/60" aria-hidden />
                 <div>
-                  <p className="font-display text-4xl tracking-tight text-white">{s.value}</p>
+                  <p className="font-display text-4xl tracking-tight text-white">
+                    <CountUp value={s.value} decimals={s.decimals} suffix={s.suffix} />
+                  </p>
                   <div className="mt-2 flex items-center gap-2">
                     <p className="text-sm text-slate-400">{s.label}</p>
                     {s.delta && (

@@ -25,8 +25,8 @@ import { businesses } from "@/lib/data/businesses";
 import { CITIES, ESTATES } from "@/lib/constants";
 import { formatKES } from "@/lib/format";
 import { createOrder, generateOrderNumber } from "@/lib/orders";
-import { easeOut } from "@/lib/constants";
-import type { Order, PaymentMethod, PaymentState } from "@/lib/types";
+import { useMotionSafe } from "@/lib/motion";
+import type { Order, PaymentMethod } from "@/lib/types";
 
 type PayState = "idle" | "pending" | "success" | "failed";
 
@@ -46,6 +46,7 @@ export function CheckoutPage() {
   const [method, setMethod] = useState<PaymentMethod>("mpesa");
   const [touch, setTouch] = useState(false);
   const [payState, setPayState] = useState<PayState>("idle");
+  const { reduce, transition } = useMotionSafe();
 
   const rows = useMemo(
     () =>
@@ -102,46 +103,63 @@ export function CheckoutPage() {
 
   const paymentSucceeded = async () => {
     setPayState("success");
-    const order: Order = {
-      id: `order-${Date.now()}`,
-      orderNumber: generateOrderNumber(),
-      businessId: rows[0].business!.id,
-      businessName: rows[0].business!.name,
-      customerName: name,
-      customerPhone: phone,
-      items: rows.map((r) => ({
-        productId: r.product!.id,
-        name: r.product!.name,
-        quantity: r.line.quantity,
-        unitPrice: r.product!.price,
-      })),
-      subtotal,
-      deliveryFee,
-      total,
-      payment: method,
-      paymentState: "success",
-      status: "accepted",
-      address: {
-        label: "Delivery",
-        estate: estate || building || "Estate on file",
-        street: estate,
-        building,
-        floor,
-        notes,
-        phone,
-      },
-      placedAt: new Date().toISOString(),
-      eta: "≈ 50 min",
-    };
-    await createOrder(order);
+    // One order per station so each vendor receives (and tracks) their own.
+    const groups = new Map<string, typeof rows>();
+    for (const r of rows) {
+      const list = groups.get(r.business!.id) ?? [];
+      list.push(r);
+      groups.set(r.business!.id, list);
+    }
+    const created: Order[] = [];
+    for (const group of groups.values()) {
+      const station = group[0].business!;
+      const groupSubtotal = group.reduce((s, r) => s + (r.product?.price ?? 0) * r.line.quantity, 0);
+      const groupFee = groupSubtotal >= station.freeDeliveryAbove ? 0 : station.deliveryFee;
+      const order: Order = {
+        id: `order-${Date.now()}-${station.id}`,
+        orderNumber: generateOrderNumber(),
+        businessId: station.id,
+        businessName: station.name,
+        customerName: name,
+        customerPhone: phone,
+        items: group.map((r) => ({
+          productId: r.product!.id,
+          name: r.product!.name,
+          quantity: r.line.quantity,
+          unitPrice: r.product!.price,
+        })),
+        subtotal: groupSubtotal,
+        deliveryFee: groupFee,
+        total: groupSubtotal + groupFee,
+        payment: method,
+        paymentState: "success",
+        status: "pending",
+        address: {
+          label: "Delivery",
+          estate: estate || building || "Estate on file",
+          street: estate,
+          building,
+          floor,
+          notes,
+          phone,
+        },
+        placedAt: new Date().toISOString(),
+        eta: "≈ 50 min",
+      };
+      created.push(await createOrder(order));
+    }
+    const first = created[0];
     clear();
     saveCustomer({ name, phone });
     toast({
       kind: "success",
       title: "Payment received",
-      message: `Order ${order.orderNumber} is with ${order.businessName}. Track it now.`,
+      message:
+        created.length > 1
+          ? `${created.length} orders placed from ${formatKES(total)}. Start with ${first.orderNumber} — ${first.businessName}.`
+          : `Order ${first.orderNumber} is with ${first.businessName}. Track it now.`,
     });
-    window.setTimeout(() => router.push(`/order/${order.id}`), 900);
+    window.setTimeout(() => router.push(`/order/${first.id}`), 900);
   };
 
   const paymentFailed = () => {
@@ -311,6 +329,8 @@ export function CheckoutPage() {
             onSuccess={paymentSucceeded}
             onFail={paymentFailed}
             onClose={() => setPayState("idle")}
+            reduce={reduce}
+            transition={transition}
           />
         )}
       </AnimatePresence>
@@ -367,26 +387,37 @@ function PaymentOption({
   );
 }
 
+import type { Transition } from "framer-motion";
+
 function MpesaOverlay({
   phone,
   amount,
   onSuccess,
   onFail,
   onClose,
+  reduce,
+  transition,
 }: {
   phone: string;
   amount: number;
   onSuccess: () => void;
   onFail: () => void;
   onClose: () => void;
+  reduce?: boolean;
+  transition?: Transition;
 }) {
   const [sent, setSent] = useState(false);
+  const r = reduce ?? false;
+  const t = transition ?? { duration: 0.35, ease: [0.16, 1, 0.3, 1] };
+  const overlayTransition: Transition = r ? { duration: 0 } : { duration: 0.2 };
+  const panelTransition: Transition = r ? { duration: 0 } : t;
   return (
     <motion.div
       className="fixed inset-0 z-[80] flex items-center justify-center p-4"
-      initial={{ opacity: 0 }}
+      initial={r ? { opacity: 1 } : { opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      exit={r ? { opacity: 0 } : { opacity: 0 }}
+      transition={overlayTransition}
     >
       <div className="absolute inset-0 bg-ink/70 backdrop-blur-sm" onClick={onClose} aria-hidden />
       <motion.div
@@ -394,10 +425,10 @@ function MpesaOverlay({
         aria-modal="true"
         aria-label="M-Pesa payment"
         className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-layered"
-        initial={{ opacity: 0, y: 24, scale: 0.97 }}
+        initial={r ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 24, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 16 }}
-        transition={{ duration: 0.35, ease: easeOut }}
+        exit={r ? { opacity: 0, y: 0, scale: 1 } : { opacity: 0, y: 16 }}
+        transition={panelTransition}
       >
         <div className="bg-brand-gradient px-6 py-5 text-white">
           <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-white/80">
