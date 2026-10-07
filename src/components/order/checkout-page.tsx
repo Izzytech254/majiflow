@@ -25,7 +25,7 @@ import { businesses } from "@/lib/data/businesses";
 import { CITIES, ESTATES } from "@/lib/constants";
 import { formatKES } from "@/lib/format";
 import { createOrder, generateOrderNumber } from "@/lib/orders";
-import { easeOut } from "@/lib/constants";
+import { useMotionSafe } from "@/lib/motion";
 import type { Order, PaymentMethod } from "@/lib/types";
 
 type PayState = "idle" | "pending" | "success" | "failed";
@@ -46,6 +46,7 @@ export function CheckoutPage() {
   const [method, setMethod] = useState<PaymentMethod>("mpesa");
   const [touch, setTouch] = useState(false);
   const [payState, setPayState] = useState<PayState>("idle");
+  const { reduce, transition } = useMotionSafe();
 
   const rows = useMemo(
     () =>
@@ -328,6 +329,8 @@ export function CheckoutPage() {
             onSuccess={paymentSucceeded}
             onFail={paymentFailed}
             onClose={() => setPayState("idle")}
+            reduce={reduce}
+            transition={transition}
           />
         )}
       </AnimatePresence>
@@ -384,26 +387,37 @@ function PaymentOption({
   );
 }
 
+import type { Transition } from "framer-motion";
+
 function MpesaOverlay({
   phone,
   amount,
   onSuccess,
   onFail,
   onClose,
+  reduce,
+  transition,
 }: {
   phone: string;
   amount: number;
   onSuccess: () => void;
   onFail: () => void;
   onClose: () => void;
+  reduce?: boolean;
+  transition?: Transition;
 }) {
   const [sent, setSent] = useState(false);
+  const r = reduce ?? false;
+  const t = transition ?? { duration: 0.35, ease: [0.16, 1, 0.3, 1] };
+  const overlayTransition: Transition = r ? { duration: 0 } : { duration: 0.2 };
+  const panelTransition: Transition = r ? { duration: 0 } : t;
   return (
     <motion.div
       className="fixed inset-0 z-[80] flex items-center justify-center p-4"
-      initial={{ opacity: 0 }}
+      initial={r ? { opacity: 1 } : { opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      exit={r ? { opacity: 0 } : { opacity: 0 }}
+      transition={overlayTransition}
     >
       <div className="absolute inset-0 bg-ink/70 backdrop-blur-sm" onClick={onClose} aria-hidden />
       <motion.div
@@ -411,10 +425,10 @@ function MpesaOverlay({
         aria-modal="true"
         aria-label="M-Pesa payment"
         className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-layered"
-        initial={{ opacity: 0, y: 24, scale: 0.97 }}
+        initial={r ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 24, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 16 }}
-        transition={{ duration: 0.35, ease: easeOut }}
+        exit={r ? { opacity: 0, y: 0, scale: 1 } : { opacity: 0, y: 16 }}
+        transition={panelTransition}
       >
         <div className="bg-brand-gradient px-6 py-5 text-white">
           <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-white/80">

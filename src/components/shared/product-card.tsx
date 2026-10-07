@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { productImage } from "@/lib/product-images";
 import { useCart } from "@/components/order/cart-provider";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface ProductCardProps {
   product: BusinessProduct;
@@ -68,34 +69,60 @@ export function ProductCard({ product, businessId, className }: ProductCardProps
         </div>
 
         <div className="mt-4 flex items-center gap-2 pt-1">
-          {cartItem ? (
-            <div className="flex flex-1 items-center justify-between rounded-lg border border-border bg-muted/50 p-1">
-              <button
-                onClick={() => updateQuantity(businessId, product.id, cartItem.quantity - 1)}
-                aria-label={`Decrease ${product.name} quantity`}
-                className="flex size-8 items-center justify-center rounded-md border border-border bg-white text-foreground transition-colors hover:border-[#0052FF]/40 hover:text-[#0052FF]"
+          <AnimatePresence mode="wait">
+            {cartItem ? (
+              <motion.div
+                key="stepper"
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 12 }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                className="flex flex-1 items-center justify-between rounded-lg border border-border bg-muted/50 p-1"
               >
-                <Minus className="size-3.5" aria-hidden />
-              </button>
-              <span className="text-sm font-semibold tabular-nums" aria-live="polite">
-                {cartItem.quantity} in cart
-              </span>
-              <button
-                onClick={() => updateQuantity(businessId, product.id, cartItem.quantity + 1)}
-                aria-label={`Increase ${product.name} quantity`}
-                className="flex size-8 items-center justify-center rounded-md border border-border bg-white text-foreground transition-colors hover:border-[#0052FF]/40 hover:text-[#0052FF]"
+                <button
+                  onClick={() => updateQuantity(businessId, product.id, cartItem.quantity - 1)}
+                  aria-label={`Decrease ${product.name} quantity`}
+                  className="flex size-8 items-center justify-center rounded-md border border-border bg-white text-foreground transition-colors hover:border-[#0052FF]/40 hover:text-[#0052FF]"
+                >
+                  <Minus className="size-3.5" aria-hidden />
+                </button>
+                <span className="text-sm font-semibold tabular-nums" aria-live="polite">
+                  {cartItem.quantity} in cart
+                </span>
+                <button
+                  onClick={() => updateQuantity(businessId, product.id, cartItem.quantity + 1)}
+                  aria-label={`Increase ${product.name} quantity`}
+                  className="flex size-8 items-center justify-center rounded-md border border-border bg-white text-foreground transition-colors hover:border-[#0052FF]/40 hover:text-[#0052FF]"
+                >
+                  <Plus className="size-3.5" aria-hidden />
+                </button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="quantity-select"
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 12 }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
               >
-                <Plus className="size-3.5" aria-hidden />
-              </button>
-            </div>
-          ) : (
-            <SelectQuantity value={qty} onChange={setQty} name={product.name} />
-          )}
+                <SelectQuantity value={qty} onChange={setQty} name={product.name} />
+              </motion.div>
+            )}
+          </AnimatePresence>
           {!cartItem && (
-            <Button onClick={handleAdd} className="flex-1 px-3" aria-label={`Add ${product.name} to cart`}>
+            <motion.button
+              key="add-button"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              onClick={handleAdd}
+              className="flex-1 px-3"
+              aria-label={`Add ${product.name} to cart`}
+            >
               <ShoppingCart className="size-4" aria-hidden />
               Add
-            </Button>
+            </motion.button>
           )}
         </div>
       </div>

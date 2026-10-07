@@ -11,7 +11,7 @@ import {
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Button } from "@/components/ui/button";
-import { Stagger, StaggerItem } from "@/components/ui/animated-section";
+import { Stagger, StaggerItem, AnimatedSection } from "@/components/ui/animated-section";
 
 const benefits = [
   {
@@ -57,7 +57,11 @@ export function BusinessBenefits() {
             </Stagger>
           </div>
 
-          <div className="order-1 lg:order-2 lg:sticky lg:top-28">
+          {/* clip (not hidden) keeps the vertical axis intact while containing
+              the horizontal reveal offset, which would otherwise widen the page
+              on narrow viewports. An element cannot clip its own transform, so
+              this has to sit on the parent column. */}
+          <div className="order-1 overflow-x-clip lg:order-2 lg:sticky lg:top-28">
             <SectionHeading
               align="left"
               label="For businesses"
@@ -68,7 +72,7 @@ export function BusinessBenefits() {
               }
               description="MajiFlow is the storefront and back office for Kenya's water refill businesses. You keep the water, the prices and the profits — we handle the storefront, orders and payments."
             />
-            <div className="mt-8 flex flex-col gap-6">
+            <AnimatedSection from="right" className="mt-8 flex flex-col gap-6">
               <div className="flex items-start gap-3 rounded-2xl border border-success/25 bg-success-soft/50 p-4">
                 <Store className="mt-0.5 size-5 shrink-0 text-success" aria-hidden />
                 <div>
@@ -101,7 +105,7 @@ export function BusinessBenefits() {
                   </Link>
                 </p>
               </div>
-            </div>
+            </AnimatedSection>
           </div>
         </div>
       </Container>

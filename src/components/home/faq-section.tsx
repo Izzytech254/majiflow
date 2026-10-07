@@ -4,6 +4,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { Button } from "@/components/ui/button";
 import { Accordion } from "@/components/ui/accordion";
 import { faqs } from "@/lib/data/faqs";
+import { AnimatedSection } from "@/components/ui/animated-section";
 
 export function FaqSection() {
   const items = faqs.slice(0, 6).map((f) => ({ q: f.question, a: f.answer }));
@@ -18,8 +19,10 @@ export function FaqSection() {
             </>
           }
         />
-        <Accordion items={items} className="mt-12" />
-        <div className="mt-10 text-center">
+        <AnimatedSection className="mt-12">
+          <Accordion items={items} />
+        </AnimatedSection>
+        <AnimatedSection delay={0.1} className="mt-10 text-center">
           <p className="text-sm text-muted-foreground">
             Something else on your mind?{" "}
             <Link href="/faqs" className="font-semibold text-[#0052FF] hover:underline">
@@ -31,7 +34,7 @@ export function FaqSection() {
               Talk to our team
             </Button>
           </Link>
-        </div>
+        </AnimatedSection>
       </Container>
     </section>
   );

@@ -5,12 +5,43 @@ import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { easeOut } from "@/lib/constants";
 
+type Reveal = "up" | "left" | "right" | "scale" | "none";
+
 interface AnimatedSectionProps extends ComponentPropsWithoutRef<typeof motion.div> {
-  /** Vertical offset in px for the reveal (disables with reduced motion). */
+  /** Vertical/horizontal offset in px for the reveal (disables with reduced motion). */
   y?: number;
   delay?: number;
   children: ReactNode;
   as?: ElementType;
+  from?: Reveal;
+}
+
+function getInitial(reduce: boolean, y: number, from: Reveal) {
+  if (reduce) return { opacity: 1 };
+  switch (from) {
+    case "left":
+      return { opacity: 0, x: -y };
+    case "right":
+      return { opacity: 0, x: y };
+    case "scale":
+      return { opacity: 0, scale: 0.96, y: y * 0.3 };
+    case "none":
+      return { opacity: 0 };
+    default:
+      return { opacity: 0, y };
+  }
+}
+
+function getAnimate(from: Reveal) {
+  switch (from) {
+    case "left":
+    case "right":
+      return { opacity: 1, x: 0 };
+    case "scale":
+      return { opacity: 1, scale: 1, y: 0 };
+    default:
+      return { opacity: 1, y: 0 };
+  }
 }
 
 export function AnimatedSection({
@@ -18,20 +49,24 @@ export function AnimatedSection({
   y = 28,
   delay = 0,
   children,
+  as,
+  from = "up",
   ...props
 }: AnimatedSectionProps) {
-  const reduce = useReducedMotion();
+  const reduce = useReducedMotion() ?? false;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic motion component access
+  const Comp = as && typeof as === "string" ? (motion as Record<string, any>)[as] : motion.div;
   return (
-    <motion.div
-      initial={reduce ? false : { opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
+    <Comp
+      initial={getInitial(reduce, y, from)}
+      whileInView={getAnimate(from)}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.7, delay, ease: easeOut }}
       className={cn(className)}
       {...props}
     >
       {children}
-    </motion.div>
+    </Comp>
   );
 }
 
@@ -51,6 +86,7 @@ export function Stagger({
   stagger = 0.08,
   amount = 0.2,
 }: StaggerProps) {
+  const reduce = useReducedMotion() ?? false;
   return (
     <motion.div
       initial="hidden"
@@ -58,7 +94,12 @@ export function Stagger({
       viewport={{ once: true, amount }}
       variants={{
         hidden: {},
-        show: { transition: { delayChildren, staggerChildren: stagger } },
+        show: {
+          transition: {
+            delayChildren: reduce ? 0 : delayChildren,
+            staggerChildren: reduce ? 0 : stagger,
+          },
+        },
       }}
       className={className}
     >
@@ -69,17 +110,17 @@ export function Stagger({
 
 interface StaggerItemProps extends ComponentPropsWithoutRef<typeof motion.div> {
   y?: number;
+  from?: Reveal;
 }
 
-export function StaggerItem({ className, y = 24, ...props }: StaggerItemProps) {
-  const reduce = useReducedMotion();
+export function StaggerItem({ className, y = 24, from = "up", ...props }: StaggerItemProps) {
+  const reduce = useReducedMotion() ?? false;
   return (
     <motion.div
       variants={{
-        hidden: reduce ? { opacity: 1 } : { opacity: 0, y },
+        hidden: reduce ? { opacity: 1 } : getInitial(false, y, from),
         show: {
-          opacity: 1,
-          y: 0,
+          ...getAnimate(from),
           transition: { duration: 0.65, ease: easeOut },
         },
       }}

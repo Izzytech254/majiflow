@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, type ReactNode } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, type Transition } from "framer-motion";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { easeOut } from "@/lib/constants";
+import { useMotionSafe } from "@/lib/motion";
 
 interface DialogProps {
   open: boolean;
@@ -17,6 +17,7 @@ interface DialogProps {
 
 export function Dialog({ open, onClose, title, description, children, className }: DialogProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const { reduce, transition } = useMotionSafe();
 
   const onKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -54,6 +55,9 @@ export function Dialog({ open, onClose, title, description, children, className 
     };
   }, [open, onKeyDown]);
 
+  const overlayTransition: Transition = reduce ? { duration: 0 } : { duration: 0.2 };
+  const panelTransition: Transition = transition ?? { duration: 0.35, ease: [0.16, 1, 0.3, 1] };
+
   return (
     <AnimatePresence>
       {open && (
@@ -62,7 +66,7 @@ export function Dialog({ open, onClose, title, description, children, className 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
+          transition={overlayTransition}
         >
           <div
             className="absolute inset-0 bg-ink/60 backdrop-blur-sm"
@@ -82,7 +86,7 @@ export function Dialog({ open, onClose, title, description, children, className 
             initial={{ opacity: 0, y: 32, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.98 }}
-            transition={{ duration: 0.35, ease: easeOut }}
+            transition={panelTransition}
           >
             <div className="flex items-start justify-between gap-4 border-b border-border p-5">
               <div>
