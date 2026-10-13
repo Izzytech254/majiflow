@@ -1,47 +1,52 @@
 "use client";
 
-import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ComponentPropsWithoutRef,
+  type CSSProperties,
+  type ElementType,
+  type ReactNode,
+} from "react";
 import { cn } from "@/lib/utils";
-import { easeOut } from "@/lib/constants";
 
 type Reveal = "up" | "left" | "right" | "scale" | "none";
 
-interface AnimatedSectionProps extends ComponentPropsWithoutRef<typeof motion.div> {
-  /** Vertical/horizontal offset in px for the reveal (disables with reduced motion). */
+/** Reveal an element once it scrolls into view, using CSS transitions only. */
+function useInView<T extends HTMLElement>(margin = "-80px", threshold = 0.2) {
+  const ref = useRef<T>(null);
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      setShown(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setShown(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: margin, threshold }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [margin, threshold]);
+
+  return { ref, shown };
+}
+
+interface AnimatedSectionProps extends ComponentPropsWithoutRef<"div"> {
+  /** Vertical/horizontal offset in px for the reveal. */
   y?: number;
   delay?: number;
   children: ReactNode;
   as?: ElementType;
   from?: Reveal;
-}
-
-function getInitial(reduce: boolean, y: number, from: Reveal) {
-  if (reduce) return { opacity: 1 };
-  switch (from) {
-    case "left":
-      return { opacity: 0, x: -y };
-    case "right":
-      return { opacity: 0, x: y };
-    case "scale":
-      return { opacity: 0, scale: 0.96, y: y * 0.3 };
-    case "none":
-      return { opacity: 0 };
-    default:
-      return { opacity: 0, y };
-  }
-}
-
-function getAnimate(from: Reveal) {
-  switch (from) {
-    case "left":
-    case "right":
-      return { opacity: 1, x: 0 };
-    case "scale":
-      return { opacity: 1, scale: 1, y: 0 };
-    default:
-      return { opacity: 1, y: 0 };
-  }
 }
 
 export function AnimatedSection({
@@ -53,16 +58,20 @@ export function AnimatedSection({
   from = "up",
   ...props
 }: AnimatedSectionProps) {
-  const reduce = useReducedMotion() ?? false;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic motion component access
-  const Comp = as && typeof as === "string" ? (motion as Record<string, any>)[as] : motion.div;
+  const { ref, shown } = useInView<HTMLDivElement>();
+  const Comp = (as ?? "div") as ElementType;
+
   return (
     <Comp
-      initial={getInitial(reduce, y, from)}
-      whileInView={getAnimate(from)}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.7, delay, ease: easeOut }}
-      className={cn(className)}
+      ref={ref}
+      data-from={from}
+      style={
+        {
+          "--reveal-y": `${y}px`,
+          transitionDelay: `${delay}s`,
+        } as CSSProperties
+      }
+      className={cn("reveal", shown && "is-in", className)}
       {...props}
     >
       {children}
@@ -78,7 +87,7 @@ interface StaggerProps {
   amount?: number;
 }
 
-/** Parent wrapper that staggers its direct motion children. */
+/** Parent wrapper that staggers its direct children as they scroll into view. */
 export function Stagger({
   children,
   className,
@@ -86,46 +95,28 @@ export function Stagger({
   stagger = 0.08,
   amount = 0.2,
 }: StaggerProps) {
-  const reduce = useReducedMotion() ?? false;
+  const { ref, shown } = useInView<HTMLDivElement>("-80px", amount);
+
   return (
-    <motion.div
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, amount }}
-      variants={{
-        hidden: {},
-        show: {
-          transition: {
-            delayChildren: reduce ? 0 : delayChildren,
-            staggerChildren: reduce ? 0 : stagger,
-          },
-        },
-      }}
-      className={className}
+    <div
+      ref={ref}
+      style={
+        {
+          "--stagger-base": `${delayChildren}s`,
+          "--stagger-step": `${stagger}s`,
+        } as CSSProperties
+      }
+      className={cn("stagger", shown && "is-in", className)}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
 
-interface StaggerItemProps extends ComponentPropsWithoutRef<typeof motion.div> {
-  y?: number;
-  from?: Reveal;
-}
-
-export function StaggerItem({ className, y = 24, from = "up", ...props }: StaggerItemProps) {
-  const reduce = useReducedMotion() ?? false;
+export function StaggerItem({ className, children, ...props }: ComponentPropsWithoutRef<"div">) {
   return (
-    <motion.div
-      variants={{
-        hidden: reduce ? { opacity: 1 } : getInitial(false, y, from),
-        show: {
-          ...getAnimate(from),
-          transition: { duration: 0.65, ease: easeOut },
-        },
-      }}
-      className={className}
-      {...props}
-    />
+    <div className={className} {...props}>
+      {children}
+    </div>
   );
 }

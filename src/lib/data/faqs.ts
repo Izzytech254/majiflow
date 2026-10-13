@@ -1,75 +1,85 @@
 import type { Faq } from "@/lib/types";
 
+/**
+ * Answers to the questions customers and station owners ask most.
+ */
 export const faqs: Faq[] = [
   {
     id: "f1",
     group: "customers",
     question: "How do I order water?",
     answer:
-      "Choose your location, pick a refill station near you, add cans or bottles to your cart, pay with M-Pesa, and track the order until the rider knocks at your door.",
+      "Choose your location, pick a refill station, add cans or bottles to your cart and continue to checkout. You see the delivery fee for each station before you pay, and your order can be tracked from placed to delivered.",
   },
   {
     id: "f2",
     group: "customers",
     question: "What does delivery cost?",
     answer:
-      "Delivery fees are set by each refill business and shown on the business page before you order. Most stations in Nairobi and Mombasa charge between KES 100 and KES 200 — and many give free delivery on orders above a minimum, usually KES 1,000.",
+      "Each station sets its own delivery fee and free-delivery minimum, and both are shown on the station page and in your cart before you order. A cart with items from two stations is charged each station's fee separately, and each station's minimum applies to its own items only.",
   },
   {
     id: "f3",
     group: "customers",
     question: "Can I pay with M-Pesa?",
     answer:
-      "Yes. Choose M-Pesa at checkout and confirm the STK push on your phone. Card payments are also available at stations that have enabled them.",
+      "Yes. You can pay with M-Pesa at checkout and receive a confirmation on your phone once the payment goes through. Card payment is available for stations that accept it.",
   },
   {
     id: "f4",
     group: "customers",
-    question: "How do I manage my subscription for regular delivery?",
+    question: "Can I schedule regular deliveries?",
     answer:
-      "On the order confirmation page, choose how often you want regular refills — daily, weekly or two-weekly. We schedule, remind you, and you can pause anytime from your dashboard.",
+      "Recurring refill schedules are on our roadmap. For now each order is placed on its own, so you stay in control of when and how much you order.",
   },
   {
     id: "f5",
     group: "customers",
     question: "What if the water doesn't arrive?",
     answer:
-      "Every order is live-tracked. If anything goes wrong, the business's support number is one tap away, and MajiFlow's help desk will step in if the order isn't resolved.",
+      "Open the order from your account to see its status and contact the station directly. If you need more help, our support team is reachable from the contact page.",
   },
   {
     id: "f6",
     group: "businesses",
     question: "How do I register my refill business?",
     answer:
-      "Start a 14-day free trial, add your business details, set your delivery areas and fees, list your products in KES, and go live. Most stations are online within an hour.",
+      "Use the business sign-up to add your station details, products, prices and delivery areas. Your storefront goes live on MajiFlow as soon as your profile is complete.",
   },
   {
     id: "f7",
     group: "businesses",
     question: "How do I get paid for orders?",
     answer:
-      "Customers pay with M-Pesa or card before delivery. Funds settle into your M-Pesa till or Paybill directly. Your dashboard shows every payment, automatically reconciled against orders.",
+      "Customer payments are collected at checkout and settled to your station account. Your dashboard shows every order, its payment state and the total for the period.",
+  },
+  {
+    id: "f7b",
+    group: "businesses",
+    question: "Do I get my own dashboard and analytics?",
+    answer:
+      "Yes. Every station gets a dashboard with orders, analytics, customer lists and stock alerts, all built from the orders the station receives.",
   },
   {
     id: "f8",
     group: "businesses",
-    question: "Can I cancel my subscription?",
+    question: "Can I cancel a subscription?",
     answer:
-      "Anytime, from Billing settings. Your business profile stays live until the end of the billing period, and you can export all of your data.",
+      "You can cancel at any time from your billing settings. Your station stays live until the end of the billing period, and you can export your data before you go.",
   },
   {
     id: "f9",
     group: "billing",
     question: "Is there a free trial?",
     answer:
-      "Every plan includes a 14-day free trial with no card required. You only choose a plan when you're ready to stay online.",
+      "Yes. Every plan starts with a 14-day free trial so you can run real orders before you pay anything.",
   },
   {
     id: "f10",
     group: "billing",
     question: "Are there setup or commission fees?",
     answer:
-      "No setup fees and no commission on orders. You pay a flat monthly or annual SaaS fee. The sale price you set is the price you keep.",
+      "There are no setup fees and no commission. You pay a flat monthly subscription and keep the full price your customers pay for water.",
   },
 ];
 

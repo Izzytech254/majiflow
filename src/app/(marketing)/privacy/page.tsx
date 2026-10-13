@@ -1,20 +1,28 @@
 import { ContentPage, ProseList, ProseSection } from "@/components/shared/content-page";
+import { LEGAL_UPDATED } from "@/lib/constants";
 
 export default function Privacy() {
   return (
     <ContentPage
       label="Legal"
       title="Privacy Policy"
-      description="How MajiFlow handles the personal data of customers, business owners and staff — what we collect, why, and how you stay in control."
-      updated="21 September 2026"
+      description="How MajiFlow collects, uses, and protects your personal information."
+      updated={LEGAL_UPDATED}
     >
-      <ProseSection title="What we collect">
+      <ProseSection title="Privacy Policy">
+        <p>
+          MajiFlow collects only the information we need to run your orders and your account. This
+          policy explains what we store, how we use it and the choices you have.
+        </p>
+      </ProseSection>
+
+      <ProseSection title="What we store">
         <ProseList
           items={[
-            "Account data — name, phone number, email and saved delivery addresses",
-            "Order data — products ordered, amounts, delivery addresses and payment records",
-            "Business data — business profile, menu, prices, delivery zones and staff accounts",
-            "Usage data — pages visited and basic device/browser information for performance",
+            "Orders you place - the items, quantities, station, totals and delivery fee, written to the order store",
+            "Status history - each change an order goes through, so the tracking page can show it",
+            "Account details - your name, phone number and delivery addresses",
+            "Local browser state - your cart and the preferences you toggle, kept in localStorage on your device",
           ]}
         />
       </ProseSection>
@@ -22,38 +30,36 @@ export default function Privacy() {
       <ProseSection title="How we use it">
         <ProseList
           items={[
-            "To fulfil orders — your name, phone and address are shared with the refill business fulfilling your order",
-            "To process payments through M-Pesa or card settlement providers",
-            "To send order updates, receipts, reminders and platform notices by SMS, WhatsApp or email",
-            "To improve the service — anonymised analytics only",
+            "To take, route and deliver your orders and keep you updated on their status",
+            "To let stations manage the orders they receive and support you if something goes wrong",
+            "To improve the platform and understand how it is used, in aggregate",
           ]}
         />
       </ProseSection>
 
-      <ProseSection title="Your control">
+      <ProseSection title="What we do not do">
+        <ProseList
+          items={[
+            "We do not sell your personal information to third parties",
+            "We do not store card numbers - payments are handled by our payment providers",
+            "We do not send marketing messages without your consent",
+          ]}
+        />
+      </ProseSection>
+
+      <ProseSection title="Clearing your data">
         <p>
-          You can update or delete your saved addresses and account from your dashboard. Businesses
-          can export and delete their data from Billing settings. To request account deletion or
-          data correction, email privacy@majiflow.co.ke and we'll act within 30 days.
+          You can request a copy of your data or ask us to delete it by contacting support. Clearing
+          your browser&apos;s site data removes the cart and preferences held in localStorage on your
+          device.
         </p>
       </ProseSection>
 
-      <ProseSection title="What we don't do">
-        <ProseList
-          items={[
-            "We never sell your personal data.",
-            "We never share your data with third parties for their own marketing.",
-            "We never require payment card numbers to be typed into our website — payments go through M-Pesa or PCI-compliant processors.",
-            "We never use your data to judge a business's ratings.",
-          ]}
-        />
-      </ProseSection>
-
-      <ProseSection title="Data protection">
+      <ProseSection title="Your rights">
         <p>
-          We follow the Kenya Data Protection Act, 2019. Data is stored on encrypted infrastructure
-          with access limited to vetted staff. SMS and delivery records are retained no longer than
-          necessary for reconciliation and tax purposes.
+          You have the right to access, correct and delete your personal information, and to object
+          to certain processing, under the Kenya Data Protection Act, 2019. Contact us to exercise
+          any of these rights.
         </p>
       </ProseSection>
     </ContentPage>

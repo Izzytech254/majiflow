@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowRight, Clock, MapPin, PackageCheck, Plus, Recycle, Wallet } from "lucide-react";
+import { Clock, MapPin, PackageCheck, Plus, Recycle, Wallet } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { OrderStatusBadge } from "@/components/ui/order-status-badge";
@@ -42,12 +42,12 @@ export function AccountPage() {
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-radial-glow" />
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-20 -top-24 size-64 rounded-full bg-[#0052FF]/10 blur-3xl"
+          className="pointer-events-none absolute -right-20 -top-24 size-64 rounded-full bg-transparent/10 blur-3xl"
         />
         <div className="relative flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="inline-flex items-center gap-2 rounded-full border border-success/25 bg-success-soft px-3 py-1 font-mono text-[11px] uppercase tracking-[0.18em] text-success">
-              <span className="size-1.5 rounded-full bg-success animate-pulse-dot" /> Signed in
+            <p className="inline-flex items-center gap-2 rounded-full border border-success/25 bg-transparent-soft px-3 py-1 font-mono text-[11px] uppercase tracking-[0.18em] text-success">
+              <span className="size-1.5 rounded-full bg-foreground animate-pulse-dot" /> Signed in
             </p>
             <h1 className="mt-3 font-display text-3xl text-foreground sm:text-4xl">
               Habari, {firstName}
@@ -60,7 +60,6 @@ export function AccountPage() {
           <Link href="/browse">
             <Button className="group">
               Order water
-              <ArrowRight className="size-4" aria-hidden />
             </Button>
           </Link>
         </div>
@@ -78,7 +77,7 @@ export function AccountPage() {
             key={s.label}
             className="rounded-2xl border border-border bg-white p-5 shadow-card transition-all hover:-translate-y-0.5 hover:shadow-layered"
           >
-            <span className="flex size-9 items-center justify-center rounded-lg bg-[#0052FF]/10 text-[#0052FF]">
+            <span className="flex size-9 items-center justify-center rounded-lg bg-transparent/10 text-[#0052FF]">
               <s.icon className="size-4.5" aria-hidden />
             </span>
             <p className="mt-3 font-display text-2xl text-foreground">{s.value}</p>
@@ -92,8 +91,10 @@ export function AccountPage() {
         <section>
           <div className="flex items-center justify-between">
             <h2 className="font-display text-xl text-foreground">Recent orders</h2>
-            <Link href="/account/orders" className="text-sm font-semibold text-[#0052FF] hover:underline">
-              View all →
+            <Link href="/account/orders">
+              <Button variant="secondary" size="sm" className="group gap-1.5">
+                View all
+              </Button>
             </Link>
           </div>
           {!loaded ? (
@@ -148,8 +149,10 @@ export function AccountPage() {
         <section>
           <div className="flex items-center justify-between">
             <h2 className="font-display text-xl text-foreground">Saved addresses</h2>
-            <Link href="/account/addresses" className="text-sm font-semibold text-[#0052FF] hover:underline">
-              Manage →
+            <Link href="/account/addresses">
+              <Button variant="secondary" size="sm" className="group gap-1.5">
+                Manage
+              </Button>
             </Link>
           </div>
           <div className="mt-4 flex flex-col gap-3">
@@ -158,7 +161,7 @@ export function AccountPage() {
                 href="/account/addresses"
                 className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-white p-8 text-center transition-colors hover:border-[#0052FF]/40"
               >
-                <Plus className="size-6 text-muted-foreground" aria-hidden />
+                <Plus className="size-6 text-black" aria-hidden />
                 <p className="text-sm font-medium text-muted-foreground">
                   No saved addresses yet
                 </p>
@@ -184,7 +187,7 @@ export function AccountPage() {
 
           {/* Reorder shortcut */}
           {orders.length > 0 && (
-            <div className="mt-6 rounded-2xl border border-[#0052FF]/20 bg-[#0052FF]/5 p-5">
+            <div className="mt-6 rounded-2xl border border-[#0052FF]/20 bg-transparent/5 p-5">
               <p className="font-mono text-[11px] uppercase tracking-widest text-[#0052FF]">
                 Quick reorder
               </p>
@@ -195,8 +198,7 @@ export function AccountPage() {
               </p>
               <Link href={`/order/${orders[0].id}`} className="mt-3 inline-flex">
                 <Button variant="outline" size="sm" className="group">
-                  Reorder — {formatKES(orders[0].total)}
-                  <ArrowRight className="size-4" aria-hidden />
+                  Reorder - {formatKES(orders[0].total)}
                 </Button>
               </Link>
             </div>

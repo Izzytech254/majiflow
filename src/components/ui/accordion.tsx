@@ -39,7 +39,7 @@ export function AccordionItem({ value, question, children, defaultOpen }: Accord
             className={cn(
               "flex size-7 shrink-0 items-center justify-center rounded-full border transition-all duration-300",
               open
-                ? "rotate-180 border-[#0052FF] bg-brand-gradient text-white"
+                ? "rotate-180 border-[#0052FF] bg-[#0052FF] text-white"
                 : "border-border text-muted-foreground"
             )}
           >

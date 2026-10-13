@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Button } from "@/components/ui/button";
@@ -17,19 +17,17 @@ export function FeaturedBusinesses() {
           <SectionHeading
             align="left"
             className="max-w-xl"
-            label="Near you, right now"
-            pulseLabel
+            label="Featured stations"
             title={
               <>
-                Refill stations <span className="text-gradient">worth trusting</span> in your estate
+                Refill stations <span className="text-gradient">near you</span>
               </>
             }
-            description="Every station is independently owned, verified and rated by the neighbours who use it."
+            description="Trusted refill stations across Kenya, each with its own products, prices and delivery fee."
           />
           <Link href="/browse" className="hidden shrink-0 md:inline-flex">
             <Button size="lg" variant="secondary" className="group">
               Browse all stations
-              <ArrowRight className="size-4" aria-hidden />
             </Button>
           </Link>
         </div>
@@ -42,9 +40,10 @@ export function FeaturedBusinesses() {
           ))}
         </Stagger>
 
-        <AnimatedSection className="mt-12 flex flex-wrap items-center justify-center gap-2">
+        <AnimatedSection className="mt-12 flex flex-col items-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-2">
           <span className="inline-flex items-center gap-1.5 pr-1 font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-            <MapPin className="size-3.5 text-[#0052FF]" aria-hidden /> Also live in
+            <MapPin className="size-3.5 text-[#0052FF]" aria-hidden /> Cities we cover
           </span>
           {CITIES.map((c) => (
             <Link
@@ -55,6 +54,7 @@ export function FeaturedBusinesses() {
               {c}
             </Link>
           ))}
+          </div>
         </AnimatedSection>
       </Container>
     </section>

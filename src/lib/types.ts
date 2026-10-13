@@ -9,7 +9,10 @@ export interface Plan {
   monthlyPrice: number;
   annualPrice: number;
   trialDays: number;
+  /** What the plan includes today. */
   features: string[];
+  /** Announced on the pricing pages and shipping next. */
+  planned?: string[];
   highlighted?: boolean;
   cta: string;
   audience: string;
@@ -28,6 +31,25 @@ export interface BusinessProduct {
   popular?: boolean;
   image: string;
 }
+
+export type Weekday =
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday"
+  | "sunday";
+
+export interface OperatingHours {
+  /** Local opening time in 24-hour HH:mm format. */
+  open: string;
+  /** Local closing time in 24-hour HH:mm format; earlier than open means overnight. */
+  close: string;
+}
+
+/** Missing days mean hours have not been supplied; null means confirmed closed. */
+export type WeeklyOperatingHours = Partial<Record<Weekday, OperatingHours | null>>;
 
 export type OrderStatus =
   | "pending"
@@ -118,6 +140,8 @@ export interface Business {
   subscription: PlanName;
   description: string;
   products: BusinessProduct[];
+  /** Canonical source for published hours until station settings are backed by a service. */
+  openingHours?: WeeklyOperatingHours;
   accent: string;
   cover: StaticImageData;
   lat: number;
@@ -149,48 +173,10 @@ export interface Stat {
   icon: string;
 }
 
-export interface DashboardOrderRow {
-  id: string;
-  orderNumber: string;
-  customer: string;
-  area: string;
-  items: string;
-  total: number;
-  status: OrderStatus;
-  time: string;
-}
-
-export interface DashboardStats {
-  revenueToday: number;
-  revenueTrend: number;
-  ordersToday: number;
-  pendingOrders: number;
-  outForDelivery: number;
-  comingToday: number;
-  stockAlerts: StockAlert[];
-  repeatCustomerRate: number;
-  subscription: PlanName;
-  nextBilling: string;
-  chart: { period: string; revenue: number; orders: number }[];
-  recentOrders: DashboardOrderRow[];
-  popularProducts: { name: string; orders: number; revenue: number }[];
-}
-
 export interface StockAlert {
   id: string;
   name: string;
   stock: number;
   threshold: number;
   unit: string;
-}
-
-export interface CustomerRecord {
-  id: string;
-  name: string;
-  phone: string;
-  location: string;
-  orders: number;
-  totalSpent: number;
-  lastOrder: string;
-  status: "active" | "new" | "dormant";
 }

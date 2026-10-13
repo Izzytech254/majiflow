@@ -2,22 +2,20 @@ import { PricingCard } from "@/components/shared/pricing-card";
 import { Container } from "@/components/ui/container";
 import { plans } from "@/lib/data/plans";
 
-export const metadata = { title: "Manage your account plan" };
+export const metadata = { title: "Plans and billing" };
 
 export default function AccountPlans() {
   return (
     <Container className="py-6 lg:py-8">
       <div className="mb-6">
-        <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-          <span className="size-1.5 rounded-full bg-[#0052FF] animate-pulse-dot" /> Customer plans
-        </p>
-        <h1 className="mt-2 font-display text-3xl text-foreground sm:text-4xl">
-          Home refill plans, <span className="text-gradient">billed simply</span>
+        <h1 className="font-display text-3xl text-foreground sm:text-4xl">
+          Plans and{" "}
+          <span className="text-gradient">station billing</span>
         </h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Eligible customers on a station&apos;s Growth or Pro plan can set up regular refill
-          subscriptions for homes and offices. The station delivers on schedule; you skip or pause
-          anytime.
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-foreground/80">
+          Refill businesses subscribe to a monthly plan to sell on MajiFlow, and customers are never
+          billed for using the platform. Every plan starts with a 14-day free trial, and each item
+          is marked as included today or planned next.
         </p>
       </div>
 
@@ -29,9 +27,9 @@ export default function AccountPlans() {
         ))}
       </div>
       <p className="mx-auto mt-10 max-w-2xl text-center text-sm leading-relaxed text-muted-foreground">
-        These are the SaaS plans stations pay — <strong className="text-foreground">not</strong>{" "}
-        what you pay for water. Your refill subscription is set by the station in KES and appears in
-        your order history.
+        These are the plans stations pay for - <strong className="text-foreground">not</strong>{" "}
+        what you pay for water. Your orders show the delivery fee each station charges, and nothing
+        else is added to your total.
       </p>
     </Container>
   );

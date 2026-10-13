@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { Clock, Inbox, Mail, ShieldCheck } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { PageHero } from "@/components/shared/page-hero";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
@@ -10,17 +10,29 @@ import { useToast } from "@/components/ui/toast";
 
 const topics = [
   "I want to order water",
-  "I run a refill business — register me",
+  "I run a refill business - register me",
   "Billing or subscription help",
   "Support for an existing order",
   "Press or partnership",
   "Something else",
 ];
 
-const channels = [
-  { icon: MessageCircle, label: "WhatsApp support", value: "+254 700 123 456", note: "Fastest — replies in minutes" },
-  { icon: Phone, label: "Phone", value: "+254 700 123 456", note: "Mon–Sat, 7am–9pm EAT" },
-  { icon: Mail, label: "Email", value: "hello@majiflow.co.ke", note: "Replies within one business day" },
+const notes = [
+  {
+    icon: Mail,
+    label: "Email us",
+    text: "Reach us at support@majiflow.co.ke. We reply within one business day.",
+  },
+  {
+    icon: Inbox,
+    label: "Order help",
+    text: "Resolve delivery issues fastest from the order page, where you can contact the station.",
+  },
+  {
+    icon: ShieldCheck,
+    label: "Station support",
+    text: "Refill businesses get priority help with listings and payments.",
+  },
 ];
 
 export default function Contact() {
@@ -36,7 +48,7 @@ export default function Contact() {
       toast({
         kind: "success",
         title: "Message sent",
-        message: `Thanks ${form.name || "there"} — our team will reply within one business day.`,
+        message: "Thanks for reaching out. Our team will reply within one business day.",
       });
       setForm({ name: "", email: "", phone: "", topic: topics[0], message: "" });
     }, 900);
@@ -49,44 +61,38 @@ export default function Contact() {
         pulseLabel
         title={
           <>
-            Real humans, <span className="text-gradient">MajiFlow answers</span>
+            Questions about an order? <span className="text-gradient">We are here to help.</span>
           </>
         }
-        description="Questions about ordering water, running your station or getting paid? Reach us the way that suits your phone."
+        description="Send us a message and our support team will get back to you within one business day."
       />
 
       <section className="py-16 lg:py-24">
         <Container>
           <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
             <div>
-              <h2 className="font-display text-2xl text-foreground">Talk to the team</h2>
+              <h2 className="font-display text-2xl text-foreground">How to reach us</h2>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                Whether you're a household in Roysambu or a station owner in Eldoret, the right
-                person answers.
+                Use the form for anything account, billing or partnership related, or pick the
+                channel below that fits your question.
               </p>
               <div className="mt-8 flex flex-col gap-4">
-                {channels.map((c) => (
-                  <div key={c.label} className="flex items-start gap-3.5 rounded-2xl border border-border bg-white p-5 shadow-card">
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand-gradient text-white shadow-accent">
-                      <c.icon className="size-5" aria-hidden />
+                {notes.map((n) => (
+                  <div key={n.label} className="flex items-start gap-3.5 rounded-2xl border border-border bg-white p-5 shadow-card">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-black shadow-accent">
+                      <n.icon className="size-5" aria-hidden />
                     </span>
                     <div>
-                      <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground">{c.label}</p>
-                      <p className="mt-0.5 font-semibold text-foreground">{c.value}</p>
-                      <p className="text-xs text-muted-foreground">{c.note}</p>
+                      <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">{n.label}</p>
+                      <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{n.text}</p>
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="mt-6 flex items-start gap-3 rounded-2xl border border-border bg-muted/50 p-5">
-                <MapPin className="mt-0.5 size-5 shrink-0 text-[#0052FF]" aria-hidden />
-                <div>
-                  <p className="text-sm font-semibold text-foreground">Head office</p>
-                  <p className="text-sm text-muted-foreground">
-                    Level 3, Bishop Magua Centre, Ngong Road, Nairobi
-                  </p>
-                </div>
-              </div>
+              <p className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
+                <Clock className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+                Support hours: Monday to Saturday, 7am - 7pm EAT.
+              </p>
             </div>
 
             <form onSubmit={submit} className="rounded-3xl border border-border bg-white p-6 shadow-layered sm:p-8" aria-label="Contact form">
@@ -100,7 +106,7 @@ export default function Contact() {
                     autoComplete="name"
                   />
                 </Field>
-                <Field label="Phone number" required hint="We'll only call about this enquiry.">
+                <Field label="Phone number" required hint="We only use this to discuss your enquiry.">
                   <Input
                     required
                     type="tel"
@@ -148,6 +154,10 @@ export default function Contact() {
               <Button type="submit" size="lg" className="mt-6 w-full group" disabled={sending}>
                 {sending ? "Sending…" : "Send message"}
               </Button>
+              <p className="mt-3 flex items-start gap-2 text-xs leading-relaxed text-muted-foreground">
+                <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden />
+                We only use your details to answer your enquiry and never share them.
+              </p>
             </form>
           </div>
         </Container>

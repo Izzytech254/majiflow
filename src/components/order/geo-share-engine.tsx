@@ -11,7 +11,7 @@ import { isActiveStatus } from "@/lib/order-status";
  * While a customer has an active order open at `/order/[id]`, this engine
  * asks the browser for its native geolocation permission and streams GPS
  * fixes to the order so the vendor and the platform admin can watch the
- * delivery live. It renders nothing — the only UI is the browser's own
+ * delivery live. It renders nothing - the only UI is the browser's own
  * permission prompt. Sharing stops automatically when the order reaches a
  * terminal state or the customer leaves the page. Denied permission falls
  * back silently to address-only tracking.

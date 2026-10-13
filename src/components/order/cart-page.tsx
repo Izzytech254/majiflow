@@ -2,17 +2,25 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Droplets, Minus, Plus, ShoppingCart, Trash2, Truck } from "lucide-react";
+import { Droplets, Minus, Plus, ShoppingCart, Trash2, Truck } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
 import { EmptyState } from "@/components/ui/feedback";
 import { productImage } from "@/lib/product-images";
 import { useCart } from "@/components/order/cart-provider";
 import { businesses } from "@/lib/data/businesses";
 import { formatKES } from "@/lib/format";
+import { computeCartTotals } from "@/lib/pricing";
 
 export function CartPage() {
   const { items, updateQuantity, removeItem } = useCart();
+  const { toast } = useToast();
+
+  const remove = (businessId: string, productId: string, name: string) => {
+    removeItem(businessId, productId);
+    toast({ kind: "info", title: "Removed from cart", message: name });
+  };
 
   const rows = items
     .map((line) => {
@@ -28,12 +36,11 @@ export function CartPage() {
         <EmptyState
           icon={<ShoppingCart className="size-7" aria-hidden />}
           title="Your cart is empty"
-          description="No cans in here yet. Find a trusted station near you and add a refill — it takes seconds."
+          description="No cans in here yet. Find a trusted station near you and add a refill - it takes seconds."
           action={
             <Link href="/browse">
               <Button size="lg" className="group">
                 Browse stations
-                <ArrowRight className="size-4" aria-hidden />
               </Button>
             </Link>
           }
@@ -42,30 +49,33 @@ export function CartPage() {
     );
   }
 
-  const subtotal = rows.reduce(
-    (sum, r) => sum + (r.product?.price ?? 0) * r.line.quantity,
-    0
+  const totals = computeCartTotals(
+    rows.map((r) => ({
+      businessId: r.business!.id,
+      quantity: r.line.quantity,
+      unitPrice: r.product!.price,
+    })),
+    businesses
   );
-  const grouped = new Map(rows.map((r) => [r.business!.id, r.business!]));
-  const deliveryFee = [...grouped.values()].reduce(
-    (sum, b) => (subtotal >= b.freeDeliveryAbove ? 0 : b.deliveryFee) + sum,
-    0
+  const { subtotal, deliveryFee, total } = totals;
+  const freeDeliveryStations = totals.groups.filter(
+    (group) => group.subtotal > 0 && group.deliveryFee === 0
   );
-  const total = subtotal + deliveryFee;
+  const stationNames = new Map(businesses.map((b) => [b.id, b.name]));
 
   return (
     <Container className="py-14 lg:py-20">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-[#0052FF] animate-pulse-dot" /> Your order
+            <span className="size-1.5 rounded-full bg-foreground animate-pulse-dot" /> Your order
           </p>
           <h1 className="mt-2 font-display text-3xl text-foreground sm:text-4xl">
             Review your cart
           </h1>
         </div>
         <Link href="/browse" className="text-sm font-semibold text-[#0052FF] hover:underline">
-          ← Keep shopping
+          Keep shopping
         </Link>
       </div>
 
@@ -119,7 +129,7 @@ export function CartPage() {
                   {formatKES((product?.price ?? 0) * line.quantity)}
                 </p>
                 <button
-                  onClick={() => removeItem(line.businessId, line.productId)}
+                  onClick={() => remove(line.businessId, line.productId, product!.name)}
                   aria-label={`Remove ${product!.name} from cart`}
                   className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-danger"
                 >
@@ -146,9 +156,23 @@ export function CartPage() {
                 {deliveryFee === 0 ? <span className="text-success">Free</span> : formatKES(deliveryFee)}
               </dd>
             </div>
-            {deliveryFee === 0 && subtotal > 0 && (
+            {totals.groups.length > 1 && (
+              <ul className="space-y-1 border-l border-border pl-3 text-xs text-muted-foreground">
+                {totals.groups.map((group) => (
+                  <li key={group.businessId} className="flex items-center justify-between gap-3">
+                    <span className="truncate">{stationNames.get(group.businessId) ?? group.businessId}</span>
+                    <span>{group.deliveryFee === 0 ? "Free" : formatKES(group.deliveryFee)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {freeDeliveryStations.length > 0 && (
               <p className="text-xs text-success">
-                Free delivery applied — your order qualifies.
+                Free delivery from{" "}
+                {freeDeliveryStations
+                  .map((group) => stationNames.get(group.businessId) ?? group.businessId)
+                  .join(", ")}
+                : those items reach the station minimum.
               </p>
             )}
             <div className="flex items-center justify-between border-t border-border pt-3">
@@ -157,15 +181,14 @@ export function CartPage() {
             </div>
           </dl>
 
-          <p className="mt-4 flex items-center gap-2 rounded-lg bg-success-soft/70 px-3 py-2.5 text-xs text-success">
+          <p className="mt-4 flex items-center gap-2 rounded-lg bg-transparent-soft/70 px-3 py-2.5 text-xs text-success">
             <Droplets className="size-4 shrink-0" aria-hidden />
             Payment is collected with M-Pesa before dispatch.
           </p>
 
           <Link href="/checkout" className="mt-5 block">
-            <Button size="lg" className="group w-full">
+            <Button size="lg" className="group w-full bg-orange-500 hover:bg-orange-600 text-white shadow-[0_4px_14px_-4px_rgb(249,115,22)]">
               Continue to checkout
-              <ArrowRight className="size-4" aria-hidden />
             </Button>
           </Link>
           <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-widest text-muted-foreground">

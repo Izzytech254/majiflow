@@ -1,23 +1,23 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------ */
-/*  Design tokens — "Minimalist Modern"                               */
+/*  Design tokens - "Minimalist Modern"                               */
 /* ------------------------------------------------------------------ */
 :root {
-  --background: #fafafa;
-  --foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #475569;
+  --background: #f2eee3;
+  --foreground: #23262b;
+  --muted: #eae5d7;
+  --muted-foreground: #6b675d;
   --accent: #0052ff;
   --accent-2: #4d7cff;
   --accent-foreground: #ffffff;
-  --border: #e2e8f0;
+  --border: #e2dccd;
   --card: #ffffff;
   --ring: #0052ff;
 
-  --ink: #0f172a;
-  --ink-soft: #1e293b;
-  --ink-muted: #3341559c;
+  --ink: #14181f;
+  --ink-soft: #1e232b;
+  --ink-muted: #2b313a9c;
   --ink-border: #1e293b;
 
   --success: #15803d;
@@ -266,12 +266,127 @@
   }
 }
 
+/* Water loader: droplets fall into a rippling puddle */
+@layer utilities {
+  @keyframes drop-fall {
+    0% {
+      transform: translate(-50%, -10px) scale(0.7);
+      opacity: 0;
+    }
+    20% {
+      opacity: 1;
+    }
+    75% {
+      transform: translate(-50%, 30px) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, 34px) scale(0.5);
+      opacity: 0;
+    }
+  }
+  @keyframes puddle-ripple {
+    0% {
+      transform: translateX(-50%) scale(0.2);
+      opacity: 0.55;
+    }
+    100% {
+      transform: translateX(-50%) scale(1.8);
+      opacity: 0;
+    }
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Reveal animations (CSS-only, no JS library on the critical path)  */
+/* ------------------------------------------------------------------ */
+@layer utilities {
+  .reveal {
+    opacity: 0;
+    transform: translateY(var(--reveal-y, 28px));
+    transition:
+      opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+  }
+  .reveal[data-from="left"] {
+    transform: translateX(calc(-1 * var(--reveal-y, 28px)));
+  }
+  .reveal[data-from="right"] {
+    transform: translateX(var(--reveal-y, 28px));
+  }
+  .reveal[data-from="scale"] {
+    transform: scale(0.96) translateY(calc(var(--reveal-y, 28px) * 0.3));
+  }
+  .reveal[data-from="none"] {
+    transform: none;
+  }
+  .reveal.is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  .stagger > * {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .stagger.is-in > * {
+    opacity: 1;
+    transform: none;
+  }
+  .stagger.is-in > *:nth-child(1) {
+    transition-delay: calc(var(--stagger-base, 0.05s) + var(--stagger-step, 0.08s) * 0);
+  }
+  .stagger.is-in > *:nth-child(2) {
+    transition-delay: calc(var(--stagger-base, 0.05s) + var(--stagger-step, 0.08s) * 1);
+  }
+  .stagger.is-in > *:nth-child(3) {
+    transition-delay: calc(var(--stagger-base, 0.05s) + var(--stagger-step, 0.08s) * 2);
+  }
+  .stagger.is-in > *:nth-child(4) {
+    transition-delay: calc(var(--stagger-base, 0.05s) + var(--stagger-step, 0.08s) * 3);
+  }
+  .stagger.is-in > *:nth-child(5) {
+    transition-delay: calc(var(--stagger-base, 0.05s) + var(--stagger-step, 0.08s) * 4);
+  }
+  .stagger.is-in > *:nth-child(6) {
+    transition-delay: calc(var(--stagger-base, 0.05s) + var(--stagger-step, 0.08s) * 5);
+  }
+  .stagger.is-in > *:nth-child(7) {
+    transition-delay: calc(var(--stagger-base, 0.05s) + var(--stagger-step, 0.08s) * 6);
+  }
+  .stagger.is-in > *:nth-child(8) {
+    transition-delay: calc(var(--stagger-base, 0.05s) + var(--stagger-step, 0.08s) * 7);
+  }
+  .stagger.is-in > *:nth-child(9) {
+    transition-delay: calc(var(--stagger-base, 0.05s) + var(--stagger-step, 0.08s) * 8);
+  }
+  .stagger.is-in > *:nth-child(10) {
+    transition-delay: calc(var(--stagger-base, 0.05s) + var(--stagger-step, 0.08s) * 9);
+  }
+  .stagger.is-in > *:nth-child(11) {
+    transition-delay: calc(var(--stagger-base, 0.05s) + var(--stagger-step, 0.08s) * 10);
+  }
+  .stagger.is-in > *:nth-child(12) {
+    transition-delay: calc(var(--stagger-base, 0.05s) + var(--stagger-step, 0.08s) * 11);
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /*  Motion safety                                                     */
 /* ------------------------------------------------------------------ */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .reveal,
+  .stagger > * {
+    opacity: 1 !important;
+    transform: none !important;
   }
 
   *,

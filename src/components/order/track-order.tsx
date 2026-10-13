@@ -3,17 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
-  ArrowRight,
-  CheckCircle2,
-  Clock,
-  Inbox,
-  MapPin,
-  Phone,
-  RefreshCcw,
-  Smartphone,
-  Truck,
-  XCircle,
-} from "lucide-react";
+  CheckCircle2, Clock, Inbox, MapPin, Phone, RefreshCcw, Smartphone, Truck, XCircle } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -105,7 +95,7 @@ export function TrackOrderPage({ id }: { id: string }) {
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-            <span className={cn("size-1.5 rounded-full animate-pulse-dot", cancelled ? "bg-danger" : "bg-[#0052FF]")} />
+            <span className={cn("size-1.5 rounded-full animate-pulse-dot", cancelled ? "bg-foreground" : "bg-foreground")} />
             Order tracking · {order.orderNumber}
           </p>
           <h1 className="mt-2 font-display text-3xl text-foreground sm:text-4xl">
@@ -121,7 +111,7 @@ export function TrackOrderPage({ id }: { id: string }) {
       </div>
 
       {cancelled && (
-        <div className="mb-10 flex items-start gap-4 rounded-2xl border border-danger/25 bg-danger-soft/50 p-6">
+        <div className="mb-10 flex items-start gap-4 rounded-2xl border border-danger/25 bg-transparent/10 p-6">
           <XCircle className="mt-0.5 size-6 shrink-0 text-danger" aria-hidden />
           <div>
             <h2 className="font-display text-lg text-danger">
@@ -129,14 +119,13 @@ export function TrackOrderPage({ id }: { id: string }) {
             </h2>
             <p className="mt-1 max-w-xl text-sm leading-relaxed text-foreground/80">
               Your payment of {formatKES(order.total)} was not released to the station and is being
-              returned to your M-Pesa within 24 hours. Try another station nearby — there are
+              returned to your M-Pesa within 24 hours. Try another station nearby - there are
               usually several with water ready now.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               <Link href="/browse">
                 <Button className="group">
                   Find another station
-                  <ArrowRight className="size-4" aria-hidden />
                 </Button>
               </Link>
               <Button variant="secondary" onClick={(e) => reorder(e.currentTarget)}>
@@ -157,7 +146,7 @@ export function TrackOrderPage({ id }: { id: string }) {
             {[
               { status: "accepted" as const, label: "Order accepted", desc: order.status === "pending" ? "The station will confirm shortly." : "The station confirmed and sealed your water." },
               { status: "out_for_delivery" as const, label: "Out for delivery", desc: "The rider is on the road and will call before arrival." },
-              { status: "delivered" as const, label: "Delivered", desc: "Your refills are at the door — open a can and enjoy." },
+              { status: "delivered" as const, label: "Delivered", desc: "Your refills are at the door - open a can and enjoy." },
             ].map((step, i) => {
               const reached =
                 (order.status === "accepted" && i === 0) ||
@@ -174,7 +163,7 @@ export function TrackOrderPage({ id }: { id: string }) {
                       className={cn(
                         "absolute left-[23px] top-12 h-[calc(100%-2.4rem)] w-px",
                         reached && i < 1 || (order.status === "out_for_delivery" && i === 0) || order.status === "delivered"
-                          ? "bg-brand-gradient"
+                          ? "bg-foreground"
                           : "bg-border"
                       )}
                     />
@@ -183,7 +172,7 @@ export function TrackOrderPage({ id }: { id: string }) {
                     className={cn(
                       "relative z-10 flex size-12 shrink-0 items-center justify-center rounded-full text-white",
                       reached || current
-                        ? "bg-brand-gradient shadow-accent"
+                        ? "bg-foreground shadow-accent"
                         : "border-2 border-border bg-white text-muted-foreground"
                     )}
                   >
@@ -212,7 +201,7 @@ export function TrackOrderPage({ id }: { id: string }) {
           </ol>
 
           {order.status === "pending" && (
-            <div className="mt-6 flex items-start gap-3 rounded-xl border border-warning/25 bg-warning-soft/50 p-4">
+            <div className="mt-6 flex items-start gap-3 rounded-xl border border-warning/25 bg-transparent/10 p-4">
               <Inbox className="mt-0.5 size-5 shrink-0 text-warning" aria-hidden />
               <p className="text-sm leading-relaxed text-foreground/85">
                 <strong className="font-semibold text-foreground">Waiting for the station.</strong>{" "}
@@ -289,15 +278,14 @@ export function TrackOrderPage({ id }: { id: string }) {
             <Link href="/account/orders" className="flex-1">
               <Button className="group w-full">
                 View all orders
-                <ArrowRight className="size-4" aria-hidden />
               </Button>
             </Link>
           </div>
 
-          {/* Demo controls */}
-          <details className="rounded-2xl border border-dashed border-[#0052FF]/30 bg-[#0052FF]/3 p-4">
+          {/* Status controls */}
+          <details className="rounded-2xl border border-dashed border-[#0052FF]/30 bg-transparent/3 p-4">
             <summary className="cursor-pointer font-mono text-[11px] uppercase tracking-widest text-[#0052FF]">
-              Demo controls — advance the delivery
+              Delivery status
             </summary>
             <div className="mt-4 flex flex-wrap gap-2">
               <Button size="sm" variant="secondary" onClick={() => setStatus("pending")} disabled={order.status === "pending"}>
@@ -317,8 +305,8 @@ export function TrackOrderPage({ id }: { id: string }) {
               </Button>
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
-              In production, these transitions happen in the station's dashboard and via SMS to your
-              phone. This sandbox simulates them so every state is explorable.
+              The station updates your order status as your delivery progresses. Each change is
+              confirmed to your phone and appears here.
             </p>
           </details>
         </div>

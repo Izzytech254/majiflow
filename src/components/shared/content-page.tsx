@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import { Container } from "@/components/ui/container";
-import { SectionLabel } from "@/components/ui/section-label";
 import { AnimatedSection } from "@/components/ui/animated-section";
 
 interface ContentPageProps {
+  /** Retained for call-site compatibility; eyebrow labels are no longer rendered. */
   label: string;
   title: ReactNode;
   description?: ReactNode;
@@ -12,14 +12,13 @@ interface ContentPageProps {
 }
 
 /** Reusable layout for long-form pages (terms, privacy, about copy). */
-export function ContentPage({ label, title, description, updated, children }: ContentPageProps) {
+export function ContentPage({ title, description, updated, children }: ContentPageProps) {
   return (
     <>
       <section className="relative overflow-hidden border-b border-border bg-background">
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-radial-glow" />
         <Container className="relative py-16 lg:py-24">
           <AnimatedSection className="mx-auto max-w-3xl">
-            <SectionLabel className="mb-4">{label}</SectionLabel>
             <h1 className="font-display text-4xl leading-[1.08] tracking-tight text-foreground sm:text-5xl">
               {title}
             </h1>

@@ -1,5 +1,6 @@
-import { getOrder, updateOrder } from "@/lib/server/order-store";
+import { notifyStatusChange, reportFailure } from "@/lib/monitoring";
 import { isOrderStatus } from "@/lib/order-status";
+import { getOrder, updateOrder } from "@/lib/server/order-store";
 
 export const dynamic = "force-dynamic";
 
@@ -46,7 +47,32 @@ export async function PATCH(request: Request, ctx: Context) {
     return Response.json({ error: "No patchable fields supplied" }, { status: 400 });
   }
 
-  const order = await updateOrder(id, patch);
+  const before = await getOrder(id);
+  let order;
+  try {
+    order = await updateOrder(id, patch);
+  } catch (error) {
+    await reportFailure("store", "Could not update an order.", {
+      orderId: id,
+      reason: error instanceof Error ? error.message : "unknown",
+    });
+    return Response.json({ error: "We could not update the order. Please try again." }, { status: 500 });
+  }
   if (!order) return Response.json({ error: "Order not found" }, { status: 404 });
+
+  if (patch.paymentState === "failed" && before?.paymentState !== "failed") {
+    await reportFailure("payment", "A payment failed.", {
+      orderId: id,
+      businessId: order.businessId,
+      paymentState: String(patch.paymentState),
+    });
+  }
+
+  if (typeof patch.status === "string" && patch.status !== before?.status) {
+    // Failures inside the notification seam are reported there, so this cannot
+    // turn a saved status change into an error response.
+    await notifyStatusChange({ id: order.id, status: order.status }, order.customerPhone);
+  }
+
   return Response.json({ order });
 }

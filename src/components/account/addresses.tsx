@@ -31,7 +31,7 @@ export function AddressesPage() {
     <Container className="py-6 lg:py-8">
       <div className="mb-6">
         <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-          <MapPin className="size-3.5 text-[#0052FF]" aria-hidden /> Saved addresses
+          <MapPin className="size-3.5 text-black" aria-hidden /> Saved addresses
         </p>
         <h1 className="mt-2 font-display text-3xl text-foreground sm:text-4xl">Delivery locations</h1>
       </div>
@@ -39,7 +39,7 @@ export function AddressesPage() {
       <div className="grid gap-8 lg:grid-cols-2">
         <form onSubmit={submit} className="h-fit rounded-2xl border border-border bg-white p-6 shadow-card">
           <h2 className="flex items-center gap-2 font-display text-lg text-foreground">
-            <Plus className="size-5 text-[#0052FF]" aria-hidden /> Add an address
+            <Plus className="size-5 text-black" aria-hidden /> Add an address
           </h2>
           <div className="mt-5 space-y-5">
             <Field label="Estate / area" required>
@@ -88,7 +88,7 @@ export function AddressesPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-2">
-                        <MapPin className="size-4 text-[#0052FF]" aria-hidden />
+                        <MapPin className="size-4 text-black" aria-hidden />
                         <p className="font-semibold text-foreground">
                           {a.estate}
                           {a.label !== "Home" && (
@@ -105,7 +105,7 @@ export function AddressesPage() {
                     <button
                       onClick={() => removeAddress(i)}
                       aria-label={`Remove address in ${a.estate}`}
-                      className="flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-danger-soft hover:text-danger"
+                      className="flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-transparent-soft hover:text-danger"
                     >
                       <Trash2 className="size-4" aria-hidden />
                     </button>

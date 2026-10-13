@@ -21,6 +21,8 @@ interface ToastData {
   message?: string;
 }
 
+const DURATION = 4200;
+
 const ToastContext = createContext<{ toast: (t: Omit<ToastData, "id">) => void }>({
   toast: () => {},
 });
@@ -29,10 +31,10 @@ export function useToast() {
   return useContext(ToastContext);
 }
 
-const icons: Record<ToastKind, ReactNode> = {
-  success: <CheckCircle2 className="size-4.5 text-success" aria-hidden />,
-  error: <AlertCircle className="size-4.5 text-danger" aria-hidden />,
-  info: <Info className="size-4.5 text-[#0052FF]" aria-hidden />,
+const meta: Record<ToastKind, { icon: ReactNode; ring: string }> = {
+  success: { icon: <CheckCircle2 className="size-4.5 text-success" aria-hidden />, ring: "bg-success-soft" },
+  error: { icon: <AlertCircle className="size-4.5 text-danger" aria-hidden />, ring: "bg-danger-soft" },
+  info: { icon: <Info className="size-4.5 text-[#0052FF]" aria-hidden />, ring: "bg-[#0052FF]/10" },
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -42,10 +44,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const toast = useCallback((t: Omit<ToastData, "id">) => {
     const id = ++idRef.current;
-    setToasts((prev) => [...prev, { ...t, id }]);
+    setToasts((prev) => [...prev.slice(-2), { ...t, id }]);
     window.setTimeout(() => {
       setToasts((prev) => prev.filter((x) => x.id !== id));
-    }, 4200);
+    }, DURATION);
   }, []);
 
   const dismiss = (id: number) => setToasts((prev) => prev.filter((x) => x.id !== id));
@@ -69,10 +71,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={reduce ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.96 }}
               transition={toastTransition}
-              className="pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl border border-border bg-white p-4 shadow-layered"
+              className="pointer-events-auto relative flex w-full max-w-sm items-start gap-3 overflow-hidden rounded-xl border border-border bg-white p-4 shadow-layered"
               role="status"
             >
-              <span className="mt-0.5 shrink-0">{icons[toast.kind]}</span>
+              <span className={`mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg ${meta[toast.kind].ring}`}>
+                {meta[toast.kind].icon}
+              </span>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-foreground">{toast.title}</p>
                 {toast.message && (
@@ -86,6 +90,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               >
                 <X className="size-4" aria-hidden />
               </button>
+              {!reduce && (
+                <motion.span
+                  aria-hidden
+                  className="absolute bottom-0 left-0 h-0.5 bg-[#0052FF]"
+                  initial={{ width: "100%" }}
+                  animate={{ width: 0 }}
+                  transition={{ duration: DURATION / 1000, ease: "linear" }}
+                />
+              )}
             </motion.div>
           ))}
         </AnimatePresence>

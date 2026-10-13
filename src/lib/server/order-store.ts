@@ -1,18 +1,32 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import type { Order, OrderLocation, OrderStatus } from "@/lib/types";
+import { getBusinessOrderBlockReason } from "@/lib/business-hours";
+import { businesses } from "@/lib/data/businesses";
 
 /**
  * File-backed order store.
  *
- * Orders live in `.data/orders.json` (gitignored) so the whole flow —
- * customer checkout → vendor dashboard → live tracking → platform admin —
+ * Orders live in `.data/orders.json` (gitignored) so the whole flow -
+ * customer checkout → vendor dashboard → live tracking → platform admin -
  * works across tabs and devices without an external database. Every read
  * and write is serialized through a single queue.
  */
 
-const DATA_DIR = path.join(process.cwd(), ".data");
-const ORDERS_FILE = path.join(DATA_DIR, "orders.json");
+/**
+ * Where orders are stored. `MF_DATA_DIR` lets the test suite and any other
+ * process point the store at a throwaway directory instead of the repo's
+ * `.data`, so a run never reads or overwrites real orders.
+ */
+function dataDir(): string {
+  return process.env.MF_DATA_DIR
+    ? path.resolve(process.env.MF_DATA_DIR)
+    : path.join(process.cwd(), ".data");
+}
+
+function ordersFile(): string {
+  return path.join(dataDir(), "orders.json");
+}
 
 const LOCATION_HISTORY_CAP = 300;
 
@@ -25,58 +39,20 @@ const VALID_STATUS: OrderStatus[] = [
   "cancelled",
 ];
 
-const SEED: Order = {
-  id: "demo-track",
-  orderNumber: "MF-98121",
-  businessId: "bio-water-kasarani",
-  businessName: "BioWater Refill Station",
-  customerName: "Jane Wanjiku",
-  customerPhone: "+254 712 345 678",
-  items: [
-    { productId: "bw-refill-20", name: "Refill — 20L can", quantity: 2, unitPrice: 350 },
-  ],
-  subtotal: 700,
-  deliveryFee: 120,
-  total: 820,
-  payment: "mpesa",
-  paymentState: "success",
-  status: "out_for_delivery",
-  address: {
-    label: "Home",
-    estate: "Kasarani",
-    street: "Mwiki Road",
-    building: "Singa Court, Block B",
-    floor: "3rd floor",
-    notes: "Call on arrival at the gate",
-    phone: "+254 712 345 678",
-  },
-  placedAt: "2026-09-21T10:42:00.000Z",
-  eta: "≈ 50 min",
-  timeline: [
-    { status: "pending", at: "2026-09-21T10:42:00.000Z" },
-    { status: "accepted", at: "2026-09-21T10:43:12.000Z" },
-    { status: "out_for_delivery", at: "2026-09-21T10:51:40.000Z" },
-  ],
-  location: null,
-  locationHistory: [],
-};
-
 let queue: Promise<unknown> = Promise.resolve();
 
 async function readAll(): Promise<Record<string, Order>> {
   try {
-    const raw = await fs.readFile(ORDERS_FILE, "utf8");
-    const parsed = JSON.parse(raw) as Record<string, Order>;
-    if (!parsed["demo-track"]) parsed["demo-track"] = structuredClone(SEED);
-    return parsed;
+    const raw = await fs.readFile(ordersFile(), "utf8");
+    return JSON.parse(raw) as Record<string, Order>;
   } catch {
-    return { "demo-track": structuredClone(SEED) };
+    return {};
   }
 }
 
 async function persist(orders: Record<string, Order>) {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(ORDERS_FILE, JSON.stringify(orders, null, 2), "utf8");
+  await fs.mkdir(dataDir(), { recursive: true });
+  await fs.writeFile(ordersFile(), JSON.stringify(orders, null, 2), "utf8");
 }
 
 /** Serialize a read-modify-write cycle against the order file. */
@@ -164,9 +140,19 @@ export function validateOrder(input: unknown): ValidationResult {
   if (!customerPhone) errors.customerPhone = "Use a Kenyan number, e.g. 07XX XXX XXX or +254 7XX….";
 
   if (typeof o.businessId !== "string" || !o.businessId.trim())
-    errors.businessId = "Station is missing — go back and add items again.";
+    errors.businessId = "Station is missing - go back and add items again.";
   if (typeof o.businessName !== "string" || !o.businessName.trim())
     errors.businessName = "Station name is required.";
+
+  const business = typeof o.businessId === "string"
+    ? businesses.find((candidate) => candidate.id === o.businessId)
+    : undefined;
+  if (typeof o.businessId === "string" && o.businessId.trim() && !business) {
+    errors.businessId = "This station is no longer available.";
+  } else if (business) {
+    const blocked = getBusinessOrderBlockReason(business);
+    if (blocked) errors.businessId = blocked;
+  }
 
   if (o.payment !== "mpesa" && o.payment !== "card")
     errors.payment = "Choose M-Pesa or card.";
@@ -212,13 +198,13 @@ export function validateOrder(input: unknown): ValidationResult {
     }
   }
 
-  // Financial integrity — never trust client totals.
+  // Financial integrity - never trust client totals.
   if (!isFiniteNumber(o.subtotal) || Math.abs(o.subtotal - subtotal) > 0.001)
-    errors.subtotal = "Subtotal doesn't match the items — refresh and retry.";
+    errors.subtotal = "Subtotal doesn't match the items - refresh and retry.";
   if (!isFiniteNumber(o.deliveryFee) || o.deliveryFee < 0) errors.deliveryFee = "Delivery fee is invalid.";
   const fee = isFiniteNumber(o.deliveryFee) && o.deliveryFee >= 0 ? o.deliveryFee : 0;
   if (!isFiniteNumber(o.total) || Math.abs(o.total - (subtotal + fee)) > 0.001)
-    errors.total = "Total doesn't match — refresh and retry.";
+    errors.total = "Total doesn't match - refresh and retry.";
 
   // Address
   if (typeof o.address !== "object" || o.address === null) {
@@ -229,7 +215,7 @@ export function validateOrder(input: unknown): ValidationResult {
     const a = o.address as Record<string, unknown>;
     const estate = typeof a.estate === "string" ? a.estate.trim() : "";
     const phone = normalizePhone(a.phone);
-    if (!estate) errors.estate = "Choose a recognised estate — riders use these to navigate.";
+    if (!estate) errors.estate = "Choose a recognised estate - riders use these to navigate.";
     if (!phone) errors.phone = "Enter the phone the rider should call.";
     if (estate.length > MAX_LEN.estate) errors.estate = "That estate name is too long.";
     address = {

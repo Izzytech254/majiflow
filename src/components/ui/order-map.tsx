@@ -41,7 +41,7 @@ const FALLBACK_CENTER: [number, number] = [-1.2921, 36.8219];
 
 /**
  * Live order map (client-only). Shows the station, the delivery address as
- * a fallback pin, and — while the customer is sharing GPS — their moving dot
+ * a fallback pin, and - while the customer is sharing GPS - their moving dot
  * with an accuracy circle and the recent path.
  */
 export function OrderMap({
@@ -78,7 +78,8 @@ export function OrderMap({
     if (!el) return;
 
     (async () => {
-      const mod = await import("leaflet");
+      // @ts-expect-error - the ESM build ships without type declarations for this path
+      const mod = await import("leaflet/dist/leaflet-src.esm.js").catch(() => import("leaflet"));
       const L = (mod as { default?: LeafletNS }).default ?? (mod as LeafletNS);
       if (disposed || !containerRef.current) return;
 

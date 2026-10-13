@@ -1,13 +1,5 @@
 import Link from "next/link";
-import {
-  ArrowRight,
-  BarChart3,
-  MessageSquare,
-  Repeat,
-  Smartphone,
-  Store,
-  Users,
-} from "lucide-react";
+import { BarChart3, MessageSquare, Store, Users } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Button } from "@/components/ui/button";
@@ -15,24 +7,24 @@ import { Stagger, StaggerItem, AnimatedSection } from "@/components/ui/animated-
 
 const benefits = [
   {
-    icon: Smartphone,
-    title: "Your own online storefront",
-    text: "A branded profile with your menu, prices, delivery areas and reviews — live in under an hour.",
+    icon: BarChart3,
+    title: "A storefront for your station",
+    text: "Your products, prices and delivery fees on one page.",
   },
   {
-    icon: Repeat,
-    title: "Customers who come back",
-    text: "Repeat-order reminders, loyal-customer lists and retention tools turn one-off drop-ins into standing weekly orders.",
+    icon: MessageSquare,
+    title: "Orders you accept and track",
+    text: "Accept or reject orders and move them to delivered.",
   },
   {
     icon: BarChart3,
-    title: "Sales that show themselves",
-    text: "Watch daily revenue, popular products and stock alerts on a dashboard designed to be read in a minute.",
+    title: "Reports from your own orders",
+    text: "Sales, top products and stock alerts from your real orders.",
   },
   {
     icon: Users,
-    title: "Team, orders and customers in one place",
-    text: "Assign staff, accept or reject orders, and message customers — no notebooks, no missed calls.",
+    title: "Team, customers and stock",
+    text: "Staff, customer history and low-stock alerts together.",
   },
 ];
 
@@ -46,8 +38,8 @@ export function BusinessBenefits() {
               {benefits.map((b) => (
                 <StaggerItem key={b.title}>
                   <div className="group flex h-full flex-col rounded-2xl border border-border bg-background p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#0052FF]/25 hover:bg-white hover:shadow-layered">
-                    <span className="flex size-11 items-center justify-center rounded-xl bg-brand-gradient text-white shadow-accent transition-transform duration-300 group-hover:scale-110">
-                      <b.icon className="size-5" aria-hidden />
+                    <span className="flex size-11 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110">
+                      <b.icon className="size-5 text-black" aria-hidden />
                     </span>
                     <h3 className="mt-5 text-base font-bold text-foreground">{b.title}</h3>
                     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{b.text}</p>
@@ -67,41 +59,40 @@ export function BusinessBenefits() {
               label="For businesses"
               title={
                 <>
-                  Turn every water order into a <span className="text-gradient">repeat customer</span>
+                  Run the station from <span className="text-gradient">one dashboard</span>
                 </>
               }
-              description="MajiFlow is the storefront and back office for Kenya's water refill businesses. You keep the water, the prices and the profits — we handle the storefront, orders and payments."
+              description="Everything a refill station needs to sell and deliver water online."
             />
             <AnimatedSection from="right" className="mt-8 flex flex-col gap-6">
-              <div className="flex items-start gap-3 rounded-2xl border border-success/25 bg-success-soft/50 p-4">
-                <Store className="mt-0.5 size-5 shrink-0 text-success" aria-hidden />
+              <div className="flex items-start gap-3 rounded-2xl border border-success/25 bg-transparent/10 p-4">
+                <Store className="mt-0.5 size-5 shrink-0 text-black" aria-hidden />
                 <div>
-                  <p className="text-sm font-semibold text-foreground">No commission on orders</p>
+                  <p className="text-sm font-semibold text-foreground">Your prices stay yours</p>
                   <p className="mt-0.5 text-sm text-muted-foreground">
-                    Customers pay you through your M-Pesa till or Paybill before delivery. MajiFlow takes a flat SaaS fee — never a cut of your water.
+                    A flat monthly fee with no commission. You keep the full price customers pay.
                   </p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 rounded-2xl border border-[#0052FF]/20 bg-[#0052FF]/5 p-4">
-                <MessageSquare className="mt-0.5 size-5 shrink-0 text-[#0052FF]" aria-hidden />
+              <div className="flex items-start gap-3 rounded-2xl border border-[#0052FF]/20 bg-transparent/5 p-4">
+                <MessageSquare className="mt-0.5 size-5 shrink-0 text-black" aria-hidden />
                 <div>
-                  <p className="text-sm font-semibold text-foreground">Customers find you online</p>
+                  <p className="text-sm font-semibold text-foreground">Reports from real order records</p>
                   <p className="mt-0.5 text-sm text-muted-foreground">
-                    Growth and Pro stations get priority placement when neighbours search for water in their area.
+                    Analytics read your stored orders, so the numbers move as orders come in.
                   </p>
                 </div>
               </div>
               <div>
-                <Link href="/business/register">
+                <Link href="/business">
                   <Button size="lg" className="group">
-                    Register your business
-                    <ArrowRight className="size-4" aria-hidden />
+                    Open the dashboard
                   </Button>
                 </Link>
                 <p className="mt-3 text-sm text-muted-foreground">
-                  Free for 14 days. No card required.{" "}
+                  No setup fees, and you can cancel any time.{" "}
                   <Link href="/pricing" className="font-semibold text-[#0052FF] hover:underline">
-                    See plans →
+                    See plans
                   </Link>
                 </p>
               </div>

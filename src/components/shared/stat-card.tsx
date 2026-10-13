@@ -5,7 +5,7 @@ import { CountUp } from "@/components/ui/count-up";
 
 interface StatCardProps {
   icon: LucideIcon;
-  /** Display value — plain string or a CountUp node */
+  /** Display value - plain string or a CountUp node */
   value: React.ReactNode;
   label: string;
   delta?: string;
@@ -15,7 +15,7 @@ interface StatCardProps {
   /** When true (default), the card is wrapped in AnimatedSection.
    *  Set false when the parent handles stagger/reveal to avoid double animation. */
   animated?: boolean;
-  /** CountUp-specific props — only used when value is a number and these are provided. */
+  /** CountUp-specific props - only used when value is a number and these are provided. */
   prefix?: string;
   suffix?: string;
   decimals?: number;
@@ -45,7 +45,7 @@ export function StatCard({
     >
       <div
         className={cn(
-          "flex size-11 items-center justify-center rounded-xl bg-brand-gradient text-white shadow-accent",
+          "flex size-11 items-center justify-center rounded-xl bg-transparent text-black shadow-accent",
           "transition-transform duration-300 group-hover:scale-110"
         )}
       >

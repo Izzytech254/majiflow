@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin, Store, PackagePlus, Wallet, Truck, BadgeCheck } from "lucide-react";
+import { MapPin, Store, PackagePlus, ShoppingCart, ClipboardList } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Button } from "@/components/ui/button";
@@ -8,28 +8,28 @@ import { AnimatedSection, Stagger, StaggerItem } from "@/components/ui/animated-
 const steps = [
   {
     icon: MapPin,
-    title: "Pick your location",
-    text: "Tell us your estate — Kasarani, Nyali, Milimani or 40+ more — and we'll show refill stations that deliver there.",
+    title: "Pick your city",
+    text: "Choose your city and see the stations serving it.",
   },
   {
     icon: Store,
-    title: "Choose a trusted station",
-    text: "Browse verified businesses with live ratings, delivery fees and lab-tested water. Every station operates independently.",
+    title: "Compare stations",
+    text: "Compare price, delivery fee and free-delivery minimum.",
   },
   {
     icon: PackagePlus,
-    title: "Order your refills",
-    text: "Add 20L cans, 5L bottles, dispensers or office plans to your cart and set a delivery window.",
+    title: "Add to the cart",
+    text: "One cart, with delivery totalled per station.",
   },
   {
-    icon: Wallet,
-    title: "Pay with M-Pesa",
-    text: "Confirm the STK push on your phone. Cards work too wherever a station has enabled them.",
+    icon: ShoppingCart,
+    title: "Checkout and pay",
+    text: "Pay with M-Pesa or card at checkout.",
   },
   {
-    icon: Truck,
-    title: "Track to your door",
-    text: "Watch your order go out for delivery, get a call from the rider, and receive your clean refill.",
+    icon: ClipboardList,
+    title: "Follow the order",
+    text: "Track it from accepted to delivered.",
   },
 ];
 
@@ -45,16 +45,15 @@ export function HowItWorks() {
               pulseLabel
               title={
                 <>
-                  From thirsty to refilled in <span className="text-gradient">five steps</span>
+                  From browsing to <span className="text-gradient">delivered</span>
                 </>
               }
-              description="No accounts with every station, no cash in your pocket, no hauling cans across town. Just order, pay and receive."
+              description="Order in a few steps, and follow every one."
             />
             <AnimatedSection delay={0.15} className="mt-8">
               <Link href="/browse">
-                <Button size="lg" className="group">
+                <Button size="lg" variant="secondary" className="group">
                   Find your station
-                  <span aria-hidden className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
                 </Button>
               </Link>
             </AnimatedSection>
@@ -65,7 +64,7 @@ export function HowItWorks() {
               <StaggerItem key={s.title}>
                 <div className="group flex gap-5 rounded-2xl border border-border bg-white p-5 shadow-card transition-all duration-300 hover:-translate-y-1 hover:border-[#0052FF]/25 hover:shadow-layered sm:p-6">
                   <div className="relative flex flex-col items-center">
-                    <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-brand-gradient text-white shadow-accent transition-transform duration-300 group-hover:scale-110">
+                    <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-transparent text-black shadow-accent transition-transform duration-300 group-hover:scale-110">
                       <s.icon className="size-5" aria-hidden />
                     </span>
                     <span className="mt-3 font-mono text-[11px] font-semibold uppercase tracking-widest text-[#0052FF]">

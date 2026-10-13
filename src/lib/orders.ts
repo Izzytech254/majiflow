@@ -80,16 +80,34 @@ export async function fetchOrder(id: string): Promise<Order | null> {
 
 /** Fetch orders, optionally filtered by station / status / customer phone. */
 export async function fetchOrders(query: OrderQuery = {}): Promise<Order[]> {
+  const result = await fetchOrdersResult(query);
+  return result.ok ? result.orders : [];
+}
+
+/**
+ * Same fetch, but the caller can tell "the station has no orders" apart from
+ * "the store could not be reached" so screens can show an error instead of a
+ * misleading empty table.
+ */
+export async function fetchOrdersResult(
+  query: OrderQuery = {}
+): Promise<{ ok: true; orders: Order[] } | { ok: false }> {
   const params = new URLSearchParams();
   if (query.businessId) params.set("businessId", query.businessId);
   if (query.status) params.set("status", query.status);
   if (query.phone) params.set("phone", query.phone);
   const qs = params.toString();
-  const data = await getJson<{ orders: Order[] }>(`${BASE}${qs ? `?${qs}` : ""}`);
-  return data?.orders ?? [];
+  try {
+    const res = await fetch(`${BASE}${qs ? `?${qs}` : ""}`, { cache: "no-store" });
+    if (!res.ok) return { ok: false };
+    const data = (await res.json()) as { orders: Order[] };
+    return { ok: true, orders: data.orders ?? [] };
+  } catch {
+    return { ok: false };
+  }
 }
 
-/** Update order status / payment state (demo controls, vendor actions). */
+/** Update order status / payment state (vendor actions). */
 export async function updateOrder(id: string, patch: Partial<Order>): Promise<Order | null> {
   try {
     const res = await fetch(`${BASE}/${encodeURIComponent(id)}`, {

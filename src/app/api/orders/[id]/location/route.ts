@@ -1,5 +1,6 @@
-import { getOrder, recordLocation } from "@/lib/server/order-store";
+import { reportFailure } from "@/lib/monitoring";
 import type { OrderLocation } from "@/lib/types";
+import { getOrder, recordLocation } from "@/lib/server/order-store";
 
 export const dynamic = "force-dynamic";
 
@@ -45,7 +46,15 @@ export async function POST(request: Request, ctx: Context) {
   if (!location) {
     return Response.json({ error: "Invalid location payload" }, { status: 400 });
   }
-  const order = await recordLocation(id, location);
-  if (!order) return Response.json({ error: "Order not found" }, { status: 404 });
-  return Response.json({ location: order.location, status: order.status }, { status: 201 });
+  try {
+    const order = await recordLocation(id, location);
+    if (!order) return Response.json({ error: "Order not found" }, { status: 404 });
+    return Response.json({ location: order.location, status: order.status }, { status: 201 });
+  } catch (error) {
+    await reportFailure("store", "Could not record a courier location.", {
+      orderId: id,
+      reason: error instanceof Error ? error.message : "unknown",
+    });
+    return Response.json({ error: "Could not record the location. Please try again." }, { status: 500 });
+  }
 }

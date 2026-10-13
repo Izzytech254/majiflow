@@ -1,33 +1,61 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
-import { Pause, Plus, Trash2, Wrench } from "lucide-react";
+import { Pause, Plus, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/toast";
 import { formatKES } from "@/lib/format";
 import { productImage } from "@/lib/product-images";
+import { getBusinessAvailability } from "@/lib/business-hours";
+import { useBusiness } from "@/components/business/business-provider";
 import { cn } from "@/lib/utils";
 
-const PRODUCTS = [
-  { id: "p1", name: "Refill — 20L can", desc: "Borehole water, refilled on existing can", price: 400, stock: 220, unit: "cans", image: "can", on: true },
-  { id: "p2", name: "5L bottle", desc: "Chilled, sealed, for fridges", price: 120, stock: 96, unit: "bottles", image: "bottle", on: true },
-  { id: "p3", name: "Replacement 20L can — full", desc: "Swap-in full can, keep yours as spare", price: 650, stock: 6, unit: "cans", image: "can", on: true },
-  { id: "p4", name: "10L bottle (chilled)", desc: "Best for small offices — Nyali favorite", price: 180, stock: 34, unit: "bottles", image: "bottle", on: false },
-  { id: "p5", name: "Tabletop dispenser — rental", desc: "Monthly rental with free refills", price: 600, stock: 3, unit: "units", image: "dispenser", on: true },
-];
+/**
+ * Product management reads the station's own catalogue, so the prices and
+ * stock shown here are the same ones the store validates orders against. Menu
+ * visibility is kept per browser.
+ */
+
+const HIDDEN_KEY = "mf:hiddenProducts";
+
+function readHidden(): string[] {
+  try {
+    const raw = window.localStorage.getItem(HIDDEN_KEY);
+    const parsed = raw ? (JSON.parse(raw) as unknown) : [];
+    return Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === "string") : [];
+  } catch {
+    return [];
+  }
+}
 
 export function BusinessProducts() {
-  const [products, setProducts] = useState(PRODUCTS);
-  const [note, setNote] = useState<string | null>(null);
+  const { business } = useBusiness();
+  const { toast } = useToast();
+  const [hidden, setHidden] = useState<string[]>(readHidden);
+  const availability = getBusinessAvailability(business.openingHours);
 
-  const toggle = (id: string) => {
-    setProducts((all) => all.map((p) => (p.id === id ? { ...p, on: !p.on } : p)));
-  };
+  const counts = useMemo(() => {
+    const live = business.products.filter((p) => !hidden.includes(p.id)).length;
+    return { live, total: business.products.length, low: business.products.filter((p) => p.stock <= p.stockLow).length };
+  }, [business.products, hidden]);
 
-  const remove = (id: string) => {
-    setProducts((all) => all.filter((p) => p.id !== id));
-    setNote("Product removed from your public menu. It stays in history for reports.");
+  const toggle = (id: string, name: string) => {
+    setHidden((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+      try {
+        window.localStorage.setItem(HIDDEN_KEY, JSON.stringify(next));
+      } catch {
+        /* noop */
+      }
+      toast({
+        kind: "info",
+        title: next.includes(id) ? `${name} hidden` : `${name} is live`,
+        message: "Your menu is updated for customers right away.",
+      });
+      return next;
+    });
   };
 
   return (
@@ -36,69 +64,75 @@ export function BusinessProducts() {
         <div>
           <h1 className="font-display text-2xl text-foreground sm:text-3xl">Products</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            What customers see on your public menu. Toggle off to hide, not delete.
+            Your station&apos;s catalog: {counts.live} of {counts.total} live
+            {counts.low > 0 && <span className="text-warning"> · {counts.low} at reorder point</span>}
           </p>
         </div>
-        <Button
-          className="group"
-          onClick={() => setNote("Product draft created — fill in details from the station clipboard.")}
-        >
+        <Button className="group" disabled title="Contact support to add a new product">
           <Plus className="size-4" aria-hidden /> New product
         </Button>
       </div>
 
-      {note && (
-        <div role="status" className="flex items-center justify-between rounded-xl border border-[#0052FF]/25 bg-[#0052FF]/5 px-4 py-3 text-sm text-[#0052FF]">
-          {note}
-          <button onClick={() => setNote(null)} className="font-semibold" aria-label="Dismiss">
-            Dismiss
-          </button>
-        </div>
-      )}
+      <div className="flex items-start gap-3 rounded-2xl border border-border bg-white p-5 shadow-card">
+        <Badge variant={availability.state === "open" ? "success" : "muted"}>{availability.hoursLabel}</Badge>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          {counts.total} products are validated at checkout against the prices below. Hide an item to
+          take it off the menu without deleting it.
+        </p>
+      </div>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {products.map((p) => (
-          <article
-            key={p.id}
-            className={cn(
-              "rounded-2xl border bg-white p-5 shadow-card transition-opacity",
-              p.on ? "border-border" : "border-border opacity-55"
-            )}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#0052FF]/10">
-                <Image src={productImage(p.image)} alt="" className="size-full object-cover" />
-              </span>
-              <div className="flex items-center gap-2">
-                <Badge variant={p.on ? "softAccent" : "muted"}>{p.on ? "Live" : "Hidden"}</Badge>
-                <button
-                  onClick={() => remove(p.id)}
-                  aria-label={`Remove ${p.name}`}
-                  className="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-danger-soft hover:text-danger"
-                >
-                  <Trash2 className="size-4" aria-hidden />
-                </button>
-              </div>
-            </div>
-            <h2 className="mt-3 font-display text-lg text-foreground">{p.name}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">{p.desc}</p>
-            <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
-              <span className="font-display text-xl text-foreground">{formatKES(p.price)}</span>
-              <span className={cn("font-mono text-xs", p.stock < 10 ? "text-danger" : p.stock < 15 ? "text-warning" : "text-muted-foreground")}>
-                {p.stock} {p.unit} in stock
-              </span>
-            </div>
-            <button
-              onClick={() => toggle(p.id)}
-              role="switch"
-              aria-checked={p.on}
-              className={cn("mt-4 flex w-full items-center justify-center gap-2 rounded-xl border py-2 text-sm font-semibold transition-colors", p.on ? "border-border text-foreground hover:bg-muted" : "border-[#0052FF] text-[#0052FF]")}
+        {business.products.map((p) => {
+          const isLive = !hidden.includes(p.id);
+          return (
+            <article
+              key={p.id}
+              className={cn(
+                "rounded-2xl border bg-white p-5 shadow-card transition-opacity",
+                isLive ? "border-border" : "border-border opacity-55"
+              )}
             >
-              {p.on ? <Pause className="size-4" aria-hidden /> : <Wrench className="size-4" aria-hidden />}
-              {p.on ? "Hide from menu" : "Bring back"}
-            </button>
-          </article>
-        ))}
+              <div className="flex items-start justify-between gap-3">
+                <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-transparent/10">
+                  <Image src={productImage(p.image)} alt="" className="size-full object-cover" />
+                </span>
+                <Badge variant={isLive ? "softAccent" : "muted"}>{isLive ? "Live" : "Hidden"}</Badge>
+              </div>
+              <h2 className="mt-3 font-display text-lg text-foreground">{p.name}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{p.description}</p>
+              <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
+                <span className="font-display text-xl text-foreground">
+                  {formatKES(p.price)}
+                  {p.oldPrice && (
+                    <span className="ml-2 text-sm font-normal text-muted-foreground line-through">
+                      {formatKES(p.oldPrice)}
+                    </span>
+                  )}
+                </span>
+                <span
+                  className={cn(
+                    "font-mono text-xs",
+                    p.stock <= p.stockLow ? "text-danger" : "text-muted-foreground"
+                  )}
+                >
+                  {p.stock} in stock
+                </span>
+              </div>
+              <button
+                onClick={() => toggle(p.id, p.name)}
+                role="switch"
+                aria-checked={isLive}
+                className={cn(
+                  "mt-4 flex w-full items-center justify-center gap-2 rounded-xl border py-2 text-sm font-semibold transition-colors",
+                  isLive ? "border-border text-foreground hover:bg-muted" : "border-[#0052FF] text-[#0052FF]"
+                )}
+              >
+                {isLive ? <Pause className="size-4" aria-hidden /> : <Wrench className="size-4" aria-hidden />}
+                {isLive ? "Hide from menu" : "Bring back"}
+              </button>
+            </article>
+          );
+        })}
       </section>
     </div>
   );

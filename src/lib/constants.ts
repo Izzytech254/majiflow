@@ -1,5 +1,11 @@
 export const easeOut = [0.16, 1, 0.3, 1] as const;
 
+/** Absolute site URL used for metadata, sitemap and robots. */
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
+/** Bump this whenever the Terms of Service or Privacy Policy copy changes. */
+export const LEGAL_UPDATED = "21 October 2026";
+
 export const CITIES = [
   "Nairobi",
   "Mombasa",

@@ -5,9 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 const STAFF = [
-  { id: "s1", name: "Grace Mwangi", role: "Owner", phone: "+254 712 000 001", access: "Everything", online: true },
-  { id: "s2", name: "Kevin Baraka", role: "Rider", phone: "+254 712 000 002", access: "Orders + delivery", online: true },
-  { id: "s3", name: "Esther Wambui", role: "Assistant", phone: "+254 712 000 003", access: "Orders only", online: false },
+  { id: "s1", name: "Grace Mwangi", role: "Owner", phone: "+254 722 481 390", access: "Everything", online: true },
+  { id: "s2", name: "Kevin Baraka", role: "Rider", phone: "+254 733 205 118", access: "Orders + delivery", online: true },
+  { id: "s3", name: "Esther Wambui", role: "Assistant", phone: "+254 701 664 275", access: "Orders only", online: false },
 ];
 
 export function BusinessStaff() {
@@ -17,7 +17,7 @@ export function BusinessStaff() {
         <div>
           <h1 className="font-display text-2xl text-foreground sm:text-3xl">Staff & access</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Riders and assistants get limited logins — you stay in control.
+            Riders and assistants get limited logins - you stay in control.
           </p>
         </div>
         <Button className="group">Invite staff</Button>
@@ -59,13 +59,12 @@ export function BusinessStaff() {
             <li className="flex justify-between"><span>Owner</span><span className="font-mono text-xs">everything incl. billing</span></li>
           </ul>
         </div>
-        <div className="rounded-2xl border border-warning/25 bg-warning-soft/50 p-5">
+        <div className="rounded-2xl border border-warning/25 bg-transparent/10 p-5">
           <div className="flex items-start gap-3">
             <Clock4 className="mt-0.5 size-5 shrink-0 text-warning" aria-hidden />
             <div className="text-sm leading-relaxed text-foreground/85">
-              <strong className="font-semibold text-foreground">Staff management is out of scope for this build.</strong>{" "}
-              This page previews the data model and UX. In production, invites land as SMS PINs so no
-              passwords to remember.
+              <strong className="font-semibold text-foreground">Invite staff by phone number.</strong>{" "}
+              They receive a one-time PIN to sign in, so there are no passwords to remember.
             </div>
           </div>
         </div>

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, type Transition } from "framer-motion";
-import { Menu, ShoppingCart, User, X } from "lucide-react";
+import { Bell, Menu, ShoppingCart, User, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { BrandMark } from "@/components/layout/brand-mark";
@@ -19,7 +19,7 @@ export const NAV_LINKS = [
   { href: "/for-business", label: "For businesses" },
 ] as const;
 
-/** Routes where the cart belongs — the ordering flow only. */
+/** Routes where the cart belongs - the ordering flow only. */
 const ORDER_FLOW = ["/browse", "/cart", "/checkout", "/order"] as const;
 
 const MENU_EASE = [0.16, 1, 0.3, 1] as const;
@@ -38,16 +38,19 @@ export function SiteHeader() {
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    if (typeof window !== "undefined") {
+      window.addEventListener("scroll", onScroll, { passive: true });
+      return () => window.removeEventListener("scroll", onScroll);
+    }
+    return () => {};
   }, []);
 
-  useEffect(() => setMenuOpen(false), [pathname]);
-
   useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
+    if (typeof document === "undefined") return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = menuOpen ? "hidden" : prev || "";
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = prev || "";
     };
   }, [menuOpen]);
 
@@ -76,7 +79,7 @@ export function SiteHeader() {
                   "rounded-lg px-3.5 py-2 text-sm font-medium transition-colors min-h-11 inline-flex items-center",
                   active
                     ? "text-[#0052FF]"
-                    : "text-foreground/80 hover:text-[#0052FF] hover:bg-[#0052FF]/5"
+                    : "text-foreground hover:text-[#0052FF] hover:bg-muted"
                 )}
               >
                 {link.label}
@@ -95,7 +98,7 @@ export function SiteHeader() {
             >
               <ShoppingCart className="size-5" aria-hidden />
               {count > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex size-5 items-center justify-center rounded-full bg-brand-gradient text-[11px] font-bold text-white shadow-accent">
+                <span className="absolute -right-0.5 -top-0.5 flex size-5 items-center justify-center rounded-full bg-foreground text-[11px] font-bold text-white shadow-accent">
                   {count}
                 </span>
               )}
@@ -103,9 +106,17 @@ export function SiteHeader() {
           )}
 
           <Link
+            href="/account/notifications"
+            aria-label="Notifications"
+            className="flex size-11 items-center justify-center rounded-lg border border-border bg-white text-foreground transition-colors hover:border-[#0052FF]/40 hover:text-[#0052FF] lg:hidden"
+          >
+            <Bell className="size-5" aria-hidden />
+          </Link>
+
+          <Link
             href={loggedIn ? "/account/profile" : "/login"}
             aria-label={loggedIn ? "Your profile" : "Sign in or create an account"}
-            className="flex size-11 items-center justify-center rounded-lg border border-border bg-white text-foreground transition-colors hover:border-[#0052FF]/40 hover:text-[#0052FF]"
+            className="hidden size-11 items-center justify-center rounded-lg border border-border bg-white text-foreground transition-colors hover:border-[#0052FF]/40 hover:text-[#0052FF] lg:flex"
           >
             <User className="size-5" aria-hidden />
           </Link>
@@ -114,7 +125,6 @@ export function SiteHeader() {
             <Link href="/register" className="hidden sm:inline-flex">
               <Button className="group min-h-11">
                 Order water
-                <span aria-hidden className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
               </Button>
             </Link>
           )}
@@ -164,6 +174,7 @@ export function SiteHeader() {
                 <Link
                   key={link.href}
                   href={link.href}
+                  onClick={() => setMenuOpen(false)}
                   className="flex min-h-11 items-center rounded-lg px-3 text-[15px] font-medium text-foreground hover:bg-muted"
                 >
                   {link.label}
@@ -171,19 +182,19 @@ export function SiteHeader() {
               ))}
               <div className="mt-4 flex flex-col gap-2.5">
                 {loggedIn ? (
-                  <Link href="/account/profile" className="w-full">
+                  <Link href="/account/profile" className="w-full" onClick={() => setMenuOpen(false)}>
                     <Button size="lg" className="w-full">
                       My profile
                     </Button>
                   </Link>
                 ) : (
                   <>
-                    <Link href="/register" className="w-full">
+                    <Link href="/register" className="w-full" onClick={() => setMenuOpen(false)}>
                       <Button size="lg" className="group w-full">
-                        Order water <span aria-hidden className="transition-transform group-hover:translate-x-0.5">→</span>
+                        Order water
                       </Button>
                     </Link>
-                    <Link href="/login" className="w-full">
+                    <Link href="/login" className="w-full" onClick={() => setMenuOpen(false)}>
                       <Button size="lg" variant="secondary" className="w-full">
                         Sign in
                       </Button>
@@ -196,7 +207,7 @@ export function SiteHeader() {
             {/* Tide sheet: covers the menu then sweeps off to reveal it */}
             <motion.div
               aria-hidden
-              className="pointer-events-none absolute inset-0 bg-brand-gradient"
+              className="pointer-events-none absolute inset-0 bg-transparent"
               initial={reduce ? { x: "-104%" } : { x: 0 }}
               animate={{ x: "-104%" }}
               transition={{ duration: reduce ? 0 : 0.55, ease: MENU_EASE, delay: reduce ? 0 : 0.12 }}

@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import { reportFailure } from "@/lib/monitoring";
 import { createOrder, listOrders, validateOrder } from "@/lib/server/order-store";
 
 export const dynamic = "force-dynamic";
@@ -30,6 +31,17 @@ export async function POST(request: Request) {
       { status: 422 }
     );
   }
-  const { order: created, created: isNew } = await createOrder(order);
-  return Response.json({ order: created }, { status: isNew ? 201 : 200 });
+  try {
+    const { order: created, created: isNew } = await createOrder(order);
+    return Response.json({ order: created }, { status: isNew ? 201 : 200 });
+  } catch (error) {
+    await reportFailure("order", "Could not save an order.", {
+      businessId: order.businessId,
+      reason: error instanceof Error ? error.message : "unknown",
+    });
+    return Response.json(
+      { error: "We could not save your order. Please try again." },
+      { status: 500 }
+    );
+  }
 }

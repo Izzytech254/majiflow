@@ -3,63 +3,54 @@ import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Button } from "@/components/ui/button";
 import { Stagger, StaggerItem } from "@/components/ui/animated-section";
-import {
-  MapPin,
-  Store,
-  PackagePlus,
-  Wallet,
-  Truck,
-  Bell,
-  BadgeCheck,
-  Smartphone,
-} from "lucide-react";
+import { MapPin, Store, PackagePlus, ShoppingCart, ClipboardList, Bell } from "lucide-react";
 import Link from "next/link";
 
 const customerSteps = [
   {
     icon: MapPin,
-    title: "Choose your area",
-    text: "Select your estate — or let us detect it. We show only verified refill stations that deliver to your door.",
-    detail: "Nairobi, Mombasa, Kisumu, Nakuru, Eldoret, Thika & Machakos — more towns monthly.",
+    title: "Choose your city",
+    text: "Pick your city and see the stations there.",
   },
   {
     icon: Store,
-    title: "Pick your station",
-    text: "Compare ratings, delivery fees, free-delivery minimums and what's on the menu. Every station is an independent Kenyan business.",
-    detail: "See lab results, reviews and real delivery times before you choose.",
+    title: "Compare stations",
+    text: "Compare price, delivery fee and free-delivery minimum.",
   },
   {
     icon: PackagePlus,
-    title: "Build your order",
-    text: "Add 20L cans, 5L bottles, dispensers or office plans. Set quantities, then tell us where and when to deliver.",
-    detail: "Save addresses so next week's refill is one tap.",
+    title: "Build your cart",
+    text: "Cans, bottles and dispensers in one cart, delivery totalled per station.",
   },
   {
-    icon: Wallet,
-    title: "Pay with M-Pesa",
-    text: "Choose M-Pesa at checkout and confirm the STK push on your phone. Payment is held and released to the station only when your order ships.",
-    detail: "Card payments available at stations that have enabled them.",
+    icon: ShoppingCart,
+    title: "Checkout and pay",
+    text: "Pay with M-Pesa or card and get a confirmation.",
   },
   {
-    icon: Truck,
-    title: "Track until arrival",
-    text: "Follow your order from accepted → out for delivery → delivered. The rider calls before arrival — there is always water at your gate.",
-    detail: "Average delivery in major towns: 40–60 minutes.",
+    icon: ClipboardList,
+    title: "Follow the order",
+    text: "Track it from pending to delivered.",
   },
   {
     icon: Bell,
-    title: "Never run dry again",
-    text: "Set a weekly or two-weekly refill schedule and get a reminder a day before. Pause or skip whenever you like.",
-    detail: "Standing orders save you up to 15% on delivery fees.",
+    title: "Recurring orders, coming soon",
+    text: "A refill schedule with reminders is on the roadmap.",
   },
 ];
 
 const faqItems = [
-  { q: "How fast is delivery?", a: "Stations in Nairobi, Mombasa, Kisumu and Nakuru typically deliver within 40–60 minutes during the day. Each business publishes its own average on its profile." },
-  { q: "Is there a free-delivery minimum?", a: "Many stations offer free delivery above a set amount, for example KES 1,000. It's always shown on the station's page before you order." },
-  { q: "What if the delivery arrives damaged?", a: "Tell us within 24 hours with a photo and the station replaces the product at no cost. MajiFlow follows up until it's resolved." },
-  { q: "Can I pay cash on delivery?", a: "Not on the platform — payments are prepaid via M-Pesa or card. This keeps riders, drivers and stations accountable, and means nobody carries cash." },
+  { q: "Is anything actually delivered?", a: "Yes. Orders are accepted and delivered by the station you choose, and you can follow every stage." },
+  { q: "Is there a free-delivery minimum?", a: "Yes, per station. Some waive the delivery fee above a set amount, shown on the station page." },
+  { q: "What if something goes wrong?", a: "Open the order to see its status and contact the station, or reach support from the contact page." },
+  { q: "Can I pay cash on delivery?", a: "Orders are prepaid by M-Pesa or card at checkout." },
 ];
+
+export const metadata = {
+  title: "How it works",
+  description:
+    "Compare refill stations, build a cart, pay with M-Pesa and follow your delivery from checkout to your door.",
+};
 
 export default function HowItWorks() {
   return (
@@ -69,45 +60,39 @@ export default function HowItWorks() {
         pulseLabel
         title={
           <>
-            From thirsty to <span className="text-gradient">refilled</span> in five steps
+            From browsing to a <span className="text-gradient">delivered order</span>
           </>
         }
-        description="Ordering drinking water in Kenya should be easier than schlepping a can up three floors. Here's exactly how it works."
+        description="Compare stations, place an order and follow it to your door."
       >
         <div className="flex flex-col items-center gap-3 sm:flex-row">
           <Link href="/browse">
-            <Button size="lg" className="group w-full sm:w-auto">
+            <Button size="lg" variant="secondary" className="group w-full sm:w-auto">
               Browse stations
-              <span aria-hidden className="transition-transform group-hover:translate-x-0.5">→</span>
             </Button>
           </Link>
-          <Link href="/register">
+          <Link href="/business">
             <Button size="lg" variant="secondary" className="w-full sm:w-auto">
-              Create an account
+              Open the dashboard
             </Button>
           </Link>
         </div>
       </PageHero>
 
-      <section className="py-16 lg:py-24">
+      <section className="py-16 lg:py-20">
         <Container>
           <Stagger className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" stagger={0.07}>
             {customerSteps.map((s, i) => (
               <StaggerItem key={s.title}>
-                <div className="group flex h-full flex-col rounded-2xl border border-border bg-white p-7 shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-layered">
+                <div className="group flex h-full flex-col rounded-2xl border border-border bg-card p-7 shadow-card">
                   <div className="flex items-center justify-between">
-                    <span className="flex size-12 items-center justify-center rounded-xl bg-brand-gradient text-white shadow-accent transition-transform duration-300 group-hover:scale-110">
+                    <span className="flex size-12 items-center justify-center rounded-xl bg-neutral-100 text-black">
                       <s.icon className="size-5" aria-hidden />
                     </span>
-                    <span className="font-mono text-sm font-bold text-[#0052FF]/40">
-                      0{i + 1}
-                    </span>
+                    <span className="font-mono text-sm font-bold text-[#0052FF]/40">0{i + 1}</span>
                   </div>
                   <h3 className="mt-6 font-display text-xl text-foreground">{s.title}</h3>
-                  <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{s.text}</p>
-                  <p className="mt-4 border-t border-border pt-3 font-mono text-[11px] uppercase tracking-wide text-muted-foreground">
-                    {s.detail}
-                  </p>
+                  <p className="mt-2 text-sm leading-relaxed text-foreground">{s.text}</p>
                 </div>
               </StaggerItem>
             ))}
@@ -115,50 +100,25 @@ export default function HowItWorks() {
         </Container>
       </section>
 
-      <section className="bg-white py-16 lg:py-24">
-        <Container>
-          <div className="mx-auto max-w-2xl text-center">
-            <SectionHeading
-              label="Works on any phone"
-              title={
-                <>
-                  No app to install. <span className="text-gradient">No data-heavy pages.</span>
-                </>
-              }
-              description="The whole ordering flow runs in your browser and works on even modest phones and 2G. SMS receipts, M-Pesa pushes and WhatsApp updates mean you're never offline."
-            />
-            <div className="mt-8 inline-flex items-center gap-3 rounded-2xl border border-border bg-background px-6 py-4 shadow-card">
-              <Smartphone className="size-6 text-[#0052FF]" aria-hidden />
-              <div className="text-left">
-                <p className="text-sm font-semibold text-foreground">Try the demo order</p>
-                <p className="text-xs text-muted-foreground">
-                  Full cart → M-Pesa → tracking flow, ready to explore.
-                </p>
-              </div>
-            </div>
-          </div>
-        </Container>
-      </section>
-
-      <section className="py-16 lg:py-24">
+      <section className="bg-card py-16 lg:py-20">
         <Container size="md">
           <SectionHeading
             label="Quick answers"
             title={
               <>
-                Delivery you can <span className="text-gradient">count on</span>
+                Common <span className="text-gradient">questions</span>
               </>
             }
           />
           <Stagger className="mt-12 grid gap-5 sm:grid-cols-2" stagger={0.07}>
             {faqItems.map((f) => (
               <StaggerItem key={f.q}>
-                <div className="h-full rounded-2xl border border-border bg-white p-6 shadow-card">
+                <div className="h-full rounded-2xl border border-border bg-background p-6 shadow-card">
                   <h3 className="flex items-start gap-2.5 font-semibold text-foreground">
-                    <BadgeCheck className="mt-0.5 size-5 shrink-0 text-[#0052FF]" aria-hidden />
+                    <Store className="mt-0.5 size-5 shrink-0 text-[#0052FF]" aria-hidden />
                     {f.q}
                   </h3>
-                  <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">{f.a}</p>
+                  <p className="mt-2.5 text-sm leading-relaxed text-foreground">{f.a}</p>
                 </div>
               </StaggerItem>
             ))}

@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { SectionLabel } from "@/components/ui/section-label";
 import { Container } from "@/components/ui/container";
 import { AnimatedSection } from "@/components/ui/animated-section";
 
@@ -17,8 +16,6 @@ interface PageHeroProps {
 
 /** Sticky-style page hero used across inner marketing pages. */
 export function PageHero({
-  label,
-  pulseLabel,
   title,
   description,
   children,
@@ -32,17 +29,22 @@ export function PageHero({
         "relative overflow-hidden",
         tone === "dark" ? "bg-ink text-white" : "bg-background",
         "border-b",
-        tone === "dark" ? "border-white/10" : "border-border"
+        tone === "dark" ? "border-white/10" : "border-border",
+        className
       )}
     >
       {tone === "light" ? (
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-radial-glow" />
       ) : (
         <>
-          <div aria-hidden className="pointer-events-none absolute inset-0 bg-dot-pattern opacity-60" />
+          <div aria-hidden className="pointer-events-none absolute inset-0 bg-dot-pattern opacity-40" />
           <div
             aria-hidden
-            className="pointer-events-none absolute left-1/2 top-0 size-[30rem] -translate-x-1/2 rounded-full bg-[#0052FF]/20 blur-[120px]"
+            className="pointer-events-none absolute inset-0"
+            style={{
+              backgroundImage:
+                "radial-gradient(ellipse 70% 60% at 82% -10%, rgba(0,82,255,0.38), transparent 62%), radial-gradient(ellipse 60% 50% at 0% 110%, rgba(77,124,255,0.18), transparent 60%)",
+            }}
           />
         </>
       )}
@@ -54,11 +56,6 @@ export function PageHero({
             align === "center" && "mx-auto max-w-3xl"
           )}
         >
-          {label && (
-            <SectionLabel pulse={pulseLabel} tone={tone === "dark" ? "dark" : "light"}>
-              {label}
-            </SectionLabel>
-          )}
           <h1
             className={cn(
               "font-display text-4xl leading-[1.08] tracking-tight sm:text-5xl md:text-[3.25rem]",

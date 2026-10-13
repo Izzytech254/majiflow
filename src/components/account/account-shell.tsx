@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
+  Bell,
   CreditCard,
   Droplets,
   Headphones,
@@ -12,6 +13,7 @@ import {
   MapPin,
   Menu,
   MessageCircle,
+  MoreHorizontal,
   Package,
   Search,
   ShoppingCart,
@@ -19,7 +21,8 @@ import {
 } from "lucide-react";
 import { BrandMark } from "@/components/layout/brand-mark";
 import { WaterDrawer } from "@/components/ui/water-drawer";
-import { Button } from "@/components/ui/button";
+import { MobileTabBar } from "@/components/layout/mobile-tab-bar";
+import { PageTransition } from "@/components/layout/page-transition";
 import waterLiquid from "@/assets/images/backdrops/water-liquid.webp";
 import { useCart } from "@/components/order/cart-provider";
 import { useCustomer } from "@/components/order/customer-provider";
@@ -34,8 +37,9 @@ type NavItem = {
 
 const NAV: NavItem[] = [
   { href: "/account", label: "Overview", icon: LayoutDashboard },
-  { href: "/account/profile", label: "Profile", icon: User },
   { href: "/account/orders", label: "Orders", icon: Package },
+  { href: "/account/notifications", label: "Notifications", icon: Bell },
+  { href: "/account/profile", label: "Profile", icon: User },
   { href: "/account/addresses", label: "Addresses", icon: MapPin },
   { href: "/account/plans", label: "Plans", icon: CreditCard },
 ];
@@ -69,7 +73,7 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
         />
       ))}
 
-      <p className="px-3 pb-1 pt-5 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+      <p className="px-3 pb-1 pt-5 font-mono text-[10px] uppercase tracking-[0.2em] text-foreground">
         Shop
       </p>
       {SHOP.map((item) => (
@@ -91,7 +95,7 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
         onClick={() => setOpen(false)}
       />
 
-      <p className="px-3 pb-1 pt-5 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+      <p className="px-3 pb-1 pt-5 font-mono text-[10px] uppercase tracking-[0.2em] text-foreground">
         Help
       </p>
       {HELP.map((item) => (
@@ -104,25 +108,9 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
         />
       ))}
 
-      {/* Refill CTA */}
-      <div className="mt-auto rounded-xl bg-brand-gradient p-3.5 text-white shadow-accent">
-        <p className="font-display text-sm">Need a refill?</p>
-        <p className="mt-0.5 text-[11px] leading-snug text-white/80">
-          Stations near you deliver in under 60 minutes.
-        </p>
-        <Link
-          href="/browse"
-          onClick={() => setOpen(false)}
-          className="mt-2.5 flex items-center justify-center gap-1.5 rounded-lg bg-white/15 px-3 py-1.5 text-xs font-semibold ring-1 ring-white/25 transition-colors hover:bg-white/25"
-        >
-          Order water
-          <span aria-hidden>→</span>
-        </Link>
-      </div>
-
       {/* User card */}
       <div className="mt-3 flex items-center gap-2.5 rounded-xl border border-border bg-white px-3 py-2.5">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand-gradient font-display text-sm text-white">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-muted font-display text-sm text-foreground">
           {initial}
         </span>
         <div className="min-w-0">
@@ -147,9 +135,9 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
           <Menu className="size-5" aria-hidden />
         </button>
         <div className="relative hidden items-center gap-2 rounded-xl border border-border bg-white px-3 py-2 md:flex">
-          <Search className="size-4 text-muted-foreground" aria-hidden />
+          <Search className="size-4 text-black" aria-hidden />
           <input
-            className="w-44 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+            className="w-44 bg-white text-sm text-foreground outline-none placeholder:text-foreground"
             placeholder="Search orders, stations…"
             aria-label="Search your account"
           />
@@ -158,24 +146,23 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
 
       <div className="ml-auto flex items-center gap-2">
         <Link
+          href="/account/notifications"
+          aria-label="Notifications"
+          className="relative flex size-10 items-center justify-center rounded-xl border border-border bg-white text-foreground transition-colors hover:text-[#0052FF]"
+        >
+          <Bell className="size-4.5" aria-hidden />
+        </Link>
+        <Link
           href="/cart"
           aria-label={`Cart, ${count} items`}
-          className="relative flex size-10 items-center justify-center rounded-xl border border-border bg-white text-muted-foreground hover:text-foreground"
+          className="relative flex size-10 items-center justify-center rounded-xl border border-border bg-white text-foreground hover:text-foreground"
         >
           <ShoppingCart className="size-4.5" aria-hidden />
           {count > 0 && (
-            <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-brand-gradient text-[11px] font-bold text-white shadow-accent ring-2 ring-white">
+            <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-foreground text-[11px] font-bold text-white shadow-accent ring-2 ring-white">
               {count}
             </span>
           )}
-        </Link>
-        <Link href="/browse" className="hidden sm:inline-flex">
-          <Button className="group min-h-10">
-            Order water
-            <span aria-hidden className="transition-transform duration-200 group-hover:translate-x-0.5">
-              →
-            </span>
-          </Button>
         </Link>
       </div>
     </>
@@ -197,7 +184,7 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
       </WaterDrawer>
 
       {/* Content column */}
-      <div className="relative lg:pl-64">
+      <div className="relative flex min-h-screen flex-col lg:pl-64">
         <div
           aria-hidden
           className="pointer-events-none fixed inset-y-0 left-0 right-0 z-0 lg:left-64"
@@ -220,11 +207,13 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
           {header}
         </header>
 
-        <main className="relative p-4 sm:p-6">{children}</main>
+        <main className="relative flex-1 p-4 pb-24 sm:p-6 lg:pb-6">
+          <PageTransition>{children}</PageTransition>
+        </main>
 
         <footer className="relative border-t border-border bg-white/60">
-          <div className="mx-auto flex max-w-[80rem] flex-wrap items-center justify-between gap-4 px-4 py-3 text-xs text-muted-foreground sm:px-6">
-            <p>MajiFlow — Water refill, delivered.</p>
+          <div className="mx-auto flex max-w-[80rem] flex-wrap items-center justify-between gap-4 px-4 pb-24 pt-3 text-xs text-foreground sm:px-6 lg:pb-3">
+            <p>MajiFlow - Water refill, delivered.</p>
             <nav className="flex items-center gap-4" aria-label="Footer">
               <Link href="/" className="hover:underline">
                 Home
@@ -242,6 +231,16 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
           </div>
         </footer>
       </div>
+
+      <MobileTabBar
+        items={[
+          { href: "/account", label: "Overview", icon: LayoutDashboard },
+          { href: "/account/orders", label: "Orders", icon: Package },
+          { href: "/account/addresses", label: "Addresses", icon: MapPin },
+          { href: "/browse", label: "Browse", icon: Droplets },
+          { label: "More", icon: MoreHorizontal, onClick: () => setOpen(true) },
+        ]}
+      />
     </div>
   );
 }
@@ -269,14 +268,14 @@ function SidebarLink({
       className={cn(
         "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
         active
-          ? "bg-[#0052FF]/8 text-[#0052FF]"
-          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+          ? "bg-white/8 text-[#0052FF]"
+          : "text-foreground hover:bg-muted hover:text-foreground"
       )}
     >
       <Icon className={cn("size-4.5", active && "text-[#0052FF]")} aria-hidden />
       {label}
       {badge && (
-        <span className="ml-auto flex min-w-5 items-center justify-center rounded-full bg-brand-gradient px-1.5 py-0.5 font-mono text-[10px] font-semibold text-white">
+        <span className="ml-auto flex min-w-5 items-center justify-center rounded-full bg-white px-1.5 py-0.5 font-mono text-[10px] font-semibold text-foreground">
           {badge}
         </span>
       )}

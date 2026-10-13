@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -11,13 +11,16 @@ interface RotatingWordProps {
 }
 
 /**
- * Cycles through words with a soft, water-like vertical fade. A hidden sizer
- * holds the width of the longest word so the surrounding headline never
- * reflows as the word changes.
+ * Cycles through words with a horizontal 3D flip. The container width animates
+ * to the current word so the surrounding headline shifts with it, and because
+ * the flip rotates around the vertical axis the baseline never moves, so every
+ * word sits on the same line as the rest of the sentence.
  */
 export function RotatingWord({ words, className, interval = 2400 }: RotatingWordProps) {
   const reduce = useReducedMotion();
   const [index, setIndex] = useState(0);
+  const measureRef = useRef<HTMLSpanElement>(null);
+  const [widths, setWidths] = useState<number[]>([]);
 
   useEffect(() => {
     if (reduce || words.length < 2) return;
@@ -25,33 +28,54 @@ export function RotatingWord({ words, className, interval = 2400 }: RotatingWord
     return () => window.clearInterval(id);
   }, [reduce, words.length, interval]);
 
+  useEffect(() => {
+    const el = measureRef.current;
+    if (!el) return;
+    const spans = Array.from(el.children) as HTMLElement[];
+    setWidths(spans.map((s) => s.getBoundingClientRect().width));
+  }, [words]);
+
   const first = words[0] ?? "";
   if (reduce || words.length < 2) {
     return <span className={className}>{first}</span>;
   }
 
-  const longest = words.reduce((a, b) => (b.length > a.length ? b : a), first);
   const word = words[index] ?? first;
+  const width = widths[index];
 
   return (
-    <span className="relative inline-grid align-baseline">
-      <span aria-hidden className="invisible col-start-1 row-start-1 whitespace-nowrap">
-        {longest}
+    <span className="relative inline-block align-baseline" style={{ perspective: "600px" }}>
+      <span
+        ref={measureRef}
+        aria-hidden
+        className="pointer-events-none absolute left-0 top-0 -z-10 whitespace-nowrap opacity-0"
+      >
+        {words.map((w, i) => (
+          <span key={i} className={cn("inline-block whitespace-nowrap", className)}>
+            {w}
+          </span>
+        ))}
       </span>
-      <span className="col-start-1 row-start-1">
+
+      <motion.span
+        className="relative inline-block align-baseline"
+        animate={width !== undefined ? { width } : undefined}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      >
         <AnimatePresence mode="wait" initial={false}>
           <motion.span
             key={word}
-            initial={{ y: "0.45em", opacity: 0, filter: "blur(6px)" }}
-            animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
-            exit={{ y: "-0.45em", opacity: 0, filter: "blur(6px)" }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ rotateY: -90, opacity: 0 }}
+            animate={{ rotateY: 0, opacity: 1 }}
+            exit={{ rotateY: 90, opacity: 0 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            style={{ transformOrigin: "50% 50%", backfaceVisibility: "hidden" }}
             className={cn("inline-block whitespace-nowrap", className)}
           >
             {word}
           </motion.span>
         </AnimatePresence>
-      </span>
+      </motion.span>
     </span>
   );
 }

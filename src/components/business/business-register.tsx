@@ -3,19 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
-  ArrowLeft,
-  ArrowRight,
-  Building2,
-  Check,
-  CreditCard,
-  Loader2,
-  MapPin,
-  MapPinCheck,
-  Navigation,
-  PartyPopper,
-  Store,
-  TriangleAlert,
-} from "lucide-react";
+  ArrowLeft, Building2, Check, CreditCard, Loader2, MapPin, MapPinCheck, Navigation, PartyPopper, Store, TriangleAlert } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
@@ -184,7 +172,7 @@ function validateStep(step: number, draft: RegistrationDraft): Errors {
 function geolocationUnavailableReason(): string | null {
   if (typeof window === "undefined") return null;
   if (!window.isSecureContext)
-    return "Location needs https. You're using an http:// link — open the https:// MajiFlow link (not the 10.162.122.91 IP), then allow location. We'll use your town's location instead.";
+    return "Location needs a secure connection. Open MajiFlow over https and allow location, then try again. We'll use your town's location instead.";
   if (typeof navigator === "undefined" || !("geolocation" in navigator))
     return "This browser can't share location. We'll use your town's location instead.";
   return null;
@@ -316,7 +304,7 @@ export function BusinessRegister() {
     return (
       <Container className="py-16 lg:py-24">
         <div className="mx-auto max-w-xl rounded-3xl border border-border bg-white p-8 text-center shadow-layered sm:p-12">
-          <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-brand-gradient text-white shadow-accent">
+          <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-foreground text-white shadow-accent">
             <PartyPopper className="size-7" aria-hidden />
           </span>
           <h1 className="mt-6 font-display text-3xl text-foreground">
@@ -324,32 +312,31 @@ export function BusinessRegister() {
           </h1>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
             Your business profile is set up on the{" "}
-            <strong className="text-foreground">{selected.name}</strong> plan. MajiFlow is free while we
-            finish building — your details, including your business location, are saved for when the
-            platform goes live.
+            <strong className="text-foreground">{selected.name}</strong> plan. Your 14-day free trial
+            starts today, and your details are saved so you can start taking orders right away.
           </p>
 
           <dl className="mt-6 space-y-2 rounded-2xl bg-muted/50 p-5 text-left text-sm">
             <div className="flex items-center justify-between gap-3">
               <dt className="text-muted-foreground">Plan</dt>
               <dd className="font-semibold text-foreground">
-                {selected.name} · free for now
+                {selected.name} · 14-day free trial
               </dd>
             </div>
             <div className="flex items-center justify-between gap-3">
               <dt className="text-muted-foreground">Registered to</dt>
-              <dd className="font-semibold text-foreground">{draft.ownerName || "—"}</dd>
+              <dd className="font-semibold text-foreground">{draft.ownerName || "-"}</dd>
             </div>
             <div className="flex items-center justify-between gap-3">
               <dt className="text-muted-foreground">Contact</dt>
-              <dd className="font-semibold text-foreground">{draft.phone || "—"}</dd>
+              <dd className="font-semibold text-foreground">{draft.phone || "-"}</dd>
             </div>
             <div className="flex items-center justify-between gap-3">
               <dt className="text-muted-foreground">Business location</dt>
               <dd className="text-right font-mono text-xs text-foreground">
                 {draft.location
                   ? `${draft.location.lat.toFixed(5)}, ${draft.location.lng.toFixed(5)}`
-                  : "—"}
+                  : "-"}
                 {draft.location?.approx && (
                   <span className="block font-sans text-[11px] text-muted-foreground">
                     Approximate ({draft.city})
@@ -363,10 +350,9 @@ export function BusinessRegister() {
             <Link href="/business">
               <Button size="lg" className="group w-full sm:w-auto">
                 Open my dashboard
-                <ArrowRight className="size-4" aria-hidden />
               </Button>
             </Link>
-            <Link href="/business/demo">
+            <Link href="/business">
               <Button size="lg" variant="secondary" className="w-full sm:w-auto">
                 Take the tour first
               </Button>
@@ -388,8 +374,8 @@ export function BusinessRegister() {
             Get your station online in <span className="text-gradient">one lunch break</span>
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
-            Four short steps, no card required. MajiFlow is free for now — your details and business
-            location are saved for when we launch billing.
+            Four short steps, no card required. Every plan starts with a 14-day free trial, and you
+            can set up billing whenever you are ready.
           </p>
         </div>
 
@@ -401,9 +387,9 @@ export function BusinessRegister() {
                 className={cn(
                   "flex size-9 items-center justify-center rounded-full font-mono text-xs font-semibold",
                   i < step
-                    ? "bg-brand-gradient text-white"
+                    ? "bg-foreground text-white"
                     : i === step
-                      ? "bg-[#0052FF]/10 text-[#0052FF] ring-2 ring-[#0052FF]/25"
+                      ? "bg-transparent/10 text-[#0052FF] ring-2 ring-[#0052FF]/25"
                       : "bg-muted text-muted-foreground"
                 )}
               >
@@ -469,7 +455,7 @@ export function BusinessRegister() {
                   What do you sell?<span className="text-[#0052FF]"> *</span>
                 </p>
                 <div role="group" aria-label="What do you sell?" className="flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[#0052FF]/30 bg-[#0052FF]/5 px-3 py-1.5 text-sm font-medium text-[#0052FF]">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[#0052FF]/30 bg-transparent/5 px-3 py-1.5 text-sm font-medium text-[#0052FF]">
                     <Check className="size-3.5" aria-hidden /> Water refills
                   </span>
                   {EXTRA_SERVICES.map((service) => {
@@ -488,7 +474,7 @@ export function BusinessRegister() {
                         className={cn(
                           "rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
                           on
-                            ? "border-[#0052FF] bg-[#0052FF]/10 text-[#0052FF]"
+                            ? "border-[#0052FF] bg-transparent/10 text-[#0052FF]"
                             : "border-border bg-white text-muted-foreground hover:border-[#0052FF]/40 hover:text-[#0052FF]"
                         )}
                       >
@@ -510,7 +496,7 @@ export function BusinessRegister() {
                     className={cn(
                       "rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
                       draft.sellsOther.includes("Other")
-                        ? "border-[#0052FF] bg-[#0052FF]/10 text-[#0052FF]"
+                        ? "border-[#0052FF] bg-transparent/10 text-[#0052FF]"
                         : "border-border bg-white text-muted-foreground hover:border-[#0052FF]/40 hover:text-[#0052FF]"
                     )}
                   >
@@ -518,7 +504,7 @@ export function BusinessRegister() {
                   </button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Water refills are always part of your catalogue — add anything else you offer.
+                  Water refills are always part of your catalogue - add anything else you offer.
                 </p>
                 {draft.sellsOther.includes("Other") && (
                   <Field label="Other services" error={errors.otherService} className="pt-1">
@@ -534,7 +520,7 @@ export function BusinessRegister() {
 
               <Field
                 label="Business registration number"
-                hint="KRA PIN or certificate number — optional, you can add it later."
+                hint="KRA PIN or certificate number - optional, you can add it later."
               >
                 <Input
                   placeholder="e.g. P051234567X"
@@ -543,7 +529,7 @@ export function BusinessRegister() {
                 />
               </Field>
 
-              <Field label="Short description" hint="Optional — a sentence or two customers will see.">
+              <Field label="Short description" hint="Optional - a sentence or two customers will see.">
                 <Textarea
                   rows={3}
                   placeholder="Family-run since 2018. UV-treated borehole water, delivered on boda within the hour."
@@ -596,12 +582,12 @@ export function BusinessRegister() {
                 <div
                   className={cn(
                     "rounded-2xl border p-4",
-                    draft.location ? "border-success/40 bg-success/5" : "border-border bg-white"
+                    draft.location ? "border-success/40 bg-transparent/5" : "border-border bg-white"
                   )}
                 >
                   {draft.location ? (
                     <div className="flex items-start gap-3">
-                      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-success/15 text-success">
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-transparent/15 text-success">
                         <MapPinCheck className="size-5" aria-hidden />
                       </span>
                       <div className="min-w-0 flex-1">
@@ -619,7 +605,7 @@ export function BusinessRegister() {
                         )}
                         {draft.location.approx && (
                           <p className="mt-0.5 text-xs text-muted-foreground">
-                            Based on {draft.city} — you can refine this later.
+                            Based on {draft.city} - you can refine this later.
                           </p>
                         )}
                         <button
@@ -635,7 +621,7 @@ export function BusinessRegister() {
                   ) : (
                     <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex items-start gap-3">
-                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#0052FF]/10 text-[#0052FF]">
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-transparent/10 text-[#0052FF]">
                           <MapPin className="size-5" aria-hidden />
                         </span>
                         <div>
@@ -675,14 +661,14 @@ export function BusinessRegister() {
                 ) : (
                   !draft.location && (
                     <p className="text-xs text-muted-foreground">
-                      Required — your business location is saved to your profile. If your browser can&apos;t
+                      Required - your business location is saved to your profile. If your browser can&apos;t
                       share it, use your town&apos;s location.
                     </p>
                   )
                 )}
               </div>
 
-              <Field label="Delivery zones" hint="Comma-separated for now — the dashboard lets you fine-tune fees per zone.">
+              <Field label="Delivery zones" hint="Comma-separated for now - the dashboard lets you fine-tune fees per zone.">
                 <Input
                   placeholder="Kasarani, Roysambu, Kahawa West, Githurai"
                   value={draft.zones}
@@ -704,11 +690,11 @@ export function BusinessRegister() {
             <div className="space-y-5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h2 className="font-display text-xl text-foreground">Pick your plan</h2>
-                <Badge variant="success">Free for now</Badge>
+                <Badge variant="success">Free trial</Badge>
               </div>
               <p className="text-sm text-muted-foreground">
-                Choose the plan that fits today. Nothing is charged while MajiFlow is in early access — you
-                can change this later.
+                Choose the plan that fits today. Every plan starts with a 14-day free trial, and you
+                can change plan at any time.
               </p>
               <div className="grid gap-4 sm:grid-cols-3">
                 {plans.map((p) => (
@@ -749,22 +735,22 @@ export function BusinessRegister() {
               <h2 className="flex items-center gap-2 font-display text-xl text-foreground">
                 <CreditCard className="size-5 text-[#0052FF]" aria-hidden /> How should we bill you?
               </h2>
-              <div className="rounded-2xl border border-[#0052FF]/25 bg-[#0052FF]/5 p-5">
+              <div className="rounded-2xl border border-[#0052FF]/25 bg-transparent/5 p-5">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="font-display text-lg text-foreground">{selected.name} plan</p>
                     <p className="text-sm text-muted-foreground">
-                      {formatKES(selected.monthlyPrice)}/month once billing starts
+                      {formatKES(selected.monthlyPrice)}/month after your trial
                     </p>
                   </div>
-                  <Badge variant="success">Free for now</Badge>
+                  <Badge variant="success">Free trial</Badge>
                 </div>
               </div>
               <p className="rounded-xl bg-muted/50 p-4 text-sm leading-relaxed text-muted-foreground">
-                You won&apos;t be charged today. Add your M-Pesa number below and we&apos;ll use it when billing goes
-                live — you can skip this and add it later in Settings.
+                You won&apos;t be charged today. Add your M-Pesa number now, or add it later in
+                Settings.
               </p>
-              <Field label="M-Pesa number for billing" hint="Optional for now.">
+              <Field label="M-Pesa number for billing" hint="Optional - you can add it later.">
                 <Input
                   type="tel"
                   placeholder="+254 712 345 678"
@@ -781,8 +767,8 @@ export function BusinessRegister() {
                   className="mt-0.5 size-4 accent-[#0052FF]"
                 />
                 <span className="text-sm leading-relaxed text-muted-foreground">
-                  Charge my M-Pesa on the 1st of each month once billing starts. I can cancel anytime — my
-                  public page stays up until the end of the paid period.
+                  Charge my M-Pesa on the 1st of each month after my trial. I can cancel anytime -
+                  my public page stays up until the end of the paid period.
                 </span>
               </label>
               <p className="text-xs text-muted-foreground">
@@ -802,12 +788,10 @@ export function BusinessRegister() {
                 disabled={step === 1 && !draft.location && !locationError}
               >
                 Continue
-                <ArrowRight className="size-4" aria-hidden />
               </Button>
             ) : (
               <Button size="lg" className="group" onClick={submit}>
-                Start free — no card
-                <ArrowRight className="size-4" aria-hidden />
+                Start free trial
               </Button>
             )}
           </div>

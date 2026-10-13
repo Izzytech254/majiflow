@@ -3,7 +3,12 @@ import { PageHero } from "@/components/shared/page-hero";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { AccordionItem } from "@/components/ui/accordion";
 import { faqsByGroup } from "@/lib/data/faqs";
-import { CtaSection } from "@/components/home/cta-section";
+
+export const metadata = {
+  title: "FAQs",
+  description:
+    "Answers about ordering water, delivery fees, payments, and running a refill station on MajiFlow.",
+};
 
 export default function Faqs() {
   const groups = [
@@ -22,7 +27,7 @@ export default function Faqs() {
             Every answer, <span className="text-gradient">one page</span>
           </>
         }
-        description="From ordering your first refill to running five staff on the Growth plan — the questions we actually get."
+        description="From ordering your first refill to running five staff on the Growth plan - the questions we actually get."
       />
 
       <section className="py-16 lg:py-24">
@@ -43,8 +48,6 @@ export default function Faqs() {
           </div>
         </Container>
       </section>
-
-      <CtaSection />
     </>
   );
 }

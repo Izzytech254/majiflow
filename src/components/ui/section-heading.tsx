@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { SectionLabel } from "@/components/ui/section-label";
 import { AnimatedSection } from "@/components/ui/animated-section";
 
 interface SectionHeadingProps {
+  /** Retained for call-site compatibility; eyebrow labels are no longer rendered. */
   label?: string;
   pulseLabel?: boolean;
   title: ReactNode;
@@ -16,8 +16,6 @@ interface SectionHeadingProps {
 }
 
 export function SectionHeading({
-  label,
-  pulseLabel,
   title,
   description,
   align = "center",
@@ -33,11 +31,6 @@ export function SectionHeading({
         className
       )}
     >
-      {label && (
-        <SectionLabel pulse={pulseLabel} tone={tone}>
-          {label}
-        </SectionLabel>
-      )}
       <h2
         className={cn(
           "font-display text-3xl leading-[1.12] sm:text-4xl md:text-[2.75rem]",

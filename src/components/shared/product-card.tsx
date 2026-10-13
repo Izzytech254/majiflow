@@ -3,25 +3,29 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { Minus, Plus, ShoppingCart } from "lucide-react";
-import type { BusinessProduct } from "@/lib/types";
+import type { BusinessProduct, WeeklyOperatingHours } from "@/lib/types";
 import { formatKES } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
 import { productImage } from "@/lib/product-images";
 import { useCart } from "@/components/order/cart-provider";
 import { useFlyToCart } from "@/components/order/fly-to-cart";
-import { AnimatePresence, motion } from "framer-motion";
+import { useBusinessAvailability } from "@/components/shared/business-availability";
 
 interface ProductCardProps {
   product: BusinessProduct;
   businessId: string;
+  openingHours: WeeklyOperatingHours | undefined;
   className?: string;
 }
 
-export function ProductCard({ product, businessId, className }: ProductCardProps) {
+export function ProductCard({ product, businessId, openingHours, className }: ProductCardProps) {
   const { items, addItem, updateQuantity } = useCart();
+  const { toast } = useToast();
+  const availability = useBusinessAvailability(openingHours);
   const fly = useFlyToCart();
   const [qty, setQty] = useState(1);
   const [flying, setFlying] = useState(false);
@@ -30,11 +34,20 @@ export function ProductCard({ product, businessId, className }: ProductCardProps
     (i) => i.businessId === businessId && i.productId === product.id
   );
 
+  const closed = availability.state !== "open";
+  const closedLabel =
+    availability.state === "closed" ? "Station closed" : "Hours unavailable";
+
   const handleAdd = () => {
+    if (closed) return;
+    const add = () => {
+      addItem({ businessId, productId: product.id, quantity: qty });
+      toast({ kind: "success", title: "Added to cart", message: `${qty} × ${product.name}` });
+      setQty(1);
+    };
     const fromEl = imageRef.current;
     if (!fromEl) {
-      addItem({ businessId, productId: product.id, quantity: qty });
-      setQty(1);
+      add();
       return;
     }
     setFlying(true);
@@ -43,16 +56,20 @@ export function ProductCard({ product, businessId, className }: ProductCardProps
       src: productImage(product.image).src,
       alt: product.name,
       onDone: () => {
-        addItem({ businessId, productId: product.id, quantity: qty });
-        setQty(1);
+        add();
         setFlying(false);
       },
     });
   };
 
   return (
-    <Card className={cn("group flex h-full flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-layered", className)}>
-      <div ref={imageRef} className="relative h-28 overflow-hidden bg-gradient-to-br from-slate-100 via-white to-[#0052FF]/5" aria-hidden>
+    <Card
+      className={cn(
+        "group flex h-full flex-col overflow-hidden border-border transition-all duration-300 hover:-translate-y-1 hover:shadow-layered",
+        className
+      )}
+    >
+      <div ref={imageRef} className="relative aspect-[4/3] overflow-hidden bg-muted" aria-hidden>
         <Image
           src={productImage(product.image)}
           alt=""
@@ -60,7 +77,6 @@ export function ProductCard({ product, businessId, className }: ProductCardProps
           sizes="(min-width: 1280px) 14rem, (min-width: 1024px) 18rem, (min-width: 640px) 45vw, 92vw"
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-radial-glow" />
         {product.popular && (
           <Badge variant="accent" className="absolute left-3 top-3">
             Popular
@@ -74,12 +90,14 @@ export function ProductCard({ product, businessId, className }: ProductCardProps
       </div>
 
       <div className="flex flex-1 flex-col p-5">
-        <h3 className="text-[15px] font-semibold leading-snug text-foreground">{product.name}</h3>
+        <h3 className="line-clamp-1 text-[15px] font-semibold leading-snug text-foreground">
+          {product.name}
+        </h3>
         <p className="mt-1 line-clamp-2 text-[13px] leading-relaxed text-muted-foreground">
           {product.description}
         </p>
 
-        <div className="mt-4 flex items-baseline gap-2">
+        <div className="mt-3 flex items-baseline gap-2">
           <span className="text-xl font-bold tracking-tight text-foreground">{formatKES(product.price)}</span>
           <span className="font-mono text-[11px] uppercase text-muted-foreground">/ {product.unit}</span>
           {product.oldPrice && (
@@ -87,62 +105,44 @@ export function ProductCard({ product, businessId, className }: ProductCardProps
           )}
         </div>
 
-        <div className="mt-4 flex items-center gap-2 pt-1">
-          <AnimatePresence mode="wait">
-            {cartItem ? (
-              <motion.div
-                key="stepper"
-                initial={{ opacity: 0, x: -12 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 12 }}
-                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                className="flex flex-1 items-center justify-between rounded-lg border border-border bg-muted/50 p-1"
+        <div className="mt-4 pt-1">
+          {closed ? (
+            <Button disabled className="h-10 w-full">
+              {closedLabel}
+            </Button>
+          ) : cartItem ? (
+            <div className="flex items-center justify-between rounded-lg border border-border bg-muted/50 p-1">
+              <button
+                onClick={() => updateQuantity(businessId, product.id, cartItem.quantity - 1)}
+                aria-label={`Decrease ${product.name} quantity`}
+                className="flex size-8 items-center justify-center rounded-md border border-border bg-white text-foreground transition-colors hover:border-[#0052FF]/40 hover:text-[#0052FF]"
               >
-                <button
-                  onClick={() => updateQuantity(businessId, product.id, cartItem.quantity - 1)}
-                  aria-label={`Decrease ${product.name} quantity`}
-                  className="flex size-8 items-center justify-center rounded-md border border-border bg-white text-foreground transition-colors hover:border-[#0052FF]/40 hover:text-[#0052FF]"
-                >
-                  <Minus className="size-3.5" aria-hidden />
-                </button>
-                <span className="text-sm font-semibold tabular-nums" aria-live="polite">
-                  {cartItem.quantity} in cart
-                </span>
-                <button
-                  onClick={() => updateQuantity(businessId, product.id, cartItem.quantity + 1)}
-                  aria-label={`Increase ${product.name} quantity`}
-                  className="flex size-8 items-center justify-center rounded-md border border-border bg-white text-foreground transition-colors hover:border-[#0052FF]/40 hover:text-[#0052FF]"
-                >
-                  <Plus className="size-3.5" aria-hidden />
-                </button>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="quantity-select"
-                initial={{ opacity: 0, x: -12 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 12 }}
-                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                <Minus className="size-3.5" aria-hidden />
+              </button>
+              <span className="text-sm font-semibold tabular-nums" aria-live="polite">
+                {cartItem.quantity} in cart
+              </span>
+              <button
+                onClick={() => updateQuantity(businessId, product.id, cartItem.quantity + 1)}
+                aria-label={`Increase ${product.name} quantity`}
+                className="flex size-8 items-center justify-center rounded-md border border-border bg-white text-foreground transition-colors hover:border-[#0052FF]/40 hover:text-[#0052FF]"
               >
-                <SelectQuantity value={qty} onChange={setQty} name={product.name} />
-              </motion.div>
-            )}
-          </AnimatePresence>
-          {!cartItem && (
-            <motion.button
-              key="add-button"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              onClick={handleAdd}
-              disabled={flying}
-              className="flex-1 px-3 disabled:pointer-events-none disabled:opacity-70"
-              aria-label={`Add ${product.name} to cart`}
-            >
-              <ShoppingCart className="size-4" aria-hidden />
-              Add
-            </motion.button>
+                <Plus className="size-3.5" aria-hidden />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <SelectQuantity value={qty} onChange={setQty} name={product.name} />
+              <Button
+                onClick={handleAdd}
+                disabled={flying}
+                className="h-10 flex-1"
+                aria-label={`Add ${product.name} to cart`}
+              >
+                <ShoppingCart className="size-4" aria-hidden />
+                Add
+              </Button>
+            </div>
           )}
         </div>
       </div>

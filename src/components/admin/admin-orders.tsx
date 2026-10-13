@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Clock, MapPin, Phone, Radio, Truck } from "lucide-react";
+import { Clock, MapPin, Phone, Radio, Truck } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { OrderStatusBadge } from "@/components/ui/order-status-badge";
 import { LoadingState } from "@/components/ui/feedback";
@@ -73,12 +73,12 @@ export function AdminOrders() {
           </Link>
           <h1 className="mt-2 flex items-center gap-3 font-display text-3xl text-foreground sm:text-4xl">
             Live orders
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-success-soft px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-success">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-transparent-soft px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-success">
               <Radio className="size-3 animate-pulse-dot" aria-hidden /> {inFlight} in flight
             </span>
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Every station&apos;s orders across Kenya — updating live. Open one to watch the customer&apos;s location.
+            Every station&apos;s orders across Kenya - updating live. Open one to watch the customer&apos;s location.
           </p>
         </div>
       </div>
@@ -92,7 +92,7 @@ export function AdminOrders() {
             className={cn(
               "shrink-0 rounded-xl border px-4 py-2 text-sm font-medium transition-colors",
               tab === t.id
-                ? "border-[#0052FF] bg-[#0052FF]/8 text-[#0052FF]"
+                ? "border-[#0052FF] bg-transparent/8 text-[#0052FF]"
                 : "border-border bg-white text-muted-foreground hover:text-foreground"
             )}
             aria-pressed={tab === t.id}
@@ -124,7 +124,7 @@ export function AdminOrders() {
                     <p className="truncate text-sm font-semibold text-foreground">
                       {o.customerName}
                       <span className="ml-2 font-mono text-xs font-normal text-muted-foreground">{o.orderNumber}</span>
-                      <span className="ml-2 rounded-full bg-[#0052FF]/8 px-2 py-0.5 text-[11px] font-medium text-[#0052FF]">
+                      <span className="ml-2 rounded-full bg-transparent/8 px-2 py-0.5 text-[11px] font-medium text-[#0052FF]">
                         {o.businessName}
                       </span>
                     </p>
@@ -153,10 +153,10 @@ export function AdminOrders() {
                   <OrderStatusBadge status={o.status} />
                   <Link
                     href={`/admin/orders/${o.id}`}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-[#0052FF]/30 bg-[#0052FF]/5 px-3 py-2 text-xs font-semibold text-[#0052FF] hover:bg-[#0052FF]/10"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-[#0052FF]/30 bg-transparent/5 px-3 py-2 text-xs font-semibold text-[#0052FF] hover:bg-transparent/10"
                     aria-label={`Track order ${o.orderNumber}`}
                   >
-                    Track <ArrowRight className="size-3.5" aria-hidden />
+                    Track
                   </Link>
                 </div>
               </li>

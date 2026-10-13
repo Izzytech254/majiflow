@@ -3,16 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
-  ArrowLeft,
-  ArrowRight,
-  CheckCircle2,
-  Clock,
-  MapPin,
-  Phone,
-  Radio,
-  Truck,
-  XCircle,
-} from "lucide-react";
+  ArrowLeft, CheckCircle2, Clock, MapPin, Phone, Radio, Truck, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { OrderStatusBadge } from "@/components/ui/order-status-badge";
@@ -27,10 +18,10 @@ import type { Order, OrderStatus, OrderTimelineEntry } from "@/lib/types";
 
 const STATUS_NOTES: Partial<Record<OrderStatus, string>> = {
   pending: "Waiting for the station to accept.",
-  accepted: "Order accepted — customer notified.",
+  accepted: "Order accepted - customer notified.",
   out_for_delivery: "Rider assigned and heading out.",
   delivered: "Marked delivered. Payment settled via M-Pesa.",
-  rejected: "Order rejected — customer refunded automatically.",
+  rejected: "Order rejected - customer refunded automatically.",
   cancelled: "Order cancelled.",
 };
 
@@ -67,7 +58,7 @@ function timelineOf(order: Order): OrderTimelineEntry[] {
 }
 
 /**
- * Shared live-tracking view for a single order — used by the vendor
+ * Shared live-tracking view for a single order - used by the vendor
  * dashboard (`/business/orders/[id]`) and the platform admin
  * (`/admin/orders/[id]`). Brand-new surface; existing screens link into it.
  */
@@ -167,7 +158,7 @@ export function OrderDetailView({
       </div>
 
       {note && (
-        <div role="status" className="flex items-center justify-between rounded-xl border border-success/25 bg-success/5 px-4 py-3 text-sm text-success">
+        <div role="status" className="flex items-center justify-between rounded-xl border border-success/25 bg-transparent/5 px-4 py-3 text-sm text-success">
           <span className="flex items-center gap-2">
             <CheckCircle2 className="size-4" aria-hidden /> {note}
           </span>
@@ -186,7 +177,7 @@ export function OrderDetailView({
             </h2>
             <span
               className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[10px] uppercase tracking-widest ${
-                liveFresh ? "bg-success-soft text-success" : "bg-muted text-muted-foreground"
+                liveFresh ? "bg-transparent-soft text-success" : "bg-muted text-muted-foreground"
               }`}
             >
               <Radio className={`size-3 ${liveFresh ? "animate-pulse-dot" : ""}`} aria-hidden />
@@ -275,7 +266,7 @@ export function OrderDetailView({
                     ? "Completed. Payment already settled to the station."
                     : order.status === "rejected" || order.status === "cancelled"
                       ? "Closed. Any payment is returned to the customer automatically."
-                      : "—"}
+                      : "-"}
                 </p>
               </div>
             ) : (
@@ -309,7 +300,7 @@ export function OrderDetailView({
                   onClick={() => void setStatus(nextStatus(order.status))}
                   disabled={nextStatus(order.status) === order.status}
                 >
-                  Advance step <ArrowRight className="size-4" aria-hidden />
+                  Advance step
                 </Button>
               </div>
             )}
@@ -324,7 +315,7 @@ export function OrderDetailView({
                 .reverse()
                 .map((entry, i) => (
                   <li key={`${entry.status}-${entry.at}-${i}`} className="flex items-start gap-3">
-                    <span className="mt-1.5 size-2 shrink-0 rounded-full bg-brand-gradient" aria-hidden />
+                    <span className="mt-1.5 size-2 shrink-0 rounded-full bg-muted-foreground" aria-hidden />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-foreground">{TIMELINE_LABEL[entry.status]}</p>
                       <p className="text-xs text-muted-foreground">

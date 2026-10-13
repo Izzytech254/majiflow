@@ -109,7 +109,7 @@ export function WaterDrawer({ open, onClose, children }: WaterDrawerProps) {
             {/* Tide sheet: covers the drawer then sweeps off to reveal it */}
             <motion.div
               aria-hidden
-              className="pointer-events-none absolute inset-0 bg-brand-gradient"
+              className="pointer-events-none absolute inset-0 bg-transparent"
               initial={reduce ? { x: "-102%" } : { x: 0 }}
               animate={{ x: "-102%" }}
               transition={{ duration: reduce ? 0 : 0.55, ease: EASE, delay: reduce ? 0 : 0.12 }}

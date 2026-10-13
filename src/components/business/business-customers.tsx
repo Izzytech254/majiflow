@@ -4,11 +4,17 @@ import { useMemo, useState } from "react";
 import { Download, Mail, MapPin, Phone, Search, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState, ErrorState, LoadingState } from "@/components/ui/feedback";
+import { useToast } from "@/components/ui/toast";
 import { formatKES } from "@/lib/format";
-import { customerRecords } from "@/lib/data/content";
+import { filterCustomers } from "@/lib/analytics";
+import { DORMANT_AFTER_DAYS } from "@/lib/analytics";
+import { useBusiness } from "@/components/business/business-provider";
+import { useStationOrders } from "@/lib/use-station-orders";
 import { cn } from "@/lib/utils";
+import type { StationCustomer } from "@/lib/analytics";
 
-type Segment = "all" | "active" | "new" | "dormant";
+type Segment = "all" | StationCustomer["status"];
 
 const TABS: { id: Segment; label: string }[] = [
   { id: "all", label: "All customers" },
@@ -18,40 +24,80 @@ const TABS: { id: Segment; label: string }[] = [
 ];
 
 export function BusinessCustomers() {
+  const { business } = useBusiness();
+  const { stats, loading, error, refresh } = useStationOrders(business, "all");
+  const { toast } = useToast();
   const [q, setQ] = useState("");
   const [tab, setTab] = useState<Segment>("all");
-  const [note, setNote] = useState<string | null>(null);
 
   const filtered = useMemo(
-    () =>
-      customerRecords.filter(
-        (c) =>
-          (tab === "all" || c.status === tab) &&
-          (c.name.toLowerCase().includes(q.toLowerCase()) || c.phone.includes(q) || c.location.toLowerCase().includes(q.toLowerCase()))
-      ),
-    [q, tab]
+    () => (stats ? filterCustomers(stats.customers, { query: q, segment: tab }) : []),
+    [stats, q, tab]
   );
+
+  const tabs = useMemo(
+    () =>
+      TABS.map((t) => ({
+        ...t,
+        count: stats ? filterCustomers(stats.customers, { segment: t.id }).length : 0,
+      })),
+    [stats]
+  );
+
+  const exportCsv = () => {
+    const header = ["Name", "Phone", "Area", "Orders", "Total spent", "Last order", "Status"];
+    const rows = filtered.map((c) => [
+      c.name,
+      c.phone,
+      c.location,
+      String(c.orders),
+      String(c.totalSpent),
+      c.lastOrder,
+      c.status,
+    ]);
+    const csv = [header, ...rows]
+      .map((line) => line.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(","))
+      .join("\r\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${business.slug}-customers.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast({
+      kind: "success",
+      title: "CSV downloaded",
+      message: `${filtered.length} ${filtered.length === 1 ? "customer" : "customers"} from this station.`,
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Header onExport={exportCsv} exportable={false} />
+        <LoadingState label="Loading your customers…" />
+      </div>
+    );
+  }
+
+  if (error || !stats) {
+    return (
+      <div className="space-y-6">
+        <Header onExport={exportCsv} exportable={false} />
+        <ErrorState
+          title="Could not load customers"
+          message="The order store did not answer. Your customer list is built from your orders, so it will return with them."
+          action={<Button onClick={refresh}>Try again</Button>}
+        />
+      </div>
+    );
+  }
+
+  const noCustomers = stats.customers.length === 0;
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="font-display text-2xl text-foreground sm:text-3xl">Customers</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Every phone number that has ordered with you, on record.</p>
-        </div>
-        <Button variant="secondary" className="gap-2" onClick={() => setNote("CSV export queued — lands in your email.")}>
-          <Download className="size-4" aria-hidden /> Export
-        </Button>
-      </div>
-
-      {note && (
-        <div role="status" className="flex items-center justify-between rounded-xl border border-[#0052FF]/25 bg-[#0052FF]/5 px-4 py-3 text-sm text-[#0052FF]">
-          {note}
-          <button onClick={() => setNote(null)} className="font-semibold" aria-label="Dismiss">
-            Dismiss
-          </button>
-        </div>
-      )}
+      <Header onExport={exportCsv} exportable={filtered.length > 0} />
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-border bg-white px-3 py-2.5 sm:max-w-md">
@@ -59,32 +105,43 @@ export function BusinessCustomers() {
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search name, phone, or area…"
+            placeholder="Search name, phone, or area"
             className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
             aria-label="Search customers"
           />
         </div>
         <div className="flex gap-2 overflow-x-auto">
-          {TABS.map((t) => (
+          {tabs.map((t) => (
             <button
               key={t.id}
               type="button"
               onClick={() => setTab(t.id)}
               className={cn(
                 "shrink-0 rounded-xl px-3.5 py-2 text-sm font-medium transition-colors",
-                tab === t.id ? "bg-[#0052FF]/8 text-[#0052FF]" : "text-muted-foreground hover:text-foreground"
+                tab === t.id ? "bg-transparent/8 text-[#0052FF]" : "text-muted-foreground hover:text-foreground"
               )}
               aria-pressed={tab === t.id}
             >
               {t.label}
+              <span className="ml-1.5 font-mono text-xs text-muted-foreground">{t.count}</span>
             </button>
           ))}
         </div>
       </div>
 
       <section className="overflow-hidden rounded-2xl border border-border bg-white shadow-card">
-        {filtered.length === 0 ? (
-          <p className="p-10 text-center text-sm text-muted-foreground">No customers match your search.</p>
+        {noCustomers ? (
+          <div className="p-6">
+            <EmptyState
+              icon={<Users className="size-6" aria-hidden />}
+              title="No customers yet"
+              description="Every phone number that checks out on your public page lands here with its order history."
+            />
+          </div>
+        ) : filtered.length === 0 ? (
+          <p className="p-10 text-center text-sm text-muted-foreground">
+            No customers match that search. Clear the box or pick another segment.
+          </p>
         ) : (
           <ul className="divide-y divide-border">
             {filtered.map((c) => (
@@ -103,11 +160,14 @@ export function BusinessCustomers() {
                     <span className="flex items-center gap-1">
                       <Phone className="size-3" aria-hidden /> {c.phone}
                     </span>
+                    {c.location && (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="size-3" aria-hidden /> {c.location}
+                      </span>
+                    )}
                     <span className="flex items-center gap-1">
-                      <MapPin className="size-3" aria-hidden /> {c.location}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Mail className="size-3" aria-hidden /> last order: {c.lastOrder}
+                      <Mail className="size-3" aria-hidden /> last order{" "}
+                      {new Date(c.lastOrder).toLocaleDateString("en-KE", { dateStyle: "medium" })}
                     </span>
                   </p>
                 </div>
@@ -121,15 +181,31 @@ export function BusinessCustomers() {
         )}
       </section>
 
-      {tab === "dormant" && filtered.length > 0 && (
-        <div className="flex items-start gap-3 rounded-2xl border border-warning/25 bg-warning-soft/50 p-5">
+      {filtered.some((c) => c.status === "dormant") && (
+        <div className="flex items-start gap-3 rounded-2xl border border-warning/25 bg-transparent/10 p-5">
           <Users className="mt-0.5 size-5 shrink-0 text-warning" aria-hidden />
           <p className="text-sm leading-relaxed text-foreground/85">
-            These customers ordered 30+ days ago. One KES 50-off SMS each ("karibu nyumbani") has won back
-            an average of 4 in 10 dormant customers for stations on Growth.
+            {filtered.filter((c) => c.status === "dormant").length} of these customers last ordered more than{" "}
+            {DORMANT_AFTER_DAYS} days ago. Export the list to work through them by phone or SMS.
           </p>
         </div>
       )}
+    </div>
+  );
+}
+
+function Header({ onExport, exportable }: { onExport: () => void; exportable: boolean }) {
+  return (
+    <div className="flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <h1 className="font-display text-2xl text-foreground sm:text-3xl">Customers</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Built from your orders: one row per phone number that has checked out with you.
+        </p>
+      </div>
+      <Button variant="secondary" className="gap-2" onClick={onExport} disabled={!exportable}>
+        <Download className="size-4" aria-hidden /> Export CSV
+      </Button>
     </div>
   );
 }

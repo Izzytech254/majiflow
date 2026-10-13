@@ -4,7 +4,7 @@ import { CITIES, CITY_COORDS, ESTATE_COORDS } from "@/lib/constants";
  * Shared browser-geolocation helpers.
  *
  * The product captures a delivery location by asking the customer to allow
- * location access (no manual typing). A real map/tiles API plugs in later —
+ * location access (no manual typing). A real map/tiles API plugs in later -
  * these helpers only turn the native Geolocation API into a small, serializable
  * shape plus the offline fallbacks already used elsewhere.
  */
@@ -22,7 +22,7 @@ export interface CapturedLocation {
 export function geolocationUnavailableReason(): string | null {
   if (typeof window === "undefined") return null;
   if (!window.isSecureContext)
-    return "Location needs https. You're using an http:// link — open the https:// MajiFlow link (not the 10.162.122.91 IP), then allow location.";
+    return "Location needs a secure connection. Open MajiFlow over https and allow location, then try again.";
   if (typeof navigator === "undefined" || !("geolocation" in navigator))
     return "This browser can't share location.";
   return null;
@@ -197,7 +197,7 @@ export async function reverseGeocode(
 
 /**
  * Best-effort display label for a captured location: prefer the street, then the
- * estate/area, then the town — so the "street / area" line is never blank.
+ * estate/area, then the town - so the "street / area" line is never blank.
  */
 export function composeArea(
   address: { street?: string; estate?: string; city?: string; building?: string } | null

@@ -11,10 +11,10 @@ import { useCustomer } from "@/components/order/customer-provider";
 import { CITIES } from "@/lib/constants";
 
 const perks = [
-  "Order refills from verified stations around you",
-  "Pay with M-Pesa before the rider leaves",
-  "Track every order from accepted to delivered",
-  "Save addresses and reorder in two taps",
+  "Browse verified stations around you",
+  "See each station's delivery fee in the cart",
+  "Follow an order from placed to delivered",
+  "Save your details for one-tap checkout",
 ];
 
 export function AuthShell({
@@ -29,15 +29,15 @@ export function AuthShell({
   return (
     <div className="min-h-[70vh] py-14 lg:py-20">
       <div className="mx-auto grid w-full max-w-4xl overflow-hidden rounded-3xl border border-border bg-white shadow-layered lg:grid-cols-[0.95fr_1.05fr]">
-        <div className="relative hidden flex-col justify-between overflow-hidden bg-ink p-10 text-white lg:flex">
+        <div className="relative hidden flex-col justify-between overflow-hidden bg-foreground p-10 text-white lg:flex">
           <div aria-hidden className="pointer-events-none absolute inset-0 bg-dot-pattern opacity-60" />
           <div
             aria-hidden
-            className="pointer-events-none absolute -left-24 -top-24 size-80 rounded-full bg-[#0052FF]/25 blur-[100px]"
+            className="pointer-events-none absolute -left-24 -top-24 size-80 rounded-full bg-transparent/25 blur-[100px]"
           />
 
           <div className="relative">
-            <span className="flex size-11 items-center justify-center rounded-2xl bg-brand-gradient text-white shadow-accent">
+            <span className="flex size-11 items-center justify-center rounded-2xl bg-transparent text-white shadow-accent">
               <Droplets className="size-6" aria-hidden />
             </span>
             <h2 className="mt-8 font-display text-3xl leading-[1.15] text-white">
@@ -49,7 +49,7 @@ export function AuthShell({
           <ul className="relative space-y-3">
             {perks.map((p) => (
               <li key={p} className="flex items-start gap-2.5 text-sm text-slate-200">
-                <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-success text-white">
+                <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-white/20 text-white">
                   <Check className="size-3" strokeWidth={3} aria-hidden />
                 </span>
                 {p}
@@ -95,8 +95,8 @@ export function RegisterForm() {
       setSending(false);
       toast({
         kind: "success",
-        title: "Account created",
-        message: `Karibu, ${form.name.split(" ")[0] || "friend"}! We'll use ${form.phone} for your M-Pesa orders.`,
+        title: "Profile saved",
+        message: `${form.name.split(" ")[0] || "Karibu"} - your account is ready.`,
       });
       login({
         name: form.name.trim(),
@@ -110,9 +110,9 @@ export function RegisterForm() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl text-foreground sm:text-3xl">Create your account</h1>
+      <h1 className="font-display text-2xl text-foreground sm:text-3xl">Create your profile</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        Start ordering water or running a station — takes under a minute.
+        Create an account to order water, track deliveries and manage your saved addresses.
       </p>
 
       <form onSubmit={submit} className="mt-8 space-y-5">
@@ -125,7 +125,7 @@ export function RegisterForm() {
             autoComplete="name"
           />
         </Field>
-        <Field label="M-Pesa phone number" required hint="We send order updates and payment requests here.">
+        <Field label="Phone number" required hint="Used for order updates and delivery calls.">
           <Input
             required
             type="tel"
@@ -144,7 +144,7 @@ export function RegisterForm() {
             autoComplete="email"
           />
         </Field>
-        <Field label="Password" required>
+        <Field label="Password" required hint="Use a secure password.">
           <div className="relative">
             <Input
               required
@@ -185,7 +185,7 @@ export function RegisterForm() {
           </Field>
         </div>
         <Button type="submit" size="lg" className="w-full" disabled={sending}>
-          {sending ? "Creating account…" : "Create account"}
+          {sending ? "Saving…" : "Save profile"}
         </Button>
         <p className="text-center text-xs leading-relaxed text-muted-foreground">
           By continuing you agree to our{" "}
@@ -215,7 +215,7 @@ export function LoginForm() {
     setSending(true);
     window.setTimeout(() => {
       setSending(false);
-      toast({ kind: "success", title: "Signed in", message: "Welcome back!" });
+      toast({ kind: "success", title: "Signed in", message: "Welcome back" });
       login({ phone: form.phone.trim() });
       router.push("/account");
     }, 700);
@@ -223,8 +223,10 @@ export function LoginForm() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl text-foreground sm:text-3xl">Welcome back</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Sign in to order and track your refills.</p>
+      <h1 className="font-display text-2xl text-foreground sm:text-3xl">Sign in</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Sign in with the phone number and password you registered with.
+      </p>
 
       <form onSubmit={submit} className="mt-8 space-y-5">
         <Field label="Phone number" required>
@@ -237,7 +239,7 @@ export function LoginForm() {
             autoComplete="tel"
           />
         </Field>
-        <Field label="Password" required>
+        <Field label="Password" required hint="Enter your password">
           <Input
             required
             type="password"
@@ -251,9 +253,7 @@ export function LoginForm() {
           {sending ? "Signing in…" : "Sign in"}
         </Button>
         <p className="text-center text-sm">
-          <Link href="/contact" className="font-medium text-[#0052FF] hover:underline">
-            Forgot your password? We can help.
-          </Link>
+          <span className="text-muted-foreground">Forgot your password</span>
         </p>
       </form>
     </div>

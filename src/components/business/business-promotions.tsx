@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Clock, PartyPopper, Users2, Zap } from "lucide-react";
+import { PartyPopper, Users2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { formatKES } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 const PROMOS = [
-  { id: "pr1", name: "Karibu tena — KES 50 off", audience: "Dormant (30d+)", discount: "KES 50 off any order", ends: "This Friday", active: true, recipients: 14, redeemed: 6 },
+  { id: "pr1", name: "Karibu tena - KES 50 off", audience: "Dormant (30d+)", discount: "KES 50 off any order", ends: "This Friday", active: true, recipients: 14, redeemed: 6 },
   { id: "pr2", name: "Ode office days", audience: "Office addresses", discount: "2nd can free on 20L refills", ends: "All month", active: true, recipients: 22, redeemed: 9 },
   { id: "pr3", name: "Weekend chilled deal", audience: "All customers", discount: "10L chilled at KES 150", ends: "Ended", active: false, recipients: 310, redeemed: 47 },
 ];
@@ -19,7 +18,7 @@ export function BusinessPromotions() {
 
   const toggle = (id: string) => {
     setPromos((all) => all.map((p) => (p.id === id ? { ...p, active: !p.active } : p)));
-    setNote("Promotion status toggled — customers see the change in their app instantly.");
+    setNote("Promotion status toggled - customers see the change in their app instantly.");
   };
 
   return (
@@ -33,14 +32,14 @@ export function BusinessPromotions() {
         </div>
         <Button
           className="group"
-          onClick={() => setNote("Draft started — choose an audience and an offer, then review pricing math.")}
+          onClick={() => setNote("Draft started - choose an audience and an offer, then review pricing math.")}
         >
           <PartyPopper className="size-4" aria-hidden /> New promotion
         </Button>
       </div>
 
       {note && (
-        <div role="status" className="flex items-center justify-between rounded-xl border border-[#0052FF]/25 bg-[#0052FF]/5 px-4 py-3 text-sm text-[#0052FF]">
+        <div role="status" className="flex items-center justify-between rounded-xl border border-[#0052FF]/25 bg-transparent/5 px-4 py-3 text-sm text-[#0052FF]">
           {note}
           <button onClick={() => setNote(null)} className="font-semibold" aria-label="Dismiss">
             Dismiss
@@ -68,28 +67,17 @@ export function BusinessPromotions() {
                 </span>
               </div>
               <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
-                <div className="h-full rounded-full bg-brand-gradient" style={{ width: `${(p.redeemed / Math.max(p.recipients, 1)) * 100}%` }} />
+                <div className="h-full rounded-full bg-foreground" style={{ width: `${(p.redeemed / Math.max(p.recipients, 1)) * 100}%` }} />
               </div>
             </div>
             <button
               onClick={() => toggle(p.id)}
-              className="mt-4 w-full rounded-xl border border-[#0052FF]/30 py-2 text-sm font-semibold text-[#0052FF] transition-colors hover:bg-[#0052FF]/5"
+              className="mt-4 w-full rounded-xl border border-[#0052FF]/30 py-2 text-sm font-semibold text-[#0052FF] transition-colors hover:bg-transparent/5"
             >
               {p.active ? "Pause" : "Reactivate"}
             </button>
           </article>
         ))}
-
-        <article className="flex flex-col justify-center gap-3 rounded-2xl border border-dashed border-[#0052FF]/30 bg-[#0052FF]/5 p-6">
-          <Zap className="size-6 text-[#0052FF]" aria-hidden />
-          <p className="text-sm leading-relaxed text-foreground/80">
-            Pro tip: Monday mornings pull the most refill orders in Kasarani. Launch your next offer
-            then, and pair it with the free <strong className="text-foreground">"out of stock" reminder</strong>.
-          </p>
-          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Clock className="size-3.5" aria-hidden /> Avg. turn-around from launch to first redemption: 2h
-          </p>
-        </article>
       </div>
     </div>
   );

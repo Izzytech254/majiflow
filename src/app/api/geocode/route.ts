@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import { reportFailure } from "@/lib/monitoring";
 
 export const dynamic = "force-dynamic";
 
@@ -74,7 +75,7 @@ async function fetchNominatim(lat: number, lng: number): Promise<NominatimRespon
     headers: {
       Accept: "application/json",
       "Accept-Language": "en",
-      "User-Agent": "MajiFlow/0.1 (water delivery demo)",
+      "User-Agent": "MajiFlow/0.1 (MajiFlow)",
     },
     signal: AbortSignal.timeout(6000),
     cache: "no-store",
@@ -84,7 +85,7 @@ async function fetchNominatim(lat: number, lng: number): Promise<NominatimRespon
 }
 
 /**
- * Nearest named road via Overpass — used when the point itself has no road in
+ * Nearest named road via Overpass - used when the point itself has no road in
  * OSM's address breakdown (common in informal or mapped-only-by-building
  * areas). Excludes motorways/trunks so we return a delivery street, not a
  * highway that happens to be overhead.
@@ -110,7 +111,7 @@ async function fetchNearestStreet(
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-          "User-Agent": "MajiFlow/0.1 (water delivery demo)",
+          "User-Agent": "MajiFlow/0.1 (MajiFlow)",
         },
         body: new URLSearchParams({ data: query }).toString(),
         signal: AbortSignal.timeout(5000),
@@ -141,7 +142,7 @@ async function fetchNearestStreet(
 }
 
 /**
- * Photon (komoot) reverse geocoder — fast single request over OSM data that
+ * Photon (komoot) reverse geocoder - fast single request over OSM data that
  * returns the nearest named street even when the exact point isn't on a road.
  * Used alongside Nominatim (which gives a richer address breakdown) to make the
  * street capture fast and reliable on the phone.
@@ -156,7 +157,7 @@ async function fetchPhoton(lat: number, lng: number): Promise<PhotonResult | nul
   try {
     const url = `https://photon.komoot.io/reverse?lon=${lng}&lat=${lat}&limit=1`;
     const res = await fetch(url, {
-      headers: { Accept: "application/json", "User-Agent": "MajiFlow/0.1 (water delivery demo)" },
+      headers: { Accept: "application/json", "User-Agent": "MajiFlow/0.1 (MajiFlow)" },
       signal: AbortSignal.timeout(5000),
       cache: "no-store",
     });
@@ -252,6 +253,7 @@ export async function GET(request: NextRequest) {
     return Response.json({ error: "Invalid coordinates", result: null }, { status: 400 });
   }
 
+  let lastFailure: string | undefined;
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const result = await fetchGeocode(lat, lng, accuracy);
@@ -261,9 +263,15 @@ export async function GET(request: NextRequest) {
           { headers: { "Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600" } }
         );
       }
-    } catch {
-      /* retry once */
+    } catch (error) {
+      lastFailure = error instanceof Error ? error.message : "unknown";
     }
+  }
+  if (lastFailure) {
+    // A point with no address is a normal answer; an unreachable lookup is not.
+    await reportFailure("geocode", "Reverse geocoding failed for a delivery location.", {
+      reason: lastFailure,
+    });
   }
   return Response.json({ result: null });
 }

@@ -34,7 +34,7 @@ interface CustomerContextValue {
   profile: CustomerProfile;
   /** True once the persisted profile has been read from localStorage. */
   hydrated: boolean;
-  /** True once the user has signed in (this demo uses a lightweight session flag). */
+  /** True once the user has signed in (MajiFlow uses a lightweight session flag). */
   loggedIn: boolean;
   saveCustomer: (p: Partial<CustomerProfile>) => void;
   /** Persist reusable checkout details; upserts (never duplicates) the address. */
@@ -104,6 +104,7 @@ export function CustomerProvider({ children }: { children: ReactNode }) {
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- hydrate the profile from localStorage after mount */
     let next = EMPTY;
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -112,17 +113,18 @@ export function CustomerProvider({ children }: { children: ReactNode }) {
       /* noop */
     }
     setProfile(next);
-    setLoggedIn(readLocal(AUTH_KEY) === "1" || Boolean(next.name));
+    setLoggedIn((typeof window !== "undefined" && readLocal(AUTH_KEY) === "1") || Boolean(next.name));
     setHydrated(true);
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || typeof window === "undefined") return;
     writeLocal(STORAGE_KEY, JSON.stringify(profile));
   }, [profile, hydrated]);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || typeof window === "undefined") return;
     writeLocal(AUTH_KEY, loggedIn ? "1" : "0");
   }, [loggedIn, hydrated]);
 

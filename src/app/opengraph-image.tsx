@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "MajiFlow — Clean water, delivered simply";
+export const alt = "MajiFlow - Clean water, delivered simply";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -73,12 +73,12 @@ export default function OpengraphImage() {
               color: "#cbd5e1",
             }}
           >
-            Order refills from trusted stations near you. Pay with M-Pesa, track the rider, get your cans at the door.
+            Order refills from stations near you. Browse, build a cart, pay with M-Pesa or card and follow your delivery.
           </div>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-          {["M-Pesa", "Live tracking", "Verified stations"].map((chip) => (
+          {["Verified stations", "Order tracking", "Secure payments"].map((chip) => (
             <div
               key={chip}
               style={{
