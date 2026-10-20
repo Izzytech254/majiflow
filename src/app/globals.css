@@ -114,6 +114,60 @@
       opacity: 0;
     }
   }
+  @keyframes mf-ping {
+    0% {
+      transform: scale(1);
+      opacity: 0.35;
+    }
+    70%,
+    100% {
+      transform: scale(2.6);
+      opacity: 0;
+    }
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Map popups (Leaflet) - KFC-style station card                     */
+/* ------------------------------------------------------------------ */
+.mf-map-popup .leaflet-popup-content-wrapper {
+  border-radius: 14px;
+  padding: 0;
+  box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.28);
+}
+.mf-map-popup .leaflet-popup-content {
+  margin: 0;
+  width: auto !important;
+}
+.mf-map-popup .leaflet-popup-tip {
+  box-shadow: none;
+}
+.mf-popup-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  font: 13px/1.4 system-ui, sans-serif;
+  min-width: 190px;
+}
+.mf-popup-title {
+  color: #14181f;
+  font-weight: 700;
+  font-size: 14px;
+}
+.mf-popup-meta {
+  color: #6b675d;
+}
+.mf-popup-link {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+  color: #0052ff;
+  text-decoration: none;
+}
+.mf-popup-link:hover {
+  text-decoration: underline;
 }
 
 /* ------------------------------------------------------------------ */

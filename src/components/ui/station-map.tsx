@@ -38,12 +38,33 @@ interface StationMapProps {
   center?: [number, number];
   zoom?: number;
   className?: string;
+  /** Drop the card border/rounding so the map bleeds edge-to-edge in a full-height pane. */
+  bare?: boolean;
 }
 
 function escapeHtml(value: string) {
   return value.replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string
   );
+}
+
+/** Short initials shown inside a pin head, KFC-style (e.g. "Maji Springs" -> "MS"). */
+function markerLabel(s: StationPinData) {
+  const words = s.name.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return "";
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0][0] + words[1][0]).toUpperCase();
+}
+
+/** KFC-style station card shown in the map popup. */
+function popupHtml(s: StationPinData) {
+  const distance =
+    typeof s.distanceKm === "number" ? ` · ${s.distanceKm.toFixed(1)} km` : "";
+  return `<div class="mf-popup-card">
+    <strong class="mf-popup-title">${escapeHtml(s.name)}</strong>
+    <span class="mf-popup-meta">${escapeHtml(s.city)} · KES ${s.deliveryFee} delivery${distance}</span>
+    <a class="mf-popup-link" href="/browse/${encodeURIComponent(s.slug)}">View menu →</a>
+  </div>`;
 }
 
 export function StationMap({
@@ -54,6 +75,7 @@ export function StationMap({
   center,
   zoom = 12,
   className = "",
+  bare = false,
 }: StationMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Leaflet.Map | null>(null);
@@ -111,7 +133,8 @@ export function StationMap({
       seen.add(s.id);
       const selected = s.id === selectedId;
       let marker = markersRef.current.get(s.id);
-      const icon = selected ? selectedPin(L) : stationPin(L);
+      const label = markerLabel(s);
+      const icon = selected ? selectedPin(L, label) : stationPin(L, label);
       if (!marker) {
         marker = L.marker([s.lat, s.lng], { icon, keyboard: false, zIndexOffset: selected ? 400 : 0 })
           .addTo(map)
@@ -121,15 +144,7 @@ export function StationMap({
         marker.setIcon(icon);
         marker.setZIndexOffset(selected ? 400 : 0);
       }
-      marker.bindPopup(
-        `<div style="min-width:150px;font:13px/1.35 system-ui,sans-serif">
-           <strong style="display:block;color:#14181f">${escapeHtml(s.name)}</strong>
-           <span style="color:#6b675d">${escapeHtml(s.city)} · KES ${s.deliveryFee} delivery${
-             typeof s.distanceKm === "number" ? ` · ${s.distanceKm.toFixed(1)} km` : ""
-           }</span>
-           <a href="/browse/${encodeURIComponent(s.slug)}" style="display:inline-block;margin-top:6px;color:#0052FF;font-weight:600">View menu →</a>
-         </div>`
-      );
+      marker.bindPopup(popupHtml(s), { className: "mf-map-popup", closeButton: false });
     }
     markersRef.current.forEach((marker, id) => {
       if (!seen.has(id)) {
@@ -195,7 +210,7 @@ export function StationMap({
   return (
     <div
       ref={containerRef}
-      className={`overflow-hidden rounded-2xl border border-border bg-muted ${className}`}
+      className={`overflow-hidden bg-muted ${bare ? "" : "rounded-2xl border border-border"} ${className}`}
       role="application"
       aria-label="Map of refill stations"
     />
