@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { OrderStatusBadge, PAYMENT_STATE_META } from "@/components/ui/order-status-badge";
 import { LoadingState, ErrorState } from "@/components/ui/feedback";
+import { OrderMap, type MapPoint } from "@/components/ui/order-map";
+import { businesses } from "@/lib/data/businesses";
+import { CITY_COORDS, ESTATE_COORDS } from "@/lib/constants";
 import { useCart } from "@/components/order/cart-provider";
 import { useFlyToCart } from "@/components/order/fly-to-cart";
 import { useToast } from "@/components/ui/toast";
@@ -111,6 +114,20 @@ export function TrackOrderPage({ id }: { id: string }) {
   const payment = PAYMENT_STATE_META[order.paymentState];
   const rider = order.rider && (order.status === "rider_assigned" || order.status === "out_for_delivery") ? order.rider : null;
 
+  const stationPoint = (() => {
+    const station = businesses.find((b) => b.id === order.businessId);
+    return station ? { lat: station.lat, lng: station.lng, label: station.name } : undefined;
+  })();
+  const addressPoint: MapPoint = (() => {
+    if (typeof order.address.lat === "number" && typeof order.address.lng === "number") {
+      return { lat: order.address.lat, lng: order.address.lng, label: order.address.estate || "Delivery location" };
+    }
+    const coords = ESTATE_COORDS[order.address.estate] ?? CITY_COORDS.Nairobi;
+    return { ...coords, label: order.address.estate || "Delivery address" };
+  })();
+  const live = order.location ?? null;
+  const history = order.locationHistory ?? [];
+
   const reorder = (target: HTMLElement) => {
     fly({
       fromEl: target,
@@ -178,6 +195,27 @@ export function TrackOrderPage({ id }: { id: string }) {
       )}
 
       <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+        {/* Live map */}
+        {!cancelled && (
+          <section className="rounded-2xl border border-border bg-white p-6 shadow-card sm:p-8 lg:col-span-2">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="flex items-center gap-2.5 font-display text-lg text-foreground">
+                <MapPin className="size-5 text-[#0052FF]" aria-hidden /> Live tracking
+              </h2>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                {live ? "Updating live" : order.consent?.location ? "Waiting for your location" : "Station & address"}
+              </span>
+            </div>
+            <OrderMap
+              station={stationPoint}
+              address={addressPoint}
+              location={live}
+              history={history}
+              className="mt-5 h-[320px] sm:h-[380px]"
+            />
+          </section>
+        )}
+
         {/* Timeline */}
         <section className="rounded-2xl border border-border bg-white p-6 shadow-card sm:p-8">
           <h2 className="flex items-center gap-2.5 font-display text-lg text-foreground">

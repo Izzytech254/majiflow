@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Check, Droplets, Eye, EyeOff } from "lucide-react";
+import { Check, Eye, EyeOff } from "lucide-react";
 import { Field, Input, Select } from "@/components/ui/field";
+import { MajiMark } from "@/components/layout/maji-mark";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { useCustomer } from "@/components/order/customer-provider";
@@ -28,7 +29,7 @@ export function AuthShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-[70vh] py-14 lg:py-20">
+    <div className="w-full">
       <div className="mx-auto grid w-full max-w-4xl overflow-hidden rounded-3xl border border-border bg-white shadow-layered lg:grid-cols-[0.95fr_1.05fr]">
         <div className="relative hidden flex-col justify-between overflow-hidden bg-foreground p-10 text-white lg:flex">
           <div aria-hidden className="pointer-events-none absolute inset-0 bg-dot-pattern opacity-60" />
@@ -38,8 +39,8 @@ export function AuthShell({
           />
 
           <div className="relative">
-            <span className="flex size-11 items-center justify-center rounded-2xl bg-transparent text-white shadow-accent">
-              <Droplets className="size-6" aria-hidden />
+            <span className="flex size-11 items-center justify-center overflow-hidden rounded-2xl shadow-accent">
+              <MajiMark />
             </span>
             <h2 className="mt-8 font-display text-3xl leading-[1.15] text-white">
               Clean water, delivered simply
@@ -63,16 +64,16 @@ export function AuthShell({
       </div>
 
       {title.includes("Sign in") ? (
-        <p className="mt-6 text-center text-sm text-muted-foreground">
+        <p className="mt-6 text-center text-sm text-white/70">
           New here?{" "}
-          <Link href="/register" className="font-semibold text-[#0052FF] hover:underline">
+          <Link href="/register" className="font-semibold text-white hover:underline">
             Create an account
           </Link>
         </p>
       ) : (
-        <p className="mt-6 text-center text-sm text-muted-foreground">
+        <p className="mt-6 text-center text-sm text-white/70">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-[#0052FF] hover:underline">
+          <Link href="/login" className="font-semibold text-white hover:underline">
             Sign in
           </Link>
         </p>
