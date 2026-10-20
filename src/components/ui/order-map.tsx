@@ -3,41 +3,19 @@
 import { useEffect, useRef, type MutableRefObject } from "react";
 import type * as Leaflet from "leaflet";
 import type { OrderLocation } from "@/lib/types";
+import {
+  createBaseMap,
+  addressPin,
+  finitePoint,
+  loadLeaflet,
+  stationPin,
+  youPin,
+  type LeafletNS,
+  type MapPoint,
+} from "@/lib/leaflet-client";
 import "leaflet/dist/leaflet.css";
 
-type LeafletNS = typeof import("leaflet");
-
-export interface MapPoint {
-  lat: number;
-  lng: number;
-  label?: string;
-}
-
-const STATION_ICON = (L: LeafletNS) =>
-  L.divIcon({
-    className: "",
-    html: `<span style="display:block;width:18px;height:18px;border-radius:9999px;background:#0052FF;border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.45)"></span>`,
-    iconSize: [18, 18],
-    iconAnchor: [9, 9],
-  });
-
-const ADDRESS_ICON = (L: LeafletNS) =>
-  L.divIcon({
-    className: "",
-    html: `<span style="display:block;width:14px;height:14px;border-radius:9999px;background:#64748b;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></span>`,
-    iconSize: [14, 14],
-    iconAnchor: [7, 7],
-  });
-
-const CUSTOMER_ICON = (L: LeafletNS) =>
-  L.divIcon({
-    className: "",
-    html: `<span style="display:block;width:16px;height:16px;border-radius:9999px;background:#16A34A;border:3px solid #fff;box-shadow:0 0 0 4px rgba(22,163,74,.25),0 1px 6px rgba(0,0,0,.45)"></span>`,
-    iconSize: [16, 16],
-    iconAnchor: [8, 8],
-  });
-
-const FALLBACK_CENTER: [number, number] = [-1.2921, 36.8219];
+export type { MapPoint };
 
 /**
  * Live order map (client-only). Shows the station, the delivery address as
@@ -64,7 +42,6 @@ export function OrderMap({
   const flewRef = useRef(false);
   const propsRef = useRef({ location, history });
 
-  // Keep the latest props reachable from the async map setup.
   useEffect(() => {
     propsRef.current = { location, history };
   });
@@ -78,33 +55,27 @@ export function OrderMap({
     if (!el) return;
 
     (async () => {
-      // @ts-expect-error - the ESM build ships without type declarations for this path
-      const mod = await import("leaflet/dist/leaflet-src.esm.js").catch(() => import("leaflet"));
-      const L = (mod as { default?: LeafletNS }).default ?? (mod as LeafletNS);
+      const L = await loadLeaflet();
       if (disposed || !containerRef.current) return;
 
-      const center: [number, number] = station
-        ? [station.lat, station.lng]
-        : address
-          ? [address.lat, address.lng]
-          : FALLBACK_CENTER;
+      const center: [number, number] = finitePoint(station)
+        ? [station!.lat, station!.lng]
+        : finitePoint(address)
+          ? [address!.lat, address!.lng]
+          : [-1.2921, 36.8219];
 
-      const map = L.map(containerRef.current, { attributionControl: true }).setView(center, 13);
-      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      }).addTo(map);
+      const map = createBaseMap(L, containerRef.current, center, 13);
       mapRef.current = map;
 
-      if (station) {
-        L.marker([station.lat, station.lng], { icon: STATION_ICON(L), keyboard: false })
+      if (finitePoint(station)) {
+        L.marker([station!.lat, station!.lng], { icon: stationPin(L), keyboard: false })
           .addTo(map)
-          .bindTooltip(station.label ?? "Station", { direction: "top", offset: [0, -10] });
+          .bindTooltip(station!.label ?? "Station", { direction: "top", offset: [0, -10] });
       }
-      if (address) {
-        L.marker([address.lat, address.lng], { icon: ADDRESS_ICON(L), keyboard: false })
+      if (finitePoint(address)) {
+        L.marker([address!.lat, address!.lng], { icon: addressPin(L), keyboard: false })
           .addTo(map)
-          .bindTooltip(address.label ?? "Delivery address", { direction: "top", offset: [0, -8] });
+          .bindTooltip(address!.label ?? "Delivery address", { direction: "top", offset: [0, -8] });
       }
 
       const latest = propsRef.current.location;
@@ -129,9 +100,7 @@ export function OrderMap({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !location) return;
-    const mod = import("leaflet");
-    void mod.then((m) => {
-      const L = (m as { default?: LeafletNS }).default ?? (m as LeafletNS);
+    void loadLeaflet().then((L) => {
       if (mapRef.current !== map) return;
       applyCustomer(L, map, location, history, customerRef, lineRef, flewRef);
     });
@@ -159,7 +128,7 @@ function applyCustomer(
   const latlng: [number, number] = [location.lat, location.lng];
 
   if (!customerRef.current) {
-    const marker = L.marker(latlng, { icon: CUSTOMER_ICON(L), keyboard: false, zIndexOffset: 500 })
+    const marker = L.marker(latlng, { icon: youPin(L), keyboard: false, zIndexOffset: 500 })
       .addTo(map)
       .bindTooltip("Customer · live", { direction: "top", offset: [0, -10] });
     const circle = L.circle(latlng, {

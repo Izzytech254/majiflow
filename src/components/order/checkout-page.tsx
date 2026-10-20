@@ -10,6 +10,7 @@ import {
 import { Container } from "@/components/ui/container";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { LoadingState } from "@/components/ui/feedback";
+import { OrderMap } from "@/components/ui/order-map";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
 import { useCart } from "@/components/order/cart-provider";
 import { useCustomer, type CustomerProfile } from "@/components/order/customer-provider";
@@ -707,6 +708,19 @@ function CheckoutForm() {
               {locationError && (
                 <p className="mt-3 flex items-start gap-2 text-xs text-danger">
                   <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden /> {locationError}
+                </p>
+              )}
+            </div>
+            <div className="mt-4">
+              {location ? (
+                <OrderMap
+                  address={{ lat: location.lat, lng: location.lng, label: "Your delivery point" }}
+                  className="h-[220px] w-full"
+                />
+              ) : (
+                <p className="flex items-center gap-2 rounded-xl border border-dashed border-border bg-muted/20 px-4 py-3 text-xs text-muted-foreground">
+                  <MapPin className="size-4 shrink-0 text-[#0052FF]" aria-hidden />
+                  Add a pinned location so the rider finds you faster.
                 </p>
               )}
             </div>

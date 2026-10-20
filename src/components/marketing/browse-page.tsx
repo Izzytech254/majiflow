@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertCircle, Loader2, Navigation, Search } from "lucide-react";
+import dynamic from "next/dynamic";
+import { AlertCircle, List, Loader2, Map as MapIcon, Navigation, Search } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Input } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,15 @@ import {
 import { browseHref } from "@/lib/journey";
 import { rememberJourneyStep } from "@/components/order/journey";
 
+const StationMap = dynamic(() => import("@/components/ui/station-map").then((m) => m.StationMap), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full w-full items-center justify-center rounded-2xl border border-border bg-muted">
+      <Loader2 className="size-5 animate-spin text-muted-foreground" aria-hidden />
+    </div>
+  ),
+});
+
 const DISCOVERY_RADII_KM = [3, 5, 10, 20] as const;
 
 type LocationMode = "manual" | "current";
@@ -33,7 +43,10 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
   const [locationMode, setLocationMode] = useState<LocationMode>("manual");
   const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [view, setView] = useState<"list" | "map">("list");
   const locationRequestRef = useRef(0);
+  const listRef = useRef<HTMLDivElement>(null);
 
   // Keep the search in the URL so back navigation from a station restores it.
   useEffect(() => {
@@ -116,6 +129,31 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
       radiusKm,
     };
   }, [city, location, locationMode, query]);
+
+  const mapStations = useMemo(
+    () =>
+      discovery.results
+        .filter(({ business }) => Number.isFinite(business.lat) && Number.isFinite(business.lng))
+        .map(({ business, distanceKm }) => ({
+          id: business.id,
+          slug: business.slug,
+          name: business.name,
+          city: business.city,
+          lat: business.lat,
+          lng: business.lng,
+          deliveryFee: business.deliveryFee,
+          distanceKm,
+        })),
+    [discovery.results]
+  );
+
+  const mapUserLocation = useMemo(
+    () =>
+      location && Number.isFinite(location.lat) && Number.isFinite(location.lng)
+        ? { lat: location.lat, lng: location.lng }
+        : null,
+    [location]
+  );
 
   const countLabel =
     locationMode === "current"
@@ -240,40 +278,95 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
         </Container>
       </section>
 
-      <section className="py-14 lg:py-20">
+      <section className="py-10 lg:py-14">
         <Container>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">
               <strong className="font-semibold text-foreground">{discovery.results.length}</strong>{" "}
               {countLabel}
             </p>
+
+            {discovery.results.length > 0 && (
+              <div
+                className="inline-flex rounded-full border border-border bg-white p-1 shadow-soft"
+                role="group"
+                aria-label="Switch between map and list"
+              >
+                <button
+                  type="button"
+                  onClick={() => setView("list")}
+                  aria-pressed={view === "list"}
+                  className={`inline-flex min-h-9 items-center gap-2 rounded-full px-4 text-sm font-medium transition-colors ${
+                    view === "list" ? "bg-[#0052FF] text-white" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <List className="size-4" aria-hidden /> List
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setView("map")}
+                  aria-pressed={view === "map"}
+                  className={`inline-flex min-h-9 items-center gap-2 rounded-full px-4 text-sm font-medium transition-colors ${
+                    view === "map" ? "bg-[#0052FF] text-white" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <MapIcon className="size-4" aria-hidden /> Map
+                </button>
+              </div>
+            )}
           </div>
 
           {discovery.results.length > 0 ? (
-            <div
-              className="relative"
-              aria-busy={locating}
-              aria-label={locating ? "Updating station distances" : undefined}
-            >
-              <Stagger className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" stagger={0.06}>
-              {discovery.results.map(({ business, distanceKm }) => (
-                <StaggerItem key={business.id}>
-                  <BusinessCard business={business} distanceKm={distanceKm} />
-                </StaggerItem>
-              ))}
-              </Stagger>
-              {locating && (
-                <div className="mt-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="size-4 animate-spin" aria-hidden />
-                  Updating distances…
-                </div>
-              )}
-              {locationMode === "current" && discovery.radiusKm !== null && (
-                <p className="mt-2 text-center text-xs text-muted-foreground">
-                  Showing stations within {discovery.radiusKm} km
-                  {discovery.radiusKm > DISCOVERY_RADII_KM[0] ? " after expanding the search" : ""}.
-                </p>
-              )}
+            <div className="mt-6 lg:grid lg:grid-cols-[1.6fr_1fr] lg:gap-8">
+              {/* Map pane */}
+              <div
+                className={`${view === "map" ? "block" : "hidden"} lg:sticky lg:top-20 lg:block lg:h-[calc(100svh-6rem)] lg:order-2`}
+                aria-busy={locating}
+              >
+                <StationMap
+                  stations={mapStations}
+                  selectedId={selectedId}
+                  onSelect={setSelectedId}
+                  userLocation={mapUserLocation}
+                  className="h-[65svh] w-full lg:h-full"
+                />
+                {locationMode === "current" && discovery.radiusKm !== null && (
+                  <p className="mt-2 text-center text-xs text-muted-foreground lg:text-left">
+                    Showing stations within {discovery.radiusKm} km
+                    {discovery.radiusKm > DISCOVERY_RADII_KM[0] ? " after expanding the search" : ""}.
+                  </p>
+                )}
+              </div>
+
+              {/* List pane */}
+              <div
+                ref={listRef}
+                className={`${view === "list" ? "block" : "hidden"} mt-6 lg:mt-0 lg:order-1 lg:block ${
+                  locating ? "opacity-70" : ""
+                }`}
+              >
+                {locating && (
+                  <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="size-4 animate-spin" aria-hidden />
+                    Updating distances…
+                  </div>
+                )}
+                <Stagger className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2" stagger={0.06}>
+                  {discovery.results.map(({ business, distanceKm }) => (
+                    <StaggerItem key={business.id}>
+                      <div
+                        data-station-id={business.id}
+                        onMouseEnter={() => setSelectedId(business.id)}
+                        className={`h-full rounded-2xl transition-shadow ${
+                          selectedId === business.id ? "ring-2 ring-[#0052FF] ring-offset-2 ring-offset-background" : ""
+                        }`}
+                      >
+                        <BusinessCard business={business} distanceKm={distanceKm} />
+                      </div>
+                    </StaggerItem>
+                  ))}
+                </Stagger>
+              </div>
             </div>
           ) : (
             <div className="mt-8">
