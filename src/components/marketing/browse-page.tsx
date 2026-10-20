@@ -6,7 +6,7 @@ import { AlertCircle, List, Loader2, Map as MapIcon, Navigation, Search } from "
 import { Container } from "@/components/ui/container";
 import { Input } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
-import { BusinessCard } from "@/components/shared/business-card";
+import { StationRow } from "@/components/shared/station-row";
 import { EmptyState } from "@/components/ui/feedback";
 import { Stagger, StaggerItem } from "@/components/ui/animated-section";
 import { businesses, getBusinessesByCity } from "@/lib/data/businesses";
@@ -24,7 +24,7 @@ import { rememberJourneyStep } from "@/components/order/journey";
 const StationMap = dynamic(() => import("@/components/ui/station-map").then((m) => m.StationMap), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full w-full items-center justify-center rounded-2xl border border-border bg-muted">
+    <div className="flex h-full w-full items-center justify-center bg-muted">
       <Loader2 className="size-5 animate-spin text-muted-foreground" aria-hidden />
     </div>
   ),
@@ -44,9 +44,8 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
   const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [view, setView] = useState<"list" | "map">("list");
+  const [view, setView] = useState<"list" | "map">("map");
   const locationRequestRef = useRef(0);
-  const listRef = useRef<HTMLDivElement>(null);
 
   // Keep the search in the URL so back navigation from a station restores it.
   useEffect(() => {
@@ -197,26 +196,44 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
   };
 
   return (
-    <>
-      <section className="relative overflow-hidden border-b border-border bg-background">
-        <div aria-hidden className="pointer-events-none absolute inset-0 bg-radial-glow" />
-        <Container className="relative py-14 lg:py-20">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="inline-flex items-center gap-2.5 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-              <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full rounded-full bg-foreground animate-ping-slow" />
-                <span className="relative inline-flex size-2 rounded-full bg-foreground" />
-              </span>
-              Browse refill stations
-            </p>
-            <h1 className="mt-4 font-display text-4xl leading-[1.08] tracking-tight text-foreground sm:text-5xl">
-              Refill stations <span className="text-gradient">near you</span>
-            </h1>
-            <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Search and filter stations by name, estate or city. Each one lists its own products,
-              prices and delivery fee before you order.
-            </p>
-            <div className="relative mt-8">
+    <div className="flex min-h-[calc(100svh-4rem)] flex-col">
+      {/* Toolbar */}
+      <section className="border-b border-border bg-background">
+        <Container className="py-5">
+          <div className="flex items-center justify-between gap-3">
+            <h1 className="font-display text-xl text-foreground sm:text-2xl">Find a water station</h1>
+            {discovery.results.length > 0 && (
+              <div
+                className="inline-flex rounded-full border border-border bg-white p-1 shadow-soft lg:hidden"
+                role="group"
+                aria-label="Switch between map and list"
+              >
+                <button
+                  type="button"
+                  onClick={() => setView("map")}
+                  aria-pressed={view === "map"}
+                  className={`inline-flex min-h-9 items-center gap-2 rounded-full px-3.5 text-sm font-medium transition-colors ${
+                    view === "map" ? "bg-[#0052FF] text-white" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <MapIcon className="size-4" aria-hidden /> Map
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setView("list")}
+                  aria-pressed={view === "list"}
+                  className={`inline-flex min-h-9 items-center gap-2 rounded-full px-3.5 text-sm font-medium transition-colors ${
+                    view === "list" ? "bg-[#0052FF] text-white" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <List className="size-4" aria-hidden /> List
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center">
+            <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" aria-hidden />
               <label htmlFor="search-stations" className="sr-only">
                 Search stations by name or estate
@@ -226,170 +243,124 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search by name or estate - e.g. Kasarani"
-                className="h-14 rounded-xl pl-12 text-base shadow-card"
+                className="h-12 rounded-xl pl-12 text-base shadow-soft"
               />
             </div>
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-2" role="group" aria-label="Filter by city">
-              {["All cities", ...CITIES].map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => selectCity(c)}
-                  aria-pressed={city === c}
-                  className={`min-h-11 rounded-full border px-4 py-2 text-sm font-medium transition-all ${
-                    city === c
-                      ? "border-[#0052FF] bg-[#0052FF] text-white shadow-accent"
-                      : "border-border bg-white text-muted-foreground hover:border-[#0052FF]/40 hover:text-[#0052FF]"
-                  }`}
-                >
-                  {c === "All cities" ? "Every city" : c}
-                </button>
-              ))}
-            </div>
-            <div className="mt-5 flex flex-col items-center gap-2">
+            <div className="flex gap-3">
+              <label htmlFor="city-filter" className="sr-only">
+                Filter by city
+              </label>
+              <select
+                id="city-filter"
+                value={city}
+                onChange={(e) => selectCity(e.target.value)}
+                className="h-12 min-w-40 rounded-xl border border-border bg-white px-3 text-sm font-medium text-foreground shadow-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0052FF]"
+              >
+                {["All cities", ...CITIES].map((c) => (
+                  <option key={c} value={c}>
+                    {c === "All cities" ? "Every city" : c}
+                  </option>
+                ))}
+              </select>
               <Button
                 type="button"
                 variant="outline"
                 onClick={useCurrentLocation}
                 disabled={locating}
+                className="h-12 shrink-0"
               >
                 {locating ? (
                   <Loader2 className="size-4 animate-spin" aria-hidden />
                 ) : (
                   <Navigation className="size-4" aria-hidden />
                 )}
-                {locating ? "Finding stations near you…" : "Use my current location"}
+                <span className="hidden sm:inline">{locating ? "Locating…" : "Near me"}</span>
               </Button>
-              {locationError && (
-                <p className="flex items-start gap-2 text-left text-xs text-danger" role="alert">
-                  <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden />
-                  <span>
-                    {locationError} Choose a city above to browse by an approximate location.
-                  </span>
-                </p>
-              )}
-              {!location && !locationError && (
-                <p className="text-xs text-muted-foreground">
-                  Choose a city or allow location access to sort stations by distance.
-                </p>
-              )}
             </div>
           </div>
-        </Container>
-      </section>
 
-      <section className="py-10 lg:py-14">
-        <Container>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-muted-foreground">
-              <strong className="font-semibold text-foreground">{discovery.results.length}</strong>{" "}
-              {countLabel}
+          {locationError && (
+            <p className="mt-3 flex items-start gap-2 text-xs text-danger" role="alert">
+              <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden />
+              <span>{locationError} Pick a city above to browse by an approximate location.</span>
             </p>
-
-            {discovery.results.length > 0 && (
-              <div
-                className="inline-flex rounded-full border border-border bg-white p-1 shadow-soft"
-                role="group"
-                aria-label="Switch between map and list"
-              >
-                <button
-                  type="button"
-                  onClick={() => setView("list")}
-                  aria-pressed={view === "list"}
-                  className={`inline-flex min-h-9 items-center gap-2 rounded-full px-4 text-sm font-medium transition-colors ${
-                    view === "list" ? "bg-[#0052FF] text-white" : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <List className="size-4" aria-hidden /> List
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setView("map")}
-                  aria-pressed={view === "map"}
-                  className={`inline-flex min-h-9 items-center gap-2 rounded-full px-4 text-sm font-medium transition-colors ${
-                    view === "map" ? "bg-[#0052FF] text-white" : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <MapIcon className="size-4" aria-hidden /> Map
-                </button>
-              </div>
-            )}
-          </div>
-
-          {discovery.results.length > 0 ? (
-            <div className="mt-6 lg:grid lg:grid-cols-[1.6fr_1fr] lg:gap-8">
-              {/* Map pane */}
-              <div
-                className={`${view === "map" ? "block" : "hidden"} lg:sticky lg:top-20 lg:block lg:h-[calc(100svh-6rem)] lg:order-2`}
-                aria-busy={locating}
-              >
-                <StationMap
-                  stations={mapStations}
-                  selectedId={selectedId}
-                  onSelect={setSelectedId}
-                  userLocation={mapUserLocation}
-                  className="h-[65svh] w-full lg:h-full"
-                />
-                {locationMode === "current" && discovery.radiusKm !== null && (
-                  <p className="mt-2 text-center text-xs text-muted-foreground lg:text-left">
-                    Showing stations within {discovery.radiusKm} km
-                    {discovery.radiusKm > DISCOVERY_RADII_KM[0] ? " after expanding the search" : ""}.
-                  </p>
-                )}
-              </div>
-
-              {/* List pane */}
-              <div
-                ref={listRef}
-                className={`${view === "list" ? "block" : "hidden"} mt-6 lg:mt-0 lg:order-1 lg:block ${
-                  locating ? "opacity-70" : ""
-                }`}
-              >
-                {locating && (
-                  <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-                    <Loader2 className="size-4 animate-spin" aria-hidden />
-                    Updating distances…
-                  </div>
-                )}
-                <Stagger className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2" stagger={0.06}>
-                  {discovery.results.map(({ business, distanceKm }) => (
-                    <StaggerItem key={business.id}>
-                      <div
-                        data-station-id={business.id}
-                        onMouseEnter={() => setSelectedId(business.id)}
-                        className={`h-full rounded-2xl transition-shadow ${
-                          selectedId === business.id ? "ring-2 ring-[#0052FF] ring-offset-2 ring-offset-background" : ""
-                        }`}
-                      >
-                        <BusinessCard business={business} distanceKm={distanceKm} />
-                      </div>
-                    </StaggerItem>
-                  ))}
-                </Stagger>
-              </div>
-            </div>
-          ) : (
-            <div className="mt-8">
-              <EmptyState
-                title={locationMode === "current" ? "No nearby stations found" : "No stations matched"}
-                description={
-                  locationMode === "current"
-                    ? `No stations were found within ${DISCOVERY_RADII_KM[DISCOVERY_RADII_KM.length - 1]} km of your location. Try manual city selection or clear your search.`
-                    : `No refill business matched "${query}" in ${city}. Try a different estate or clear your search.`
-                }
-                action={
-                  <button
-                    onClick={() => setQuery("")}
-                    className="mt-2 font-semibold text-[#0052FF] hover:underline"
-                  >
-                    Clear search
-                  </button>
-                }
-              />
-            </div>
           )}
         </Container>
       </section>
-    </>
+
+      {/* Full-height locator */}
+      {discovery.results.length > 0 ? (
+        <div className="relative flex-1 lg:grid lg:grid-cols-[1.1fr_0.9fr] lg:gap-6 lg:px-6 lg:py-6">
+          {/* Map pane (left) */}
+          <div
+            className={`${view === "map" ? "block" : "hidden"} lg:order-1 lg:sticky lg:top-20 lg:block lg:h-fit`}
+            aria-busy={locating}
+          >
+            <div className="relative overflow-hidden rounded-2xl border border-border bg-white p-2 shadow-card">
+              <StationMap
+                stations={mapStations}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                userLocation={mapUserLocation}
+                className="h-[60svh] w-full lg:h-[calc(100svh-10rem)]"
+              />
+              {locationMode === "current" && discovery.radiusKm !== null && (
+                <p className="absolute bottom-5 left-5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-soft backdrop-blur">
+                  Within {discovery.radiusKm} km
+                  {discovery.radiusKm > DISCOVERY_RADII_KM[0] ? " (expanded)" : ""}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* List pane (right) */}
+          <div
+            className={`${view === "list" ? "block" : "hidden"} lg:order-2 lg:sticky lg:top-20 lg:block lg:h-[calc(100svh-10rem)] lg:overflow-y-auto lg:pr-1`}
+          >
+            <div className="flex items-center justify-between gap-3 py-1 lg:pt-0">
+              <p className="text-sm text-muted-foreground">
+                <strong className="font-semibold text-foreground">{discovery.results.length}</strong> {countLabel}
+              </p>
+              {locating && (
+                <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                  <Loader2 className="size-3.5 animate-spin" aria-hidden /> Updating…
+                </span>
+              )}
+            </div>
+            <Stagger className={`mt-3 grid gap-3 pb-6 sm:grid-cols-2 lg:grid-cols-1 ${locating ? "opacity-70" : ""}`} stagger={0.05}>
+              {discovery.results.map(({ business, distanceKm }) => (
+                <StaggerItem key={business.id}>
+                  <StationRow
+                    business={business}
+                    distanceKm={distanceKm}
+                    selected={selectedId === business.id}
+                    onSelect={() => setSelectedId(business.id)}
+                  />
+                </StaggerItem>
+              ))}
+            </Stagger>
+          </div>
+        </div>
+      ) : (
+        <Container className="py-16">
+          <EmptyState
+            title={locationMode === "current" ? "No nearby stations found" : "No stations matched"}
+            description={
+              locationMode === "current"
+                ? `No stations were found within ${DISCOVERY_RADII_KM[DISCOVERY_RADII_KM.length - 1]} km of your location. Try manual city selection or clear your search.`
+                : `No refill business matched "${query}" in ${city}. Try a different estate or clear your search.`
+            }
+            action={
+              <button
+                onClick={() => setQuery("")}
+                className="mt-2 font-semibold text-[#0052FF] hover:underline"
+              >
+                Clear search
+              </button>
+            }
+          />
+        </Container>
+      )}
+    </div>
   );
 }
