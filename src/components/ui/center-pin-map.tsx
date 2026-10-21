@@ -45,6 +45,7 @@ export function CenterPinMap({
 
   useEffect(() => {
     let disposed = false;
+    let debounce: number | undefined;
     const el = containerRef.current;
     if (!el) return;
 
@@ -60,7 +61,6 @@ export function CenterPinMap({
       mapRef.current = map;
       map.whenReady(() => map.invalidateSize());
 
-      let debounce: number | undefined;
       const settle = () => {
         window.clearTimeout(debounce);
         debounce = window.setTimeout(async () => {
@@ -88,6 +88,7 @@ export function CenterPinMap({
 
     return () => {
       disposed = true;
+      window.clearTimeout(debounce);
       mapRef.current?.remove();
       mapRef.current = null;
     };

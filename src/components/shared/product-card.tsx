@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingCart } from "lucide-react";
+import { Plus } from "lucide-react";
 import type { BusinessProduct, WeeklyOperatingHours } from "@/lib/types";
 import { formatKES } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -36,6 +36,14 @@ export function ProductCard({ product, businessId, businessSlug, openingHours, c
   const fly = useFlyToCart();
   const [flying, setFlying] = useState(false);
   const imageRef = useRef<HTMLAnchorElement | null>(null);
+  // The fly-to-cart animation lands after ~1s; the card may be gone by then.
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
   const cartItem = items.find(
     (i) => i.businessId === businessId && i.productId === product.id
   );
@@ -67,7 +75,7 @@ export function ProductCard({ product, businessId, businessSlug, openingHours, c
       alt: product.name,
       onDone: () => {
         add();
-        setFlying(false);
+        if (mountedRef.current) setFlying(false);
       },
     });
   };
@@ -172,7 +180,7 @@ export function ProductCard({ product, businessId, businessSlug, openingHours, c
               aria-label={`Add ${product.name} to order`}
               className="flex size-11 items-center justify-center rounded-full bg-[#0052FF] text-white shadow-accent transition-transform hover:scale-105 active:scale-95 disabled:opacity-60"
             >
-              <ShoppingCart className="size-5" aria-hidden />
+              <Plus className="size-6" aria-hidden />
             </button>
           )}
         </div>

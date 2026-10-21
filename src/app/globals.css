@@ -39,12 +39,27 @@
   --map-pin-closed: #94a3b8;
   --radius-pill: 9999px;
 
+  /* Where bottom-anchored notifications sit. Raised when a sticky action bar
+     owns the bottom of the screen so nothing covers it. */
+  --notify-bottom: 1rem;
+
   --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px -8px rgb(15 23 42 / 0.1);
   --shadow-layered: 0 1px 2px rgb(15 23 42 / 0.05), 0 12px 24px -6px rgb(15 23 42 / 0.08),
     0 32px 64px -24px rgb(15 23 42 / 0.14);
   --shadow-accent: 0 10px 30px -8px rgb(0 82 255 / 0.45);
   --shadow-soft: 0 2px 8px rgb(15 23 42 / 0.06);
   --shadow-glow-blue: 0 0 80px -12px rgb(0 82 255 / 0.5);
+}
+
+/* Lift bottom-anchored notifications clear of the checkout pay bar. */
+[data-checkout-pay-bar="true"] {
+  --notify-bottom: calc(9rem + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 1024px) {
+  [data-checkout-pay-bar="true"] {
+    --notify-bottom: 1rem;
+  }
 }
 
 @theme inline {

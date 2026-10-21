@@ -41,7 +41,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       ref={ref}
       rows={rows}
       aria-invalid={invalid || undefined}
-      className={cn(fieldBase, "py-2.5 resize-none", className)}
+      className={cn(fieldBase, "min-w-0 py-2.5 resize-none", className)}
       {...props}
     />
   )
@@ -92,14 +92,18 @@ export function Field({ label, hint, error, required, children, className }: Fie
       )
     : children;
   return (
-    <div className={cn("space-y-1.5", className)}>
+    <div className={cn("min-w-0 space-y-1.5", className)}>
       {label && (
-        <div className="flex items-center justify-between gap-2">
-          <label htmlFor={id} className="text-[13px] font-semibold text-foreground">
+        <div className="flex items-start justify-between gap-2">
+          <label htmlFor={id} className="min-w-0 text-[13px] font-semibold text-foreground">
             {label}
             {required && <span className="text-[#0052FF]"> *</span>}
           </label>
-          {error && <Badge variant="danger">{error}</Badge>}
+          {error && (
+            <Badge variant="danger" className="max-w-[60%] whitespace-normal text-right leading-snug">
+              {error}
+            </Badge>
+          )}
         </div>
       )}
       {labelledChild}
