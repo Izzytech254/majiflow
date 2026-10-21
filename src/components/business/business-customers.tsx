@@ -118,7 +118,7 @@ export function BusinessCustomers() {
               onClick={() => setTab(t.id)}
               className={cn(
                 "shrink-0 rounded-xl px-3.5 py-2 text-sm font-medium transition-colors",
-                tab === t.id ? "bg-transparent/8 text-[#0052FF]" : "text-muted-foreground hover:text-foreground"
+                tab === t.id ? "bg-transparent/8 text-[var(--brand)]" : "text-muted-foreground hover:text-foreground"
               )}
               aria-pressed={tab === t.id}
             >

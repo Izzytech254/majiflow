@@ -106,10 +106,10 @@ export function CenterPinMap({
       {/* Fixed centre pin */}
       <div aria-hidden className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-full">
         <span className="flex flex-col items-center">
-          <span className="flex size-10 items-center justify-center rounded-full bg-[#0052FF] text-white shadow-[0_8px_20px_-4px_rgba(0,82,255,.7)] ring-4 ring-white">
+          <span className="flex size-10 items-center justify-center rounded-full bg-[var(--brand)] text-white shadow-[0_8px_20px_-4px_rgba(0,87,230,.7)] ring-4 ring-white">
             <MapPin className="size-5" />
           </span>
-          <span className="h-3 w-1.5 rounded-b-full bg-[#0052FF]" />
+          <span className="h-3 w-1.5 rounded-b-full bg-[var(--brand)]" />
         </span>
       </div>
       <span className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-white/95 px-3 py-1 text-[11px] font-medium text-muted-foreground shadow-soft backdrop-blur">

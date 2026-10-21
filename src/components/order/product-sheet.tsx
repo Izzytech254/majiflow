@@ -133,7 +133,7 @@ export function ProductSheet({ business, product, open, onClose }: ProductSheetP
                 <ul className="mt-4 space-y-2">
                   {requirements.map((r) => (
                     <li key={r.text} className="flex items-start gap-2 rounded-xl border border-border bg-surface-2 p-3 text-xs text-foreground/85">
-                      <Info className="mt-0.5 size-4 shrink-0 text-[#0052FF]" aria-hidden />
+                      <Info className="mt-0.5 size-4 shrink-0 text-[var(--brand)]" aria-hidden />
                       <span>
                         {r.text}
                         {r.alternative && (
@@ -146,7 +146,7 @@ export function ProductSheet({ business, product, open, onClose }: ProductSheetP
               )}
 
               {inCart ? (
-                <div className="mt-5 rounded-2xl border border-[#0052FF]/25 bg-cta-soft/50 p-4">
+                <div className="mt-5 rounded-2xl border border-[var(--brand)]/25 bg-cta-soft/50 p-4">
                   <p className="text-sm font-semibold text-foreground">
                     {inCart.quantity} in your order
                   </p>

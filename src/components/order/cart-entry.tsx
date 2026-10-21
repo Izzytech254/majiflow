@@ -53,7 +53,7 @@ export function FloatingCartBar() {
           <button
             type="button"
             onClick={openCart}
-            className="mx-auto flex w-full max-w-2xl items-center gap-3 rounded-2xl bg-[#0052FF] p-3 text-left text-white shadow-accent transition-transform hover:scale-[1.01] active:scale-[0.99]"
+            className="mx-auto flex w-full max-w-2xl items-center gap-3 rounded-2xl bg-[var(--brand)] p-3 text-left text-white shadow-accent transition-transform hover:scale-[1.01] active:scale-[0.99]"
           >
             <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/15">
               <ShoppingCart className="size-5" aria-hidden />
@@ -102,7 +102,7 @@ export function SwitchStationDialog() {
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: 20, scale: 0.98 }}
             transition={reduce ? { duration: 0 } : { duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
-            <span className="flex size-12 items-center justify-center rounded-2xl bg-cta-soft text-[#0052FF]">
+            <span className="flex size-12 items-center justify-center rounded-2xl bg-cta-soft text-[var(--brand)]">
               <Repeat2 className="size-6" aria-hidden />
             </span>
             <h2 id="switch-title" className="mt-4 font-display text-lg text-foreground">

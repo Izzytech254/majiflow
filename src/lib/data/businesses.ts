@@ -50,7 +50,7 @@ export const businesses: Business[] = [
     description:
       "Family-run refill station serving Kasarani and Roysambu for eight years. Every 20-litre can goes through a 12-stage filtration process and is sealed in front of you. Same-day delivery across the estate clusters we serve.",
     openingHours: hours({ open: "06:00", close: "20:00" }, { open: "07:00", close: "18:00" }, { open: "08:00", close: "14:00" }),
-    accent: "#0052FF",
+    accent: "#0057E6",
     lat: -1.2305,
     lng: 36.895,
     cover: bioWaterCover,
@@ -313,7 +313,7 @@ export const businesses: Business[] = [
     description:
       "Bottled from a protected aquifer, treated, and delivered across Eldoret town. Popular with new learner housing in Elgon View.",
     openingHours: hours({ open: "06:00", close: "21:00" }, { open: "06:00", close: "21:00" }, { open: "09:00", close: "15:00" }),
-    accent: "#4d7cff",
+    accent: "#2E8CFF",
     lat: 0.5143,
     lng: 35.2698,
     cover: highlandsCover,

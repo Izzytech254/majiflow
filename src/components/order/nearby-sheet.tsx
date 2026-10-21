@@ -34,11 +34,11 @@ export function NearbyStationCard({
     <Link
       href={`/browse/${business.slug}`}
       className={cn(
-        "flex items-center gap-3 rounded-2xl border border-border bg-white p-3 transition-colors hover:border-[#0052FF]/50",
+        "flex items-center gap-3 rounded-2xl border border-border bg-white p-3 transition-colors hover:border-[var(--brand)]/50",
         !open && "opacity-70"
       )}
     >
-      <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-surface-3 text-[#0052FF]">
+      <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-surface-3 text-[var(--brand)]">
         <Store className="size-5" aria-hidden />
       </span>
       <span className="min-w-0 flex-1">

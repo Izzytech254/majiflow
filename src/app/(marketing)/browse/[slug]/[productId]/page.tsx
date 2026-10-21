@@ -159,7 +159,7 @@ export default async function ItemPage({ params }: PageProps) {
             {requirements.length > 0 && (
               <section aria-labelledby="item-requirements" className="rounded-2xl border border-border bg-muted/40 p-4">
                 <h2 id="item-requirements" className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                  <Info className="size-4 text-[#0052FF]" aria-hidden /> Before you order
+                  <Info className="size-4 text-[var(--brand)]" aria-hidden /> Before you order
                 </h2>
                 <ul className="mt-2 space-y-1.5 text-sm text-foreground/85">
                   {requirements.map((r) => (
@@ -171,7 +171,7 @@ export default async function ItemPage({ params }: PageProps) {
                           No empty can?{" "}
                           <Link
                             href={itemHref(business.slug, r.alternative.id)}
-                            className="font-semibold text-[#0052FF] hover:underline"
+                            className="font-semibold text-[var(--brand)] hover:underline"
                           >
                             {r.alternative.name} ({formatKES(r.alternative.price)})
                           </Link>
@@ -188,7 +188,7 @@ export default async function ItemPage({ params }: PageProps) {
 
             <Link
               href={`/browse/${business.slug}#menu`}
-              className="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-[#0052FF] hover:underline"
+              className="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-[var(--brand)] hover:underline"
             >
               <ArrowLeft className="size-4" aria-hidden /> Back to {business.name}
             </Link>
@@ -205,7 +205,7 @@ export default async function ItemPage({ params }: PageProps) {
                 <li key={p.id}>
                   <Link
                     href={itemHref(business.slug, p.id)}
-                    className="flex min-h-16 items-center gap-3 rounded-2xl border border-border bg-white p-3 shadow-card transition-colors hover:border-[#0052FF]/40"
+                    className="flex min-h-16 items-center gap-3 rounded-2xl border border-border bg-white p-3 shadow-card transition-colors hover:border-[var(--brand)]/40"
                   >
                     <span className="relative size-12 shrink-0 overflow-hidden rounded-xl bg-muted">
                       <Image src={productImage(p.image)} alt="" fill sizes="3rem" className="object-cover" />

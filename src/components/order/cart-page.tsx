@@ -93,7 +93,7 @@ export function CartPage() {
         </div>
         <JourneyLink
           step="station"
-          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[#0052FF] hover:underline"
+          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[var(--brand)] hover:underline"
         >
           <ArrowLeft className="size-4" aria-hidden /> Keep shopping
         </JourneyLink>
@@ -265,7 +265,7 @@ function CartRow({
         <Image src={productImage(product.image)} alt="" fill sizes="3.5rem" className="object-cover" />
       </Link>
       <div className="min-w-0 flex-1">
-        <Link href={href} className="block truncate text-[15px] font-semibold text-foreground hover:text-[#0052FF] hover:underline">
+        <Link href={href} className="block truncate text-[15px] font-semibold text-foreground hover:text-[var(--brand)] hover:underline">
           {product.name}
         </Link>
         <Link href={`/browse/${business.slug}#menu`} className="mt-0.5 block text-xs text-muted-foreground hover:underline">

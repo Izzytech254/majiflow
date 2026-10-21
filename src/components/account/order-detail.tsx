@@ -213,7 +213,7 @@ export function OrderDetailPage({ id }: { id: string }) {
               Delivery
             </h2>
             <div className="mt-3 flex items-start gap-2 text-sm">
-              <MapPin className="mt-0.5 size-4 shrink-0 text-[#0052FF]" aria-hidden />
+              <MapPin className="mt-0.5 size-4 shrink-0 text-[var(--brand)]" aria-hidden />
               <address className="not-italic text-foreground/85">
                 <span className="font-semibold text-foreground">{order.address.label}</span>
                 <br />

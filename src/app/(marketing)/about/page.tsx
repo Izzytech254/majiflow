@@ -115,11 +115,11 @@ export default function About() {
                       {t.marker}
                     </span>
                     {t !== timeline[timeline.length - 1] && (
-                      <span className="mt-1 w-px flex-1 bg-gradient-to-b from-[#0052FF]/40 to-transparent" />
+                      <span className="mt-1 w-px flex-1 bg-gradient-to-b from-[var(--brand)]/40 to-transparent" />
                     )}
                   </div>
                   <div className="rounded-2xl border border-border bg-background p-5 shadow-card">
-                    <p className="font-mono text-[11px] uppercase tracking-widest text-[#0052FF]">{t.title}</p>
+                    <p className="font-mono text-[11px] uppercase tracking-widest text-[var(--brand)]">{t.title}</p>
                     <p className="mt-2 text-sm leading-relaxed text-foreground/85">{t.text}</p>
                   </div>
                 </div>
@@ -131,7 +131,7 @@ export default function About() {
 
       <section className="py-16 lg:py-20">
         <Container size="md">
-          <div className="rounded-3xl border border-[#0052FF]/20 bg-card p-8 text-center shadow-card sm:p-12">
+          <div className="rounded-3xl border border-[var(--brand)]/20 bg-card p-8 text-center shadow-card sm:p-12">
             <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
               What we stand for
             </p>

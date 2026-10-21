@@ -57,7 +57,7 @@ export function StationCartBar({ business }: { business: Business }) {
         aria-label="Your cart from this station"
         className="mx-auto flex max-w-2xl items-center gap-3 rounded-2xl border border-border bg-white/95 p-3 shadow-layered backdrop-blur-md"
       >
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#0052FF]/10 text-[#0052FF]">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand)]/10 text-[var(--brand)]">
           <ShoppingCart className="size-5" aria-hidden />
         </span>
         <p className="min-w-0 flex-1 text-sm leading-tight">

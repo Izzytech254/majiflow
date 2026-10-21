@@ -51,7 +51,7 @@ export function BusinessStaff() {
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-border bg-white p-5 shadow-card">
           <div className="flex items-center gap-2 font-display text-lg text-foreground">
-            <Lock className="size-5 text-[#0052FF]" aria-hidden /> Role permissions
+            <Lock className="size-5 text-[var(--brand)]" aria-hidden /> Role permissions
           </div>
           <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
             <li className="flex justify-between"><span>Rider</span><span className="font-mono text-xs">accept, deliver, update status</span></li>

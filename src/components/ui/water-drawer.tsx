@@ -73,14 +73,14 @@ export function WaterDrawer({ open, onClose, children }: WaterDrawerProps) {
             {/* Ripple rings */}
             <motion.span
               aria-hidden
-              className="pointer-events-none absolute left-6 top-24 size-24 rounded-full border-2 border-[#0052FF]/40"
+              className="pointer-events-none absolute left-6 top-24 size-24 rounded-full border-2 border-[var(--brand)]/40"
               initial={{ scale: 0.3, opacity: 0.8 }}
               animate={{ scale: 2.4, opacity: 0 }}
               transition={{ duration: reduce ? 0 : 1, ease: EASE, delay: reduce ? 0 : 0.18 }}
             />
             <motion.span
               aria-hidden
-              className="pointer-events-none absolute left-10 top-32 size-14 rounded-full border-2 border-[#0052FF]/30"
+              className="pointer-events-none absolute left-10 top-32 size-14 rounded-full border-2 border-[var(--brand)]/30"
               initial={{ scale: 0.3, opacity: 0.8 }}
               animate={{ scale: 3.2, opacity: 0 }}
               transition={{ duration: reduce ? 0 : 1.3, ease: EASE, delay: reduce ? 0 : 0.34 }}

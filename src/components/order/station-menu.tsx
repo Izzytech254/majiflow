@@ -89,7 +89,7 @@ export function StationMenu({ business }: { business: Business }) {
             title="No items listed yet"
             description={`${business.name} hasn't published its menu. Try another station nearby.`}
             action={
-              <JourneyLink step="browse" className="text-sm font-semibold text-[#0052FF] hover:underline">
+              <JourneyLink step="browse" className="text-sm font-semibold text-[var(--brand)] hover:underline">
                 Back to stations
               </JourneyLink>
             }

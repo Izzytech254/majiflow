@@ -29,7 +29,7 @@ export function BusinessCard({
     <Link
       href={`/browse/${business.slug}`}
       className={cn(
-        "group block h-full rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0052FF]",
+        "group block h-full rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]",
         className
       )}
     >
@@ -63,7 +63,7 @@ export function BusinessCard({
 
         {/* Body */}
         <div className="flex flex-1 flex-col p-5">
-          <h3 className="line-clamp-1 font-display text-lg leading-snug text-foreground transition-colors group-hover:text-[#0052FF]">
+          <h3 className="line-clamp-1 font-display text-lg leading-snug text-foreground transition-colors group-hover:text-[var(--brand)]">
             {business.name}
           </h3>
           <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
@@ -72,7 +72,7 @@ export function BusinessCard({
 
           <BusinessAvailability hours={business.openingHours} compact plain />
           {typeof distanceKm === "number" && Number.isFinite(distanceKm) && (
-            <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-[#0052FF]">
+            <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--brand)]">
               <MapPin className="size-3.5" aria-hidden />{" "}
               {formatDistanceKm(distanceKm)} away
             </p>
@@ -89,7 +89,7 @@ export function BusinessCard({
               )}
             </div>
 
-            <span className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-white px-4 py-2.5 text-sm font-semibold text-foreground transition-colors group-hover:border-[#0052FF]/40 group-hover:text-[#0052FF]">
+            <span className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-white px-4 py-2.5 text-sm font-semibold text-foreground transition-colors group-hover:border-[var(--brand)]/40 group-hover:text-[var(--brand)]">
               View menu
             </span>
           </div>

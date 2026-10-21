@@ -6,20 +6,20 @@ export function WaterDroplets({ className }: { className?: string }) {
       {[0, 1, 2].map((i) => (
         <span
           key={i}
-          className="absolute top-0 size-2.5 rounded-full bg-[#0052FF]"
+          className="absolute top-0 size-2.5 rounded-full bg-[var(--brand)]"
           style={{
             left: `${30 + i * 20}%`,
             animation: `drop-fall 1.5s ${i * 0.22}s cubic-bezier(0.45, 0, 0.9, 0.4) infinite`,
           }}
         />
       ))}
-      <span className="absolute bottom-1 left-1/2 h-1.5 w-16 -translate-x-1/2 rounded-full bg-[#0052FF]/15" />
+      <span className="absolute bottom-1 left-1/2 h-1.5 w-16 -translate-x-1/2 rounded-full bg-[var(--brand)]/15" />
       <span
-        className="absolute bottom-1 left-1/2 size-10 rounded-full border-2 border-[#0052FF]/40"
+        className="absolute bottom-1 left-1/2 size-10 rounded-full border-2 border-[var(--brand)]/40"
         style={{ animation: "puddle-ripple 1.5s ease-out infinite" }}
       />
       <span
-        className="absolute bottom-1 left-1/2 size-10 rounded-full border-2 border-[#0052FF]/25"
+        className="absolute bottom-1 left-1/2 size-10 rounded-full border-2 border-[var(--brand)]/25"
         style={{ animation: "puddle-ripple 1.5s 0.5s ease-out infinite" }}
       />
     </div>

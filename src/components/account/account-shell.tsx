@@ -163,7 +163,7 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
         <Link
           href="/account/notifications"
           aria-label="Notifications"
-          className="relative flex size-10 items-center justify-center rounded-xl border border-border bg-white text-foreground transition-colors hover:text-[#0052FF]"
+          className="relative flex size-10 items-center justify-center rounded-xl border border-border bg-white text-foreground transition-colors hover:text-[var(--brand)]"
         >
           <Bell className="size-4.5" aria-hidden />
         </Link>
@@ -291,11 +291,11 @@ function SidebarLink({
       className={cn(
         "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
         active
-          ? "bg-white/8 text-[#0052FF]"
+          ? "bg-white/8 text-[var(--brand)]"
           : "text-foreground hover:bg-muted hover:text-foreground"
       )}
     >
-      <Icon className={cn("size-4.5", active && "text-[#0052FF]")} aria-hidden />
+      <Icon className={cn("size-4.5", active && "text-[var(--brand)]")} aria-hidden />
       {label}
       {badge && (
         <span className="ml-auto flex min-w-5 items-center justify-center rounded-full bg-white px-1.5 py-0.5 font-mono text-[10px] font-semibold text-foreground">
