@@ -2,28 +2,23 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertCircle,
   ArrowLeft,
   Check,
-  Clock,
   Loader2,
   MapPin,
   Navigation,
   Search,
-  Star,
   Store,
   Truck,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Field } from "@/components/ui/field";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
-import { formatKES } from "@/lib/format";
 import { CITIES, CITY_COORDS } from "@/lib/constants";
 import {
   captureLocationBestEffort,
@@ -35,9 +30,9 @@ import {
   type GeocodedAddress,
 } from "@/lib/geo";
 import { discoverStations } from "@/lib/station-discovery";
-import type { Business, DeliveryAddress, FulfillmentMethod } from "@/lib/types";
+import { NearbySheet, NearbyStationList } from "@/components/order/nearby-sheet";
+import type { DeliveryAddress, FulfillmentMethod } from "@/lib/types";
 import { useCustomer } from "@/components/order/customer-provider";
-import { useBusinessAvailability } from "@/components/shared/business-availability";
 import { useOrderSession } from "@/components/order/order-session-provider";
 import { useMotionSafe } from "@/lib/motion";
 
@@ -87,6 +82,7 @@ export function LocationModal({ open, onClose, onConfirm }: LocationModalProps) 
   const [locating, setLocating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const firstFieldRef = useRef<HTMLInputElement>(null);
+  const mapAreaRef = useRef<HTMLDivElement>(null);
 
   // Reset to the first sensible step each time the modal opens. Adjusting
   // state during render (React's documented pattern) avoids an extra commit.
@@ -223,6 +219,13 @@ export function LocationModal({ open, onClose, onConfirm }: LocationModalProps) 
     onConfirm?.();
     onClose();
   };
+
+  const notifyWhenAvailable = () =>
+    toast({
+      kind: "success",
+      title: "We'll let you know",
+      message: "We've noted this area and will alert you when a station is open.",
+    });
 
   const overlayTransition = reduce ? { duration: 0 } : { duration: 0.2 };
   const panelTransition = reduce ? { duration: 0 } : (transition ?? { duration: 0.35, ease: [0.16, 1, 0.3, 1] });
@@ -390,13 +393,27 @@ export function LocationModal({ open, onClose, onConfirm }: LocationModalProps) 
               {/* STEP C - map */}
               {step === "map" && (
                 <div className="flex h-full flex-col">
-                  <div className="relative h-[46vh] min-h-[280px] shrink-0 sm:h-[360px]">
+                  <div
+                    ref={mapAreaRef}
+                    className="relative h-[46vh] min-h-[280px] shrink-0 sm:h-[360px]"
+                  >
                     <CenterPinMap
                       center={point}
                       onChange={(p) => setPoint(p)}
                       onAddress={applyGeo}
                       className="h-full w-full"
                     />
+                    {/* On phones the nearby list floats over the map as a
+                        draggable sheet; wider screens get the inline list. */}
+                    {nearby.length > 0 && (
+                      <div className="sm:hidden">
+                        <NearbySheet
+                          stations={nearby}
+                          onNotify={notifyWhenAvailable}
+                          containerRef={mapAreaRef}
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div className="min-h-0 flex-1 overflow-y-auto border-t border-border p-5">
@@ -439,64 +456,18 @@ export function LocationModal({ open, onClose, onConfirm }: LocationModalProps) 
                     )}
 
                     {nearby.length > 0 ? (
-                      <div className="mt-5">
-                        <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-                          {nearby.some((s) => s.open)
-                            ? "Stations that deliver here"
-                            : "Stations near you - all closed right now"}
-                        </p>
-                        <ul className="mt-2 flex flex-col gap-2">
-                          {nearby.map(({ business, distanceKm, open }) => (
-                            <li key={business.id}>
-                              <NearbyStationCard business={business} distanceKm={distanceKm} open={open} />
-                            </li>
-                          ))}
-                        </ul>
-                        {!nearby.some((s) => s.open) && (
-                          <div className="mt-4 rounded-2xl border border-dashed border-border bg-surface-2/60 p-4 text-center">
-                            <p className="text-sm font-semibold text-foreground">
-                              Nothing is open for delivery here yet
-                            </p>
-                            <p className="mt-1 text-xs text-muted-foreground">
-                              These stations open later today. We&apos;ll let you know the moment one is open.
-                            </p>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="mt-3"
-                              onClick={() =>
-                                toast({
-                                  kind: "success",
-                                  title: "We'll let you know",
-                                  message: "We've noted this area and will alert you when a station is open.",
-                                })
-                              }
-                            >
-                              Notify me when available
-                            </Button>
-                          </div>
-                        )}
+                      <div className="mt-5 hidden sm:block">
+                        <NearbyStationList
+                          stations={nearby}
+                          onNotify={notifyWhenAvailable}
+                        />
                       </div>
                     ) : (
-                      <div className="mt-5 rounded-2xl border border-dashed border-border bg-surface-2/60 p-4 text-center">
-                        <p className="text-sm font-semibold text-foreground">No station delivers here yet</p>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          Try a nearby estate, or tell us where to expand next.
-                        </p>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="mt-3"
-                          onClick={() =>
-                            toast({
-                              kind: "success",
-                              title: "We'll let you know",
-                              message: "We've noted this area and will alert you when a station arrives.",
-                            })
-                          }
-                        >
-                          Notify me when available
-                        </Button>
+                      <div className="mt-5 sm:hidden">
+                        <NearbyStationList
+                          stations={nearby}
+                          onNotify={notifyWhenAvailable}
+                        />
                       </div>
                     )}
                   </div>
@@ -559,52 +530,3 @@ function TypeCard({
   );
 }
 
-function NearbyStationCard({
-  business,
-  distanceKm,
-  open,
-}: {
-  business: Business;
-  distanceKm?: number;
-  open: boolean;
-}) {
-  const availability = useBusinessAvailability(business.openingHours);
-  return (
-    <Link
-      href={`/browse/${business.slug}`}
-      className={cn(
-        "flex items-center gap-3 rounded-2xl border border-border bg-white p-3 transition-colors hover:border-[#0052FF]/50",
-        !open && "opacity-70"
-      )}
-    >
-      <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-surface-3 text-[#0052FF]">
-        <Store className="size-5" aria-hidden />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-2">
-          <span className="truncate text-sm font-semibold text-foreground">{business.name}</span>
-          {open ? (
-            <Badge variant="success" className="shrink-0">Open</Badge>
-          ) : (
-            <Badge variant="mono" className="shrink-0">Closed</Badge>
-          )}
-        </span>
-        <span className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-          {distanceKm !== undefined && (
-            <span className="inline-flex items-center gap-1">
-              <MapPin className="size-3" aria-hidden /> {distanceKm.toFixed(1)} km
-            </span>
-          )}
-          <span className="inline-flex items-center gap-1">
-            <Clock className="size-3" aria-hidden />{" "}
-            {open ? `~${business.avgDeliveryMinutes} min` : availability.hoursLabel}
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <Star className="size-3 fill-warning text-warning" aria-hidden /> {business.rating}
-          </span>
-          <span>{formatKES(business.deliveryFee)} delivery</span>
-        </span>
-      </span>
-    </Link>
-  );
-}

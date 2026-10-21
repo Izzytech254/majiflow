@@ -156,6 +156,16 @@ function CheckoutForm() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [testMode, setTestMode] = useState(false);
 
+  // The mobile pay bar owns the bottom of the screen; tell the toast stack to
+  // sit above it so notifications never cover the pay button.
+  useEffect(() => {
+    if (payState !== "idle") return;
+    document.documentElement.dataset.checkoutPayBar = "true";
+    return () => {
+      delete document.documentElement.dataset.checkoutPayBar;
+    };
+  }, [payState]);
+
   useEffect(() => {
     mountedRef.current = true;
     return () => {
@@ -679,7 +689,7 @@ function CheckoutForm() {
   return (
     <>
       <OrderTypeBar />
-      <Container className="py-14 lg:py-20">
+      <Container className="py-14 pb-32 lg:py-20">
       <div className="mb-8">
         <Link
           href="/cart"
@@ -694,13 +704,14 @@ function CheckoutForm() {
       </div>
 
       <form
+        id="checkout-form"
         ref={formRef}
         onSubmit={submitDelivery}
         className="grid gap-8 lg:grid-cols-[1.5fr_0.9fr]"
         noValidate
       >
         {/* Delivery details */}
-        <div className="flex flex-col gap-8">
+        <div className="flex min-w-0 flex-col gap-8">
           {loggedIn && !profileComplete && (
             <div className="flex items-start gap-3 rounded-2xl border border-[#0052FF]/20 bg-transparent/5 p-4">
               <AlertCircle className="mt-0.5 size-5 shrink-0 text-[#0052FF]" aria-hidden />
@@ -947,7 +958,7 @@ function CheckoutForm() {
         </div>
 
         {/* Summary + pay */}
-        <div className="h-fit rounded-2xl border border-border bg-white p-6 shadow-layered lg:sticky lg:top-24">
+        <div className="h-fit min-w-0 rounded-2xl border border-border bg-white p-6 shadow-layered lg:sticky lg:top-24">
           <h2 className="font-display text-xl text-foreground">Your order</h2>
           <ul className="mt-4 space-y-2.5">
             {rows.map((r) => (
@@ -1114,6 +1125,31 @@ function CheckoutForm() {
           )}
         </div>
       </form>
+
+      {/* Mobile: the total and the pay action stay reachable without scrolling
+          back up to the summary card. */}
+      {payState === "idle" && (
+        <div className="fixed inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-40 border-t border-border bg-white/95 px-4 pb-3 pt-3 backdrop-blur lg:hidden">
+          <div className="flex items-center gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Total
+              </p>
+              <p className="font-display text-xl leading-tight text-foreground">
+                {formatKES(total)}
+              </p>
+            </div>
+            <button
+              type="submit"
+              form="checkout-form"
+              disabled={stationBlockers.length > 0}
+              className="shrink-0 rounded-xl bg-orange-500 px-6 py-3.5 text-sm font-semibold text-white shadow-[0_4px_14px_-4px_rgb(249,115,22)] transition-colors hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {method === "mpesa" ? "Pay with M-Pesa" : "Pay by card"}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Payment overlay: status display only. Nothing here can mark an order paid. */}
       <AnimatePresence>
