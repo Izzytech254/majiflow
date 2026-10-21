@@ -8,10 +8,10 @@ export const ORDER_STATUS_META: Record<
   { label: string; tone: "warning" | "softAccent" | "accent" | "success" | "danger" | "muted"; dot: string }
 > = {
   pending: { label: "Pending", tone: "warning", dot: "bg-warning" },
-  accepted: { label: "Accepted", tone: "softAccent", dot: "bg-[#0052FF]" },
-  preparing: { label: "Preparing", tone: "softAccent", dot: "bg-[#0052FF]" },
-  rider_assigned: { label: "Rider assigned", tone: "accent", dot: "bg-[#4D7CFF]" },
-  out_for_delivery: { label: "Out for delivery", tone: "accent", dot: "bg-[#4D7CFF]" },
+  accepted: { label: "Accepted", tone: "softAccent", dot: "bg-[var(--brand)]" },
+  preparing: { label: "Preparing", tone: "softAccent", dot: "bg-[var(--brand)]" },
+  rider_assigned: { label: "Rider assigned", tone: "accent", dot: "bg-[var(--brand-bright)]" },
+  out_for_delivery: { label: "Out for delivery", tone: "accent", dot: "bg-[var(--brand-bright)]" },
   delivered: { label: "Delivered", tone: "success", dot: "bg-success" },
   rejected: { label: "Rejected", tone: "danger", dot: "bg-danger" },
   cancelled: { label: "Cancelled", tone: "muted", dot: "bg-muted-foreground" },

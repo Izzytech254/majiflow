@@ -299,7 +299,7 @@ export function BusinessStationSetup() {
                 <Link
                   href={`/browse/${station.business.slug}`}
                   target="_blank"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-[#0052FF] hover:underline"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--brand)] hover:underline"
                 >
                   View public page <ExternalLink className="size-3.5" aria-hidden />
                 </Link>
@@ -339,7 +339,7 @@ function TrialCard({
   return (
     <div className="rounded-2xl border border-border p-4">
       <h4 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-        <Sparkles className="size-4 text-[#0052FF]" aria-hidden /> Free trial
+        <Sparkles className="size-4 text-[var(--brand)]" aria-hidden /> Free trial
       </h4>
       {!station.subscription && (
         <>
@@ -415,7 +415,7 @@ function ListingCard({
   return (
     <div className="rounded-2xl border border-border p-4">
       <h4 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-        <CheckCircle2 className="size-4 text-[#0052FF]" aria-hidden /> Listing details
+        <CheckCircle2 className="size-4 text-[var(--brand)]" aria-hidden /> Listing details
       </h4>
       {station.business.isComplete ? (
         <p className="mt-2 text-sm text-muted-foreground">

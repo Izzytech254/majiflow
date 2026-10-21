@@ -135,7 +135,7 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
   return (
     <>
       <OrderTypeBar />
-      <section className="relative overflow-hidden border-b border-border bg-background">
+      <section className="relative overflow-hidden border-b border-border bg-surface-2">
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-radial-glow" />
         <Container className="relative py-14 lg:py-20">
           <div className="mx-auto max-w-2xl text-center">
@@ -175,8 +175,8 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
                   aria-pressed={city === c}
                   className={`min-h-11 rounded-full border px-4 py-2 text-sm font-medium transition-all ${
                     city === c
-                      ? "border-[#0052FF] bg-[#0052FF] text-white shadow-accent"
-                      : "border-border bg-white text-muted-foreground hover:border-[#0052FF]/40 hover:text-[#0052FF]"
+                      ? "border-[var(--brand)] bg-[var(--brand)] text-white shadow-accent"
+                      : "border-border bg-white text-muted-foreground hover:border-[var(--brand)]/40 hover:text-[var(--brand)]"
                   }`}
                 >
                   {c === "All cities" ? "Every city" : c}
@@ -234,7 +234,7 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
                   onClick={() => setView("list")}
                   aria-pressed={view === "list"}
                   className={`inline-flex min-h-9 items-center gap-2 rounded-full px-4 text-sm font-medium transition-colors ${
-                    view === "list" ? "bg-[#0052FF] text-white" : "text-muted-foreground hover:text-foreground"
+                    view === "list" ? "bg-[var(--brand)] text-white" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   <List className="size-4" aria-hidden /> List
@@ -244,7 +244,7 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
                   onClick={() => setView("map")}
                   aria-pressed={view === "map"}
                   className={`inline-flex min-h-9 items-center gap-2 rounded-full px-4 text-sm font-medium transition-colors ${
-                    view === "map" ? "bg-[#0052FF] text-white" : "text-muted-foreground hover:text-foreground"
+                    view === "map" ? "bg-[var(--brand)] text-white" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   <MapIcon className="size-4" aria-hidden /> Map
@@ -295,7 +295,7 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
                         data-station-id={business.id}
                         onMouseEnter={() => setSelectedId(business.id)}
                         className={`h-full rounded-2xl transition-shadow ${
-                          selectedId === business.id ? "ring-2 ring-[#0052FF] ring-offset-2 ring-offset-background" : ""
+                          selectedId === business.id ? "ring-2 ring-[var(--brand)] ring-offset-2 ring-offset-background" : ""
                         }`}
                       >
                         <BusinessCard business={business} distanceKm={distanceKm} />
@@ -317,7 +317,7 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
                 action={
                   <button
                     onClick={() => setQuery("")}
-                    className="mt-2 font-semibold text-[#0052FF] hover:underline"
+                    className="mt-2 font-semibold text-[var(--brand)] hover:underline"
                   >
                     Clear search
                   </button>

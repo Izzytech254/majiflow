@@ -123,7 +123,7 @@ export function FulfilmentPanel({
 
       {order.rider && !isTerminalStatus(order.status) && (
         <p className="mt-3 flex items-center gap-2 text-sm text-foreground">
-          <Bike className="size-4 text-[#0052FF]" aria-hidden />
+          <Bike className="size-4 text-[var(--brand)]" aria-hidden />
           Rider: <span className="font-semibold">{order.rider.name}</span> · {formatPhone(order.rider.phone)}
         </p>
       )}
@@ -151,7 +151,7 @@ export function FulfilmentPanel({
       )}
 
       {riderLink && (
-        <div className="mt-4 rounded-xl border border-[#0052FF]/25 bg-[#0052FF]/5 p-4">
+        <div className="mt-4 rounded-xl border border-[var(--brand)]/25 bg-[var(--brand)]/5 p-4">
           <p className="text-sm font-semibold text-foreground">Rider delivery link</p>
           <p className="mt-1 text-xs text-muted-foreground">
             Send this to the rider. It is shown once and stops working when the order closes or the rider changes.

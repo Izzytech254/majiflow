@@ -322,7 +322,7 @@ export function ProfilePage() {
       </section>
 
       {!complete && !editing && (
-        <div className="mt-4 flex items-start gap-3 rounded-xl border border-[#0052FF]/20 bg-white/5 p-4">
+        <div className="mt-4 flex items-start gap-3 rounded-xl border border-[var(--brand)]/20 bg-white/5 p-4">
           <AlertCircle className="mt-0.5 size-5 shrink-0 text-black" aria-hidden />
           <p className="text-sm text-foreground/85">
             <strong className="font-semibold text-foreground">Finish your profile.</strong> Share your

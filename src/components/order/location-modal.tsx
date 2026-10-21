@@ -331,7 +331,7 @@ export function LocationModal({ open, onClose, onConfirm }: LocationModalProps) 
                     type="button"
                     onClick={useCurrentLocation}
                     disabled={locating}
-                    className="mt-3 flex w-full items-center gap-3 rounded-xl border border-[#0052FF]/30 bg-cta-soft px-4 py-3 text-left text-sm font-semibold text-[#0052FF] transition-colors hover:border-[#0052FF]"
+                    className="mt-3 flex w-full items-center gap-3 rounded-xl border border-[var(--brand)]/30 bg-cta-soft px-4 py-3 text-left text-sm font-semibold text-[var(--brand)] transition-colors hover:border-[var(--brand)]"
                   >
                     {locating ? <Loader2 className="size-5 animate-spin" aria-hidden /> : <Navigation className="size-5" aria-hidden />}
                     {locating ? "Getting your location…" : "Use my current location"}
@@ -352,9 +352,9 @@ export function LocationModal({ open, onClose, onConfirm }: LocationModalProps) 
                             key={`${a.estate}-${i}`}
                             type="button"
                             onClick={() => chooseSaved(a)}
-                            className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border bg-white px-3 py-2 text-sm text-foreground transition-colors hover:border-[#0052FF]/50"
+                            className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border bg-white px-3 py-2 text-sm text-foreground transition-colors hover:border-[var(--brand)]/50"
                           >
-                            <MapPin className="size-3.5 shrink-0 text-[#0052FF]" aria-hidden />
+                            <MapPin className="size-3.5 shrink-0 text-[var(--brand)]" aria-hidden />
                             <span className="truncate">{a.label || a.estate}</span>
                           </button>
                         ))}
@@ -371,7 +371,7 @@ export function LocationModal({ open, onClose, onConfirm }: LocationModalProps) 
                             key={c}
                             type="button"
                             onClick={() => chooseCity(c)}
-                            className="rounded-full border border-border bg-white px-3 py-2 text-sm text-foreground transition-colors hover:border-[#0052FF]/50"
+                            className="rounded-full border border-border bg-white px-3 py-2 text-sm text-foreground transition-colors hover:border-[var(--brand)]/50"
                           >
                             {c}
                           </button>
@@ -383,9 +383,9 @@ export function LocationModal({ open, onClose, onConfirm }: LocationModalProps) 
                   <button
                     type="button"
                     onClick={() => setStep("map")}
-                    className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface-2 py-3 text-sm font-semibold text-foreground hover:border-[#0052FF]/40"
+                    className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface-2 py-3 text-sm font-semibold text-foreground hover:border-[var(--brand)]/40"
                   >
-                    <MapPin className="size-4 text-[#0052FF]" aria-hidden /> Pin it on the map instead
+                    <MapPin className="size-4 text-[var(--brand)]" aria-hidden /> Pin it on the map instead
                   </button>
                 </div>
               )}
@@ -418,7 +418,7 @@ export function LocationModal({ open, onClose, onConfirm }: LocationModalProps) 
 
                   <div className="min-h-0 flex-1 overflow-y-auto border-t border-border p-5">
                     <div className="flex items-start gap-3">
-                      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-cta-soft text-[#0052FF]">
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-cta-soft text-[var(--brand)]">
                         <MapPin className="size-5" aria-hidden />
                       </span>
                       <div className="min-w-0">
@@ -514,11 +514,11 @@ function TypeCard({
       className={cn(
         "flex min-h-[120px] flex-col items-start gap-3 rounded-2xl border p-5 text-left transition-all",
         selected
-          ? "border-[#0052FF] bg-cta-soft/60 ring-2 ring-[#0052FF]/20"
-          : "border-border bg-white hover:border-[#0052FF]/40 hover:shadow-soft"
+          ? "border-[var(--brand)] bg-cta-soft/60 ring-2 ring-[var(--brand)]/20"
+          : "border-border bg-white hover:border-[var(--brand)]/40 hover:shadow-soft"
       )}
     >
-      <span className={cn("flex size-12 items-center justify-center rounded-xl", selected ? "bg-[#0052FF] text-white" : "bg-surface-3 text-muted-foreground")}>
+      <span className={cn("flex size-12 items-center justify-center rounded-xl", selected ? "bg-[var(--brand)] text-white" : "bg-surface-3 text-muted-foreground")}>
         {icon}
       </span>
       <span className="flex items-center gap-2">

@@ -15,7 +15,7 @@ interface ContentPageProps {
 export function ContentPage({ title, description, updated, children }: ContentPageProps) {
   return (
     <>
-      <section className="relative overflow-hidden border-b border-border bg-background">
+      <section className="relative overflow-hidden border-b border-border bg-surface-2">
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-radial-glow" />
         <Container className="relative py-16 lg:py-24">
           <AnimatedSection className="mx-auto max-w-3xl">

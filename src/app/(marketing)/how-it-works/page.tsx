@@ -89,7 +89,7 @@ export default function HowItWorks() {
                     <span className="flex size-12 items-center justify-center rounded-xl bg-neutral-100 text-black">
                       <s.icon className="size-5" aria-hidden />
                     </span>
-                    <span className="font-mono text-sm font-bold text-[#0052FF]/40">0{i + 1}</span>
+                    <span className="font-mono text-sm font-bold text-[var(--brand)]/40">0{i + 1}</span>
                   </div>
                   <h3 className="mt-6 font-display text-xl text-foreground">{s.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-foreground">{s.text}</p>
@@ -115,7 +115,7 @@ export default function HowItWorks() {
               <StaggerItem key={f.q}>
                 <div className="h-full rounded-2xl border border-border bg-background p-6 shadow-card">
                   <h3 className="flex items-start gap-2.5 font-semibold text-foreground">
-                    <Store className="mt-0.5 size-5 shrink-0 text-[#0052FF]" aria-hidden />
+                    <Store className="mt-0.5 size-5 shrink-0 text-[var(--brand)]" aria-hidden />
                     {f.q}
                   </h3>
                   <p className="mt-2.5 text-sm leading-relaxed text-foreground">{f.a}</p>

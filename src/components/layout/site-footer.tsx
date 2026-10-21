@@ -39,7 +39,7 @@ export function SiteFooter() {
             </p>
             <Link
               href="/contact"
-              className="mt-6 inline-flex items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-sm text-muted-foreground transition-all duration-200 hover:border-[#4D7CFF] hover:bg-muted hover:text-foreground"
+              className="mt-6 inline-flex items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-sm text-muted-foreground transition-all duration-200 hover:border-[var(--brand-bright)] hover:bg-muted hover:text-foreground"
             >
               Contact us
             </Link>

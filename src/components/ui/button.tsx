@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 const buttonVariants = cva(
   [
     "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium",
-    "select-none transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0052FF]",
+    "select-none transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]",
     "disabled:pointer-events-none disabled:opacity-50",
     "[&_svg]:shrink-0 [&_svg]:transition-transform [&_svg]:duration-200",
     "hover:[&_svg]:translate-x-0.5 group-hover:[&_svg]:translate-x-0.5",
@@ -15,16 +15,16 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-[#0052FF] text-white shadow-accent hover:shadow-[0_16px_44px_-10px_rgba(0,82,255,0.6)] hover:-translate-y-0.5 active:translate-y-0",
+          "bg-[var(--brand)] text-white shadow-accent hover:shadow-[0_16px_44px_-10px_rgba(0,87,230,0.6)] hover:-translate-y-0.5 active:translate-y-0",
         secondary:
           "border border-border bg-white text-foreground shadow-card hover:border-slate-300 hover:bg-slate-50 hover:-translate-y-0.5",
         outline:
-          "border border-[#0052FF]/40 text-[#0052FF] bg-transparent hover:border-[#0052FF] hover:bg-transparent/5",
+          "border border-[var(--brand)]/40 text-[var(--brand)] bg-transparent hover:border-[var(--brand)] hover:bg-transparent/5",
         danger:
           "bg-red-600 text-white shadow-soft hover:bg-[#991b1b] hover:-translate-y-0.5 active:translate-y-0",
         ghost: "text-foreground hover:bg-muted",
         dark: "bg-white text-ink hover:bg-slate-100 hover:-translate-y-0.5 shadow-card",
-        link: "text-[#0052FF] underline-offset-4 hover:underline",
+        link: "text-[var(--brand)] underline-offset-4 hover:underline",
       },
       size: {
         md: "h-11 rounded-lg px-5 text-sm",

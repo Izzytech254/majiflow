@@ -129,7 +129,7 @@ export function RiderDelivery({ token }: { token: string }) {
 
       <section aria-labelledby="dropoff-heading" className="mt-6 rounded-2xl border border-border bg-white p-5 shadow-card">
         <h2 id="dropoff-heading" className="flex items-center gap-2 font-display text-lg text-foreground">
-          <MapPin className="size-5 text-[#0052FF]" aria-hidden /> Drop-off
+          <MapPin className="size-5 text-[var(--brand)]" aria-hidden /> Drop-off
         </h2>
         <p className="mt-2 text-base font-semibold text-foreground">{address || order.address.estate}</p>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -160,7 +160,7 @@ export function RiderDelivery({ token }: { token: string }) {
 
       <section aria-labelledby="items-heading" className="mt-4 rounded-2xl border border-border bg-white p-5 shadow-card">
         <h2 id="items-heading" className="flex items-center gap-2 font-display text-lg text-foreground">
-          <Package className="size-5 text-[#0052FF]" aria-hidden /> Items
+          <Package className="size-5 text-[var(--brand)]" aria-hidden /> Items
         </h2>
         <ul className="mt-3 space-y-1.5 text-sm text-foreground">
           {order.items.map((item) => (

@@ -37,7 +37,7 @@ export function AppSplash() {
               <MajiMark />
             </span>
             <span className="font-display text-2xl font-semibold tracking-tight text-foreground">
-              Maji<span className="text-[#0052FF]">Flow</span>
+              Maji<span className="text-[var(--brand)]">Flow</span>
             </span>
           </motion.div>
           <WaterLoader label="Filling up" />

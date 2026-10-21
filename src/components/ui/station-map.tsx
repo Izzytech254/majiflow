@@ -127,7 +127,7 @@ export function StationMap({
            <span style="color:#6b675d">${escapeHtml(s.city)} · KES ${s.deliveryFee} delivery${
              typeof s.distanceKm === "number" ? ` · ${s.distanceKm.toFixed(1)} km` : ""
            }</span>
-           <a href="/browse/${encodeURIComponent(s.slug)}" style="display:inline-block;margin-top:6px;color:#0052FF;font-weight:600">View menu →</a>
+           <a href="/browse/${encodeURIComponent(s.slug)}" style="display:inline-block;margin-top:6px;color:var(--brand);font-weight:600">View menu →</a>
          </div>`
       );
     }

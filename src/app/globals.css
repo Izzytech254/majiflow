@@ -1,24 +1,25 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------ */
-/*  Design tokens - "Minimalist Modern"                               */
+/*  Design tokens - MajiFlow water identity                            */
 /* ------------------------------------------------------------------ */
 :root {
-  --background: #f2eee3;
-  --foreground: #23262b;
-  --muted: #eae5d7;
-  --muted-foreground: #6b675d;
-  --accent: #0052ff;
-  --accent-2: #4d7cff;
+  /* Surfaces: fresh white with cool blue-tinted panels */
+  --background: #ffffff;
+  --foreground: #0b2545;
+  --muted: #eaf2fb;
+  --muted-foreground: #5a7391;
+  --accent: #0057e6;
+  --accent-2: #2e8cff;
   --accent-foreground: #ffffff;
-  --border: #e2dccd;
+  --border: #dce8f5;
   --card: #ffffff;
-  --ring: #0052ff;
+  --ring: #0057e6;
 
-  --ink: #14181f;
-  --ink-soft: #1e232b;
-  --ink-muted: #2b313a9c;
-  --ink-border: #1e293b;
+  --ink: #0a1f38;
+  --ink-soft: #132c4a;
+  --ink-muted: #3d5875a6;
+  --ink-border: #1e3a5f;
 
   --success: #15803d;
   --success-soft: #dcfce7;
@@ -28,27 +29,62 @@
   --danger-soft: #fee2e2;
   --info-soft: #dbeafe;
 
-  /* KFC-style ordering surface tokens (aqua brand, calm neutral surfaces) */
+  /* Brand: vibrant water blue. 5.68:1 on white, so it is AA-safe as text. */
+  --brand: #0057e6;
+  --brand-bright: #2e8cff;
+  --brand-deep: #003fa8;
+  --brand-soft: #e6f0ff;
+
+  /* Aqua: the water cue - waves, ripples, bubbles */
+  --aqua: #00c2d6;
+  --aqua-bright: #4fdbe9;
+  --aqua-deep: #0097a8;
+  --aqua-soft: #dff6fa;
+
+  /* Coral: the CTA accent. #ff5a3c is decorative only (3.1:1); buttons use
+     --coral-cta (4.59:1) so white label text stays AA compliant. */
+  --coral: #ff5a3c;
+  --coral-cta: #dc3d22;
+  --coral-cta-hover: #c23219;
+  --coral-soft: #ffede7;
+  --sun: #ffc400;
+  --sun-soft: #fff4d1;
+
+  /* Ordering surface tokens */
   --surface: #ffffff;
-  --surface-2: #f7f8fa;
-  --surface-3: #eef1f5;
-  --cta: #0052ff;
-  --cta-hover: #0046d6;
-  --cta-soft: #e8efff;
-  --map-pin: #0052ff;
+  --surface-2: #f4f9fe;
+  --surface-3: #e7f0fa;
+  --cta: #0057e6;
+  --cta-hover: #0042b4;
+  --cta-soft: #e6f0ff;
+  --map-pin: #0057e6;
   --map-pin-closed: #94a3b8;
+
+  /* Shape */
   --radius-pill: 9999px;
+  --radius-card: 20px;
+  --radius-card-lg: 28px;
+
+  /* Motion */
+  --ease-water: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-splash: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-drain: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 200ms;
+  --dur-base: 320ms;
+  --dur-slow: 600ms;
 
   /* Where bottom-anchored notifications sit. Raised when a sticky action bar
      owns the bottom of the screen so nothing covers it. */
   --notify-bottom: 1rem;
 
-  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px -8px rgb(15 23 42 / 0.1);
-  --shadow-layered: 0 1px 2px rgb(15 23 42 / 0.05), 0 12px 24px -6px rgb(15 23 42 / 0.08),
-    0 32px 64px -24px rgb(15 23 42 / 0.14);
-  --shadow-accent: 0 10px 30px -8px rgb(0 82 255 / 0.45);
-  --shadow-soft: 0 2px 8px rgb(15 23 42 / 0.06);
-  --shadow-glow-blue: 0 0 80px -12px rgb(0 82 255 / 0.5);
+  --shadow-card: 0 1px 2px rgb(11 37 69 / 0.04), 0 8px 24px -8px rgb(11 37 69 / 0.1);
+  --shadow-layered: 0 1px 2px rgb(11 37 69 / 0.05), 0 12px 24px -6px rgb(11 37 69 / 0.08),
+    0 32px 64px -24px rgb(11 37 69 / 0.14);
+  --shadow-accent: 0 10px 30px -8px rgb(0 87 230 / 0.45);
+  --shadow-soft: 0 2px 8px rgb(11 37 69 / 0.06);
+  --shadow-glow-blue: 0 0 80px -12px rgb(0 87 230 / 0.5);
+  --shadow-coral: 0 10px 30px -8px rgb(220 61 34 / 0.42);
+  --shadow-float: 0 18px 40px -16px rgb(11 37 69 / 0.28);
 }
 
 /* Lift bottom-anchored notifications clear of the checkout pay bar. */
@@ -94,6 +130,22 @@
   --color-map-pin: var(--map-pin);
   --color-map-pin-closed: var(--map-pin-closed);
 
+  --color-brand: var(--brand);
+  --color-brand-bright: var(--brand-bright);
+  --color-brand-deep: var(--brand-deep);
+  --color-brand-soft: var(--brand-soft);
+  --color-aqua: var(--aqua);
+  --color-aqua-bright: var(--aqua-bright);
+  --color-aqua-deep: var(--aqua-deep);
+  --color-aqua-soft: var(--aqua-soft);
+  --color-coral: var(--coral);
+  --color-coral-cta: var(--coral-cta);
+  --color-coral-cta-hover: var(--coral-cta-hover);
+  --color-coral-soft: var(--coral-soft);
+  --color-sun: var(--sun);
+  --color-sun-soft: var(--sun-soft);
+  --color-navy: var(--foreground);
+
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
   --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
@@ -105,18 +157,25 @@
   --radius-xl: 1.25rem;
   --radius-2xl: 1.75rem;
   --radius-3xl: 2.5rem;
+  --radius-card: var(--radius-card);
+  --radius-card-lg: var(--radius-card-lg);
 
   --shadow-card: var(--shadow-card);
   --shadow-layered: var(--shadow-layered);
   --shadow-accent: var(--shadow-accent);
   --shadow-soft: var(--shadow-soft);
   --shadow-glow: var(--shadow-glow-blue);
+  --shadow-coral: var(--shadow-coral);
+  --shadow-float: var(--shadow-float);
 
   --animate-float: float 7s ease-in-out infinite;
   --animate-float-slow: float 10s ease-in-out 1.2s infinite;
   --animate-spin-slow: spin 32s linear infinite;
   --animate-pulse-dot: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-ping-slow: ping-slow 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+  --animate-water-shimmer: water-shimmer 1.6s ease-in-out infinite;
+  --animate-bubble-rise: bubble-rise 9s linear infinite;
+  --animate-wave-shift: wave-shift 7s ease-in-out infinite;
 
   @keyframes float {
     0%,
@@ -147,6 +206,44 @@
     100% {
       transform: scale(2.4);
       opacity: 0;
+    }
+  }
+
+  /* Water shine sweep for skeleton loaders */
+  @keyframes water-shimmer {
+    0% {
+      transform: translateX(-110%);
+    }
+    100% {
+      transform: translateX(210%);
+    }
+  }
+
+  /* Floating bubbles for hero and empty states */
+  @keyframes bubble-rise {
+    0% {
+      transform: translate3d(0, 0, 0) scale(0.6);
+      opacity: 0;
+    }
+    12% {
+      opacity: 0.55;
+    }
+    100% {
+      transform: translate3d(var(--bubble-drift, 12px), -120%, 0) scale(1.15);
+      opacity: 0;
+    }
+  }
+
+  /* Slow horizontal swell used on wave overlays */
+  @keyframes wave-shift {
+    0% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(-3%);
+    }
+    100% {
+      transform: translateX(0);
     }
   }
 }
@@ -185,15 +282,15 @@
 @layer utilities {
   /* Gradient accent text */
   .text-gradient {
-    background-image: linear-gradient(135deg, var(--color-accent), var(--color-accent-2));
+    background-image: linear-gradient(135deg, var(--color-brand), var(--color-aqua));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
 
-  /* Signature brand gradient surface */
+  /* Signature brand gradient surface: water blue into aqua */
   .bg-brand-gradient {
-    background-image: linear-gradient(135deg, var(--color-accent), var(--color-accent-2));
+    background-image: linear-gradient(135deg, var(--color-brand), var(--color-aqua));
   }
 
   /* Dot-pattern texture for dark sections */
@@ -203,7 +300,7 @@
   }
 
   .bg-dot-pattern-light {
-    background-image: radial-gradient(rgb(15 23 42 / 0.5) 1px, transparent 1px);
+    background-image: radial-gradient(rgb(11 37 69 / 0.5) 1px, transparent 1px);
     background-size: 22px 22px;
   }
 
@@ -211,7 +308,16 @@
   .bg-radial-glow {
     background-image: radial-gradient(
       ellipse 60% 50% at 50% 40%,
-      rgb(0 82 255 / 0.16),
+      rgb(0 87 230 / 0.16),
+      transparent 70%
+    );
+  }
+
+  /* Radial aqua glow for water-themed bands */
+  .bg-radial-aqua {
+    background-image: radial-gradient(
+      ellipse 60% 50% at 50% 40%,
+      rgb(0 194 214 / 0.18),
       transparent 70%
     );
   }
@@ -329,6 +435,102 @@
       transform: translateX(-50%) scale(1.8);
       opacity: 0;
     }
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Water motion primitives                                           */
+/* ------------------------------------------------------------------ */
+@layer utilities {
+  /* Three drops bouncing on a shared surface */
+  @keyframes drop-bounce {
+    0%,
+    100% {
+      transform: translateY(0) scaleY(1);
+    }
+    35% {
+      transform: translateY(-14px) scaleY(1.08);
+    }
+    60% {
+      transform: translateY(0) scaleY(0.86);
+    }
+    75% {
+      transform: translateY(0) scaleY(1.02);
+    }
+  }
+
+  /* A single expanding ripple ring */
+  @keyframes ripple-out {
+    0% {
+      transform: scale(0.25);
+      opacity: 0.7;
+    }
+    100% {
+      transform: scale(1.9);
+      opacity: 0;
+    }
+  }
+
+  /* Splash particles thrown sideways from an impact */
+  @keyframes splash-out {
+    0% {
+      transform: translate3d(0, 0, 0) scale(0.4);
+      opacity: 0.9;
+    }
+    100% {
+      transform: translate3d(var(--splash-x, 0), var(--splash-y, -18px), 0) scale(0.1);
+      opacity: 0;
+    }
+  }
+
+  /* The water line inside the bottle: a gentle sloshing swell */
+  @keyframes bottle-slosh {
+    0%,
+    100% {
+      transform: translateX(-4%) scaleY(1);
+    }
+    50% {
+      transform: translateX(4%) scaleY(1.02);
+    }
+  }
+
+  /* Shimmer overlay that sweeps across skeleton placeholders */
+  .water-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      100deg,
+      transparent 20%,
+      rgb(255 255 255 / 0.72) 46%,
+      rgb(255 255 255 / 0.9) 52%,
+      transparent 76%
+    );
+    transform: translateX(-110%);
+    animation: var(--animate-water-shimmer);
+  }
+
+  /* Floating bubble used in heroes and empty states */
+  .bubble {
+    position: absolute;
+    border-radius: 9999px;
+    background: radial-gradient(
+      circle at 32% 28%,
+      rgb(255 255 255 / 0.9),
+      rgb(255 255 255 / 0.28) 42%,
+      transparent 70%
+    );
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.5);
+    animation: var(--animate-bubble-rise);
+    will-change: transform, opacity;
+  }
+
+  /* Wave silhouette used as a section divider */
+  .wave-divider {
+    display: block;
+    width: 100%;
+    height: auto;
   }
 }
 

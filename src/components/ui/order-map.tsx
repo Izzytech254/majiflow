@@ -148,7 +148,7 @@ function applyCustomer(
   if (history.length > 1) {
     const pts = history.slice(-80).map((h) => [h.lat, h.lng]) as [number, number][];
     if (lineRef.current) lineRef.current.setLatLngs(pts);
-    else lineRef.current = L.polyline(pts, { color: "#0052FF", weight: 2, opacity: 0.45, dashArray: "6 8" }).addTo(map);
+    else lineRef.current = L.polyline(pts, { color: "var(--brand)", weight: 2, opacity: 0.45, dashArray: "6 8" }).addTo(map);
   }
 
   if (!flewRef.current) {

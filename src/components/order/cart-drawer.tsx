@@ -61,7 +61,7 @@ export function CartDrawer() {
             transition={panelTransition}
           >
             <header className="flex shrink-0 items-center gap-3 border-b border-border px-5 py-4">
-              <ShoppingCart className="size-5 text-[#0052FF]" aria-hidden />
+              <ShoppingCart className="size-5 text-[var(--brand)]" aria-hidden />
               <h2 className="min-w-0 flex-1 font-display text-lg text-foreground">
                 Your order{count > 0 && <span className="text-muted-foreground"> · {count}</span>}
               </h2>
@@ -205,7 +205,7 @@ export function CartDrawer() {
                   <Link
                     href="/cart"
                     onClick={closeCart}
-                    className="mt-2 block text-center text-xs font-semibold text-[#0052FF] hover:underline"
+                    className="mt-2 block text-center text-xs font-semibold text-[var(--brand)] hover:underline"
                   >
                     View full cart
                   </Link>

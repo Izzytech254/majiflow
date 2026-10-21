@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 export default function NotFound() {
   return (
     <Container className="flex min-h-[75vh] flex-col items-center justify-center gap-6 py-24 text-center">
-      <span className="flex size-16 items-center justify-center rounded-2xl bg-[#0052FF] text-white shadow-accent">
+      <span className="flex size-16 items-center justify-center rounded-2xl bg-[var(--brand)] text-white shadow-accent">
         <Droplets className="size-8" aria-hidden />
       </span>
       <p className="text-gradient font-display text-6xl font-black tracking-tight">404</p>

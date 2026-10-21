@@ -133,7 +133,7 @@ export function ProductCard({ product, businessId, businessSlug, openingHours, c
               e.preventDefault();
               onOpen(product);
             }}
-            className="rounded-sm hover:text-[#0052FF] hover:underline focus-visible:outline-2 focus-visible:outline-[#0052FF]"
+            className="rounded-sm hover:text-[var(--brand)] hover:underline focus-visible:outline-2 focus-visible:outline-[var(--brand)]"
           >
             {product.name}
           </Link>
@@ -154,7 +154,7 @@ export function ProductCard({ product, businessId, businessSlug, openingHours, c
           <button
             type="button"
             onClick={() => onOpen?.(product)}
-            className="text-xs font-semibold text-[#0052FF] hover:underline"
+            className="text-xs font-semibold text-[var(--brand)] hover:underline"
           >
             View options
           </button>
@@ -178,7 +178,7 @@ export function ProductCard({ product, businessId, businessSlug, openingHours, c
               onClick={handleAdd}
               disabled={flying}
               aria-label={`Add ${product.name} to order`}
-              className="flex size-11 items-center justify-center rounded-full bg-[#0052FF] text-white shadow-accent transition-transform hover:scale-105 active:scale-95 disabled:opacity-60"
+              className="flex size-11 items-center justify-center rounded-full bg-[var(--brand)] text-white shadow-accent transition-transform hover:scale-105 active:scale-95 disabled:opacity-60"
             >
               <Plus className="size-6" aria-hidden />
             </button>

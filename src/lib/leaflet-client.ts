@@ -104,11 +104,11 @@ function teardrop(
 }
 
 /** Station pin; pass `closed` to grey it out and `label` for the initials. */
-export function stationPin(L: LeafletNS, label = "", closed = false, color = "#0052FF") {
+export function stationPin(L: LeafletNS, label = "", closed = false, color = "var(--brand)") {
   return teardrop(L, { color, label, closed });
 }
 
-export function selectedPin(L: LeafletNS, label = "", color = "#0052FF") {
+export function selectedPin(L: LeafletNS, label = "", color = "var(--brand)") {
   return teardrop(L, { color, label, selected: true });
 }
 
@@ -117,8 +117,8 @@ export function userPin(L: LeafletNS, size = 16) {
   return L.divIcon({
     className: "",
     html: `<span style="position:relative;display:block;width:${size}px;height:${size}px">
-      <span style="position:absolute;inset:0;border-radius:9999px;background:#0052FF;opacity:.35;animation:ping-slow 2.4s cubic-bezier(0,0,.2,1) infinite"></span>
-      <span style="display:block;width:${size}px;height:${size}px;border-radius:9999px;background:#0052FF;border:3px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.4)"></span>
+      <span style="position:absolute;inset:0;border-radius:9999px;background:var(--brand);opacity:.35;animation:ping-slow 2.4s cubic-bezier(0,0,.2,1) infinite"></span>
+      <span style="display:block;width:${size}px;height:${size}px;border-radius:9999px;background:var(--brand);border:3px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.4)"></span>
     </span>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],

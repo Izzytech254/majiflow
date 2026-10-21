@@ -69,13 +69,13 @@ export function AdminOverview() {
           className="pointer-events-none absolute inset-0"
           style={{
             backgroundImage:
-              "radial-gradient(ellipse 60% 60% at 90% -10%, rgba(0,82,255,0.14), transparent 60%)",
+              "radial-gradient(ellipse 60% 60% at 90% -10%, rgba(0,87,230,0.14), transparent 60%)",
           }}
         />
         <div className="relative flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-              <ShieldCheck className="size-3.5 text-[#0052FF]" aria-hidden /> Platform admin
+              <ShieldCheck className="size-3.5 text-[var(--brand)]" aria-hidden /> Platform admin
             </p>
             <h1 className="mt-2 font-display text-3xl text-foreground sm:text-4xl">MajiFlow control room</h1>
             <p className="mt-2 text-sm text-muted-foreground">
@@ -101,7 +101,7 @@ export function AdminOverview() {
       </div>
 
       {note && (
-        <div role="status" className="mt-6 flex items-center justify-between rounded-xl border border-[#0052FF]/25 bg-[#0052FF]/5 px-4 py-3 text-sm text-[#0052FF]">
+        <div role="status" className="mt-6 flex items-center justify-between rounded-xl border border-[var(--brand)]/25 bg-[var(--brand)]/5 px-4 py-3 text-sm text-[var(--brand)]">
           {note}
           <button onClick={() => setNote(null)} className="font-semibold" aria-label="Dismiss">
             Dismiss
@@ -165,7 +165,7 @@ export function AdminOverview() {
                   {r.verified ? "Live" : "Pending"}
                 </span>
               </div>
-              <Link href="/business" className="mt-3 inline-block text-xs font-semibold text-[#0052FF] hover:underline">
+              <Link href="/business" className="mt-3 inline-block text-xs font-semibold text-[var(--brand)] hover:underline">
                 Open dashboard
               </Link>
             </li>
@@ -210,7 +210,7 @@ export function AdminOverview() {
                     </span>
                   </td>
                   <td className="px-5 py-4">
-                    <Link href="/business" className="text-xs font-semibold text-[#0052FF] hover:underline">
+                    <Link href="/business" className="text-xs font-semibold text-[var(--brand)] hover:underline">
                       Open
                     </Link>
                   </td>
@@ -237,7 +237,7 @@ export function AdminOverview() {
                   </div>
                   <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
                     <div
-                      className={cn("h-full rounded-full", planId === "pro" ? "bg-foreground" : planId === "growth" ? "bg-[#4D7CFF]" : "bg-[#0052FF]/40")}
+                      className={cn("h-full rounded-full", planId === "pro" ? "bg-foreground" : planId === "growth" ? "bg-[var(--brand-bright)]" : "bg-[var(--brand)]/40")}
                       style={{ width: `${ROWS.length ? (value / ROWS.length) * 100 : 0}%` }}
                     />
                   </div>

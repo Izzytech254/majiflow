@@ -113,14 +113,14 @@ export default async function BusinessProfile({ params }: PageProps) {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
               <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
                 <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                  <Clock className="size-4 text-[#0052FF]" aria-hidden /> Opening hours
+                  <Clock className="size-4 text-[var(--brand)]" aria-hidden /> Opening hours
                 </div>
                 <BusinessAvailability hours={business.openingHours} compact className="mt-2" />
               </div>
 
               <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
                 <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                  <Truck className="size-4 text-[#0052FF]" aria-hidden /> Delivery
+                  <Truck className="size-4 text-[var(--brand)]" aria-hidden /> Delivery
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
                   {formatKES(business.deliveryFee)} per order
@@ -132,7 +132,7 @@ export default async function BusinessProfile({ params }: PageProps) {
 
               <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
                 <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                  <Smartphone className="size-4 text-[#0052FF]" aria-hidden /> Payment
+                  <Smartphone className="size-4 text-[var(--brand)]" aria-hidden /> Payment
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
                   {business.acceptsMpesa ? "M-Pesa" : "Pay on delivery"}
@@ -142,7 +142,7 @@ export default async function BusinessProfile({ params }: PageProps) {
 
               <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
                 <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                  <ShieldCheck className="size-4 text-[#0052FF]" aria-hidden /> Stock
+                  <ShieldCheck className="size-4 text-[var(--brand)]" aria-hidden /> Stock
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
                   {lowStockCount > 0 ? `${lowStockCount} items low` : "Plenty in stock"} · sealed before dispatch

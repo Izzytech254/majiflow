@@ -78,8 +78,8 @@ export function SiteHeader() {
                 className={cn(
                   "rounded-lg px-3.5 py-2 text-sm font-medium transition-colors min-h-11 inline-flex items-center",
                   active
-                    ? "text-[#0052FF]"
-                    : "text-foreground hover:text-[#0052FF] hover:bg-muted"
+                    ? "text-[var(--brand)]"
+                    : "text-foreground hover:text-[var(--brand)] hover:bg-muted"
                 )}
               >
                 {link.label}
@@ -108,7 +108,7 @@ export function SiteHeader() {
           <Link
             href="/account/notifications"
             aria-label="Notifications"
-            className="flex size-11 items-center justify-center rounded-lg border border-border bg-white text-foreground transition-colors hover:border-[#0052FF]/40 hover:text-[#0052FF] lg:hidden"
+            className="flex size-11 items-center justify-center rounded-lg border border-border bg-white text-foreground transition-colors hover:border-[var(--brand)]/40 hover:text-[var(--brand)] lg:hidden"
           >
             <Bell className="size-5" aria-hidden />
           </Link>
@@ -116,7 +116,7 @@ export function SiteHeader() {
           <Link
             href={loggedIn ? "/account/profile" : "/login"}
             aria-label={loggedIn ? "Your profile" : "Sign in or create an account"}
-            className="hidden size-11 items-center justify-center rounded-lg border border-border bg-white text-foreground transition-colors hover:border-[#0052FF]/40 hover:text-[#0052FF] lg:flex"
+            className="hidden size-11 items-center justify-center rounded-lg border border-border bg-white text-foreground transition-colors hover:border-[var(--brand)]/40 hover:text-[var(--brand)] lg:flex"
           >
             <User className="size-5" aria-hidden />
           </Link>
@@ -156,14 +156,14 @@ export function SiteHeader() {
             {/* Ripple rings */}
             <motion.span
               aria-hidden
-              className="pointer-events-none absolute left-6 top-16 size-20 rounded-full border-2 border-[#0052FF]/40"
+              className="pointer-events-none absolute left-6 top-16 size-20 rounded-full border-2 border-[var(--brand)]/40"
               initial={{ scale: 0.3, opacity: 0.8 }}
               animate={{ scale: 2.6, opacity: 0 }}
               transition={{ duration: reduce ? 0 : 1, ease: MENU_EASE, delay: reduce ? 0 : 0.18 }}
             />
             <motion.span
               aria-hidden
-              className="pointer-events-none absolute left-12 top-24 size-12 rounded-full border-2 border-[#0052FF]/30"
+              className="pointer-events-none absolute left-12 top-24 size-12 rounded-full border-2 border-[var(--brand)]/30"
               initial={{ scale: 0.3, opacity: 0.8 }}
               animate={{ scale: 3.4, opacity: 0 }}
               transition={{ duration: reduce ? 0 : 1.3, ease: MENU_EASE, delay: reduce ? 0 : 0.34 }}

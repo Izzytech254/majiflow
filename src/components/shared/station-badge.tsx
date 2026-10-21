@@ -22,7 +22,7 @@ export function StationBadge({ verified, paid, className }: StationBadgeProps) {
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium whitespace-nowrap",
         isPaid
-          ? "border-transparent bg-[#0052FF] text-white shadow-soft"
+          ? "border-transparent bg-[var(--brand)] text-white shadow-soft"
           : "border-border bg-muted text-muted-foreground",
         className
       )}

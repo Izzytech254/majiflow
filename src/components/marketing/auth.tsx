@@ -204,11 +204,11 @@ export function RegisterForm() {
         </Button>
         <p className="text-center text-xs leading-relaxed text-muted-foreground">
           By continuing you agree to our{" "}
-          <Link href="/terms" className="underline hover:text-[#0052FF]">
+          <Link href="/terms" className="underline hover:text-[var(--brand)]">
             Terms
           </Link>{" "}
           and{" "}
-          <Link href="/privacy" className="underline hover:text-[#0052FF]">
+          <Link href="/privacy" className="underline hover:text-[var(--brand)]">
             Privacy Policy
           </Link>
           .

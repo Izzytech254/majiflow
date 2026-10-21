@@ -16,7 +16,7 @@ export function BrandMark({
       href="/"
       aria-label="MajiFlow home"
       className={cn(
-        "group inline-flex items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0052FF]",
+        "group inline-flex items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]",
         className
       )}
     >
@@ -31,7 +31,7 @@ export function BrandMark({
           )}
         >
           Maji
-          <span className="text-[#0052FF]">Flow</span>
+          <span className="text-[var(--brand)]">Flow</span>
         </span>
         {showTagline && (
           <span

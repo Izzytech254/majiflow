@@ -42,13 +42,13 @@ export function FeaturedBusinesses() {
       <AnimatedSection className="mt-12 flex flex-col items-center gap-4">
         <div className="flex flex-wrap items-center justify-center gap-2">
           <span className="inline-flex items-center gap-1.5 pr-1 font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-            <MapPin className="size-3.5 text-[#0052FF]" aria-hidden /> Cities we cover
+            <MapPin className="size-3.5 text-[var(--brand)]" aria-hidden /> Cities we cover
           </span>
           {CITIES.map((c) => (
             <Link
               key={c}
               href={`/browse?city=${encodeURIComponent(c)}`}
-              className="rounded-md border border-border bg-white px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wide text-muted-foreground transition-colors hover:border-[#0052FF]/40 hover:text-[#0052FF]"
+              className="rounded-md border border-border bg-white px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wide text-muted-foreground transition-colors hover:border-[var(--brand)]/40 hover:text-[var(--brand)]"
             >
               {c}
             </Link>
