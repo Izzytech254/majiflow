@@ -2,13 +2,14 @@
 
 import Image from "next/image";
 import waterCansBg from "@/assets/images/hero/water-cans-bg.webp";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { easeOut } from "@/lib/constants";
 import { ParallaxBackdrop } from "@/components/ui/parallax-backdrop";
 import { OrderCard } from "@/components/home/order-card";
+import { usePrefersReducedMotion } from "@/lib/motion";
 
 export function Hero() {
-  const reduce = useReducedMotion();
+  const reduce = usePrefersReducedMotion();
 
   return (
     <section className="relative flex min-h-[100svh] w-full flex-col overflow-hidden bg-black lg:h-[866px] lg:min-h-[640px] lg:justify-center">

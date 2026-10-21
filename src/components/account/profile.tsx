@@ -6,7 +6,6 @@ import { useState } from "react";
 import {
   AlertCircle,
   BadgeCheck,
-  Loader2,
   Mail,
   MapPin,
   MapPinCheck,
@@ -34,6 +33,7 @@ import {
   type CapturedLocation,
 } from "@/lib/geo";
 import type { DeliveryAddress } from "@/lib/types";
+import { DropLoader } from "@/components/motion/drop-loader";
 
 type Errors = Record<string, string>;
 
@@ -542,7 +542,7 @@ function LocationCard({
             </div>
             <Button type="button" variant="outline" size="sm" onClick={onCapture} disabled={locating}>
               {locating ? (
-                <Loader2 className="size-4 animate-spin" aria-hidden />
+                <DropLoader className="size-4" />
               ) : (
                 <Navigation className="size-4" aria-hidden />
               )}
@@ -567,7 +567,7 @@ function LocationCard({
             </div>
             <Button type="button" size="sm" className="group mt-4" onClick={onCapture} disabled={locating}>
               {locating ? (
-                <Loader2 className="size-4 animate-spin" aria-hidden />
+                <DropLoader className="size-4" />
               ) : (
                 <Navigation className="size-4" aria-hidden />
               )}

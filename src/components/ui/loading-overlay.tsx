@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { DropLoader } from "@/components/motion/drop-loader";
 
 export function LoadingOverlay({ message = "Loading..." }: { message?: string }) {
   return (
@@ -11,7 +12,7 @@ export function LoadingOverlay({ message = "Loading..." }: { message?: string })
         exit={{ opacity: 0, scale: 0.9 }}
         className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-card p-6 shadow-soft"
       >
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
+        <DropLoader className="size-9 text-[var(--brand)]" />
         <p className="text-sm font-medium text-foreground">{message}</p>
       </motion.div>
     </div>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
-  ArrowLeft, Building2, Check, CreditCard, Loader2, MapPin, MapPinCheck, Navigation, PartyPopper, Store, TriangleAlert } from "lucide-react";
+  ArrowLeft, Building2, Check, CreditCard, MapPin, MapPinCheck, Navigation, PartyPopper, Store, TriangleAlert } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
@@ -20,6 +20,7 @@ import {
   reverseGeocode,
 } from "@/lib/geo";
 import { cn } from "@/lib/utils";
+import { DropLoader } from "@/components/motion/drop-loader";
 
 const STEPS = ["Business details", "Location & delivery", "Choose plan", "Payment"];
 const STORAGE_KEY = "mf:business-registration";
@@ -780,7 +781,7 @@ export function BusinessRegister() {
                         <Button variant="secondary" onClick={captureLocation} disabled={locating}>
                           {locating ? (
                             <>
-                              <Loader2 className="size-4 animate-spin" aria-hidden /> Getting location…
+                              <DropLoader className="size-4" /> Getting location…
                             </>
                           ) : (
                             <>
@@ -935,8 +936,8 @@ export function BusinessRegister() {
                 Continue
               </Button>
             ) : (
-              <Button size="lg" className="group" onClick={submit} disabled={submitting}>
-                {submitting ? <><Loader2 className="size-4 animate-spin" aria-hidden /> Submitting…</> : "Submit application"}
+              <Button size="lg" className="group" onClick={submit} loading={submitting}>
+                {submitting ? "Submitting…" : "Submit application"}
               </Button>
             )}
           </div>

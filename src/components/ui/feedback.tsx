@@ -1,10 +1,9 @@
-import { WaterDroplets } from "@/components/ui/water-loader";
+import { WaterBottle } from "@/components/motion/water-bottle";
+import { WaterSkeleton } from "@/components/motion/water-skeleton";
 import { cn } from "@/lib/utils";
 
 export function Skeleton({ className }: { className?: string }) {
-  return (
-    <div aria-hidden className={cn("rounded-lg bg-muted animate-pulse", className)} />
-  );
+  return <WaterSkeleton className={className} />;
 }
 
 interface LoadingStateProps {
@@ -19,7 +18,7 @@ export function LoadingState({ label = "Loading…", className }: LoadingStatePr
       aria-live="polite"
       className={cn("flex flex-col items-center justify-center gap-4 py-16 text-center", className)}
     >
-      <WaterDroplets />
+      <WaterBottle loop className="w-14" />
       <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">{label}</p>
     </div>
   );

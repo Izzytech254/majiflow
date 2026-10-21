@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { usePrefersReducedMotion } from "@/lib/motion";
 
 interface ParallaxBackdropProps {
   children: React.ReactNode;
@@ -14,7 +15,7 @@ export function ParallaxBackdrop({
   className,
   strength = 30,
 }: ParallaxBackdropProps) {
-  const reduce = useReducedMotion();
+  const reduce = usePrefersReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,

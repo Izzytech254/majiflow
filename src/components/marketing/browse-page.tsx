@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { AlertCircle, List, Loader2, Map as MapIcon, Navigation, Search } from "lucide-react";
+import { AlertCircle, List, Map as MapIcon, Navigation, Search } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Input } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
@@ -20,12 +20,13 @@ import { DISCOVERY_RADII_KM, discoverStations } from "@/lib/station-discovery";
 import { browseHref } from "@/lib/journey";
 import { rememberJourneyStep } from "@/components/order/journey";
 import { OrderTypeBar } from "@/components/order/order-type-bar";
+import { DropLoader } from "@/components/motion/drop-loader";
 
 const StationMap = dynamic(() => import("@/components/ui/station-map").then((m) => m.StationMap), {
   ssr: false,
   loading: () => (
     <div className="flex h-full w-full items-center justify-center rounded-2xl border border-border bg-muted">
-      <Loader2 className="size-5 animate-spin text-muted-foreground" aria-hidden />
+      <DropLoader className="size-6 text-muted-foreground" />
     </div>
   ),
 });
@@ -191,7 +192,7 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
                 disabled={locating}
               >
                 {locating ? (
-                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                  <DropLoader className="size-4" />
                 ) : (
                   <Navigation className="size-4" aria-hidden />
                 )}
@@ -284,7 +285,7 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
               >
                 {locating && (
                   <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-                    <Loader2 className="size-4 animate-spin" aria-hidden />
+                    <DropLoader className="size-4" />
                     Updating distances…
                   </div>
                 )}

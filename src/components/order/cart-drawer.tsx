@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle, ArrowRight, PackageX, ShoppingCart, Trash2, Truck, X } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/feedback";
+import { DropLoader } from "@/components/motion/drop-loader";
 import { productImage } from "@/lib/product-images";
 import { businesses } from "@/lib/data/businesses";
 import { itemHref, resolveCart } from "@/lib/cart";
@@ -76,7 +77,8 @@ export function CartDrawer() {
             </header>
 
             {!hydrated ? (
-              <div className="flex flex-1 items-center justify-center p-8 text-sm text-muted-foreground">
+              <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-sm text-muted-foreground">
+                <DropLoader className="size-8" />
                 Loading your order…
               </div>
             ) : cart.lines.length === 0 ? (
