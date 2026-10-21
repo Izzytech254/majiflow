@@ -407,55 +407,26 @@
   }
 }
 
-/* Water loader: droplets fall into a rippling puddle */
-@layer utilities {
-  @keyframes drop-fall {
-    0% {
-      transform: translate(-50%, -10px) scale(0.7);
-      opacity: 0;
-    }
-    20% {
-      opacity: 1;
-    }
-    75% {
-      transform: translate(-50%, 30px) scale(1);
-      opacity: 1;
-    }
-    100% {
-      transform: translate(-50%, 34px) scale(0.5);
-      opacity: 0;
-    }
-  }
-  @keyframes puddle-ripple {
-    0% {
-      transform: translateX(-50%) scale(0.2);
-      opacity: 0.55;
-    }
-    100% {
-      transform: translateX(-50%) scale(1.8);
-      opacity: 0;
-    }
-  }
-}
-
 /* ------------------------------------------------------------------ */
 /*  Water motion primitives                                           */
 /* ------------------------------------------------------------------ */
 @layer utilities {
   /* Three drops bouncing on a shared surface */
+  /* A drop squashes and rebounds on the surface it rests on. The travel is
+     kept small so the tip never leaves the 24-unit box it is drawn in. */
   @keyframes drop-bounce {
     0%,
     100% {
       transform: translateY(0) scaleY(1);
     }
-    35% {
-      transform: translateY(-14px) scaleY(1.08);
+    30% {
+      transform: translateY(-1px) scaleY(1.08);
     }
-    60% {
+    55% {
       transform: translateY(0) scaleY(0.86);
     }
     75% {
-      transform: translateY(0) scaleY(1.02);
+      transform: translateY(0) scaleY(1.03);
     }
   }
 

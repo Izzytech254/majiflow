@@ -1,10 +1,11 @@
 "use client";
 
 import { cloneElement, isValidElement, useEffect } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { BrandMark } from "@/components/layout/brand-mark";
 import { cn } from "@/lib/utils";
+import { usePrefersReducedMotion } from "@/lib/motion";
 
 interface WaterDrawerProps {
   open: boolean;
@@ -21,7 +22,7 @@ const EASE = [0.16, 1, 0.3, 1] as const;
  * Locks body scroll and closes on Escape.
  */
 export function WaterDrawer({ open, onClose, children }: WaterDrawerProps) {
-  const reduce = useReducedMotion();
+  const reduce = usePrefersReducedMotion();
 
   useEffect(() => {
     if (!open) return;

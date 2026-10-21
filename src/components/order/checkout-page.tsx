@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Transition } from "framer-motion";
 import {
-  AlertCircle, ArrowLeft, CheckCircle2, CreditCard, Loader2, MapPin, Navigation, RefreshCcw, ShieldCheck, Smartphone, Truck, User } from "lucide-react";
+  AlertCircle, ArrowLeft, CheckCircle2, CreditCard, MapPin, Navigation, RefreshCcw, ShieldCheck, Smartphone, Truck, User } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { LoadingState } from "@/components/ui/feedback";
@@ -32,6 +32,9 @@ import { createOrder, fetchOrder, generateOrderNumber, OrderValidationError, pos
 import { resolveCart } from "@/lib/cart";
 import { useMotionSafe } from "@/lib/motion";
 import type { DeliveryAddress, Order, PaymentMethod } from "@/lib/types";
+import { DropLoader } from "@/components/motion/drop-loader";
+import { MpesaJug } from "@/components/motion/mpesa-jug";
+import { SuccessIllustration } from "@/components/motion/success-illustration";
 
 type PayState = "idle" | "working" | "awaiting-provider" | "failed" | "stale";
 type FieldErrors = Record<string, string>;
@@ -625,10 +628,8 @@ function CheckoutForm() {
     return (
       <Container className="py-24">
         <div className="mx-auto max-w-md text-center">
-          <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-success-soft text-success">
-            <CheckCircle2 className="size-9" aria-hidden />
-          </span>
-          <h1 className="mt-6 font-display text-3xl text-foreground">Order confirmed</h1>
+          <SuccessIllustration className="mx-auto w-56" />
+          <h1 className="mt-2 font-display text-3xl text-foreground">Order confirmed</h1>
           <p className="mt-3 leading-relaxed text-muted-foreground">
             <strong className="text-foreground">{lastOrder.orderNumber}</strong> ·{" "}
             {lastOrder.businessName} · <strong className="text-foreground">{formatKES(lastOrder.total)}</strong>
@@ -818,7 +819,7 @@ function CheckoutForm() {
                   disabled={locating}
                 >
                   {locating ? (
-                    <Loader2 className="size-4 animate-spin" aria-hidden />
+                    <DropLoader className="size-4" />
                   ) : (
                     <Navigation className="size-4" aria-hidden />
                   )}
@@ -1079,7 +1080,7 @@ function CheckoutForm() {
           {(payState === "working" || payState === "awaiting-provider") && (
             <div className="mt-4">
               <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <Loader2 className="size-4 animate-spin text-[var(--brand)]" aria-hidden />
+                <DropLoader className="size-4 text-[var(--brand)]" />
                 {payState === "working" ? "Creating your order…" : "Waiting for provider confirmation…"}
               </p>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
@@ -1310,7 +1311,11 @@ function PaymentOverlay({
 
         <div className="flex flex-col items-center px-6 py-8 text-center">
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="size-10 animate-spin text-[var(--brand)]" aria-hidden />
+            {isMpesa ? (
+              <MpesaJug className="w-44" />
+            ) : (
+              <DropLoader className="size-10 text-[var(--brand)]" />
+            )}
             <p className="text-sm text-muted-foreground">
               {isMpesa ? (
                 <>
@@ -1368,7 +1373,7 @@ function PaymentOverlay({
                 disabled={rechecking}
               >
                 {rechecking ? (
-                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                  <DropLoader className="size-4" />
                 ) : (
                   <RefreshCcw className="size-4" aria-hidden />
                 )}
