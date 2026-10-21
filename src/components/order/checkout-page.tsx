@@ -6,13 +6,14 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Transition } from "framer-motion";
 import {
-  AlertCircle, ArrowLeft, CheckCircle2, CreditCard, Loader2, MapPin, Navigation, ShieldCheck, Smartphone, Truck } from "lucide-react";
+  AlertCircle, ArrowLeft, CheckCircle2, CreditCard, Loader2, MapPin, Navigation, RefreshCcw, ShieldCheck, Smartphone, Truck, User } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { LoadingState } from "@/components/ui/feedback";
 import { OrderMap } from "@/components/ui/order-map";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
 import { useCart } from "@/components/order/cart-provider";
+import { OrderTypeBar } from "@/components/order/order-type-bar";
 import { useCustomer, type CustomerProfile } from "@/components/order/customer-provider";
 import { useToast } from "@/components/ui/toast";
 import { businesses } from "@/lib/data/businesses";
@@ -346,6 +347,51 @@ function CheckoutForm() {
   };
 
   /**
+   * Re-reads the payment status from the server. Read-only: it never creates a
+   * second charge, it just asks the provider state we already have.
+   */
+  const recheckPayment = async () => {
+    const paymentId = paymentIdRef.current;
+    if (!paymentId) return;
+    try {
+      const res = await fetch(`/api/payments/${encodeURIComponent(paymentId)}`, { cache: "no-store" });
+      if (!res.ok) return;
+      const data = (await res.json()) as { payment?: { status?: string; failureReason?: string | null } };
+      const status = data.payment?.status ?? "pending";
+      if (status === "success") {
+        const created = orderIdsRef.current ?? [];
+        const confirmed: Order[] = [];
+        for (const id of created) {
+          const fresh = await fetchOrder(id);
+          if (fresh) confirmed.push(fresh);
+        }
+        const first = confirmed[0];
+        if (!first) return;
+        setLastOrder(first);
+        clear();
+        setPayState("idle");
+        toast({
+          kind: "success",
+          title: "Payment confirmed",
+          message: `Order ${first.orderNumber} is paid and with ${first.businessName}.`,
+        });
+        window.setTimeout(() => router.push(`/order/${first.id}`), 1200);
+      } else if (status !== "pending") {
+        setStatusMessage(
+          status === "cancelled"
+            ? "Payment was cancelled - no money left your account."
+            : status === "timeout"
+              ? "Confirmation took too long - no money left your account."
+              : "Payment failed - no money left your account."
+        );
+        setPayState("failed");
+      }
+    } catch {
+      /* transient - the poller keeps watching */
+    }
+  };
+
+  /**
    * Verified checkout: create PENDING orders first (the server validates
    * hours, catalog prices, stock, and totals), then initiate payment, then
    * wait for the provider - never the customer's word - to confirm it.
@@ -567,25 +613,25 @@ function CheckoutForm() {
 
   if (lastOrder) {
     return (
-      <Container className="py-24 text-center">
-        <div className="mx-auto max-w-md">
-          <span className="flex size-16 items-center justify-center rounded-2xl bg-transparent-soft text-success">
+      <Container className="py-24">
+        <div className="mx-auto max-w-md text-center">
+          <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-success-soft text-success">
             <CheckCircle2 className="size-9" aria-hidden />
           </span>
           <h1 className="mt-6 font-display text-3xl text-foreground">Order confirmed</h1>
-          <p className="mt-3 text-muted-foreground">
+          <p className="mt-3 leading-relaxed text-muted-foreground">
             <strong className="text-foreground">{lastOrder.orderNumber}</strong> ·{" "}
             {lastOrder.businessName} · <strong className="text-foreground">{formatKES(lastOrder.total)}</strong>
           </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            We&apos;re taking you to live tracking in a moment.
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            Thanks for ordering. We&apos;ll text you as it moves along, and you can follow it live from here.
           </p>
-          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link href={`/order/${lastOrder.id}`}>
-              <Button size="lg">Track order</Button>
+              <Button size="lg" className="w-full sm:w-auto">Track order</Button>
             </Link>
             <Link href="/browse">
-              <Button size="lg" variant="outline">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto">
                 Continue browsing
               </Button>
             </Link>
@@ -631,7 +677,9 @@ function CheckoutForm() {
   }
 
   return (
-    <Container className="py-14 lg:py-20">
+    <>
+      <OrderTypeBar />
+      <Container className="py-14 lg:py-20">
       <div className="mb-8">
         <Link
           href="/cart"
@@ -666,9 +714,70 @@ function CheckoutForm() {
             </div>
           )}
           <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
-            <h2 className="flex items-center gap-2.5 font-display text-lg text-foreground">
-              <MapPin className="size-5 text-[#0052FF]" aria-hidden /> Delivery details
-            </h2>
+            <div className="flex items-center gap-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-cta-soft text-[#0052FF]" aria-hidden>
+                <User className="size-4.5" />
+              </span>
+              <div>
+                <h2 className="font-display text-lg text-foreground">Contact</h2>
+                <p className="text-xs text-muted-foreground">Who we call when your water arrives.</p>
+              </div>
+            </div>
+            <div className="mt-5 grid gap-5 sm:grid-cols-2">
+              <Field label="Full name" required error={touch ? errors.name : undefined}>
+                <Input
+                  name="name"
+                  required
+                  invalid={Boolean(touch && errors.name)}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Jane Wanjiku"
+                  autoComplete="name"
+                />
+              </Field>
+              <Field label="Phone for rider" required hint="The rider calls this number." error={touch ? errors.phone : undefined}>
+                <Input
+                  name="phone"
+                  required
+                  type="tel"
+                  invalid={Boolean(touch && errors.phone)}
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+254 7XX XXX XXX"
+                  autoComplete="tel"
+                />
+              </Field>
+              <div className="sm:col-span-2">
+                <Field
+                  label="Email"
+                  required={saveProfile}
+                  error={touch ? errors.email : undefined}
+                  hint={saveProfile ? undefined : "Shown on your receipt when provided."}
+                >
+                  <Input
+                    name="email"
+                    type="email"
+                    invalid={Boolean(touch && errors.email)}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                  />
+                </Field>
+              </div>
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
+            <div className="flex items-center gap-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-cta-soft text-[#0052FF]" aria-hidden>
+                <MapPin className="size-4.5" />
+              </span>
+              <div>
+                <h2 className="font-display text-lg text-foreground">Delivery</h2>
+                <p className="text-xs text-muted-foreground">Pin the spot so the rider finds you first time.</p>
+              </div>
+            </div>
             <div className="mt-5 rounded-xl border border-border bg-muted/30 p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-start gap-3">
@@ -725,47 +834,6 @@ function CheckoutForm() {
               )}
             </div>
             <div className="mt-5 grid gap-5 sm:grid-cols-2">
-              <Field label="Full name" required error={touch ? errors.name : undefined}>
-                <Input
-                  name="name"
-                  required
-                  invalid={Boolean(touch && errors.name)}
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Jane Wanjiku"
-                  autoComplete="name"
-                />
-              </Field>
-              <Field label="Phone for rider" required hint="The rider calls this number." error={touch ? errors.phone : undefined}>
-                <Input
-                  name="phone"
-                  required
-                  type="tel"
-                  invalid={Boolean(touch && errors.phone)}
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+254 7XX XXX XXX"
-                  autoComplete="tel"
-                />
-              </Field>
-              <div className="sm:col-span-2">
-                <Field
-                  label="Email"
-                  required={saveProfile}
-                  error={touch ? errors.email : undefined}
-                  hint={saveProfile ? undefined : "Shown on your receipt when provided."}
-                >
-                  <Input
-                    name="email"
-                    type="email"
-                    invalid={Boolean(touch && errors.email)}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    autoComplete="email"
-                  />
-                </Field>
-              </div>
               <Field label="Town" required error={touch ? errors.city : undefined}>
                 <Select
                   name="city"
@@ -843,9 +911,15 @@ function CheckoutForm() {
 
           {/* Payment method */}
           <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
-            <h2 className="flex items-center gap-2.5 font-display text-lg text-foreground">
-              <ShieldCheck className="size-5 text-[#0052FF]" aria-hidden /> Payment method
-            </h2>
+            <div className="flex items-center gap-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-cta-soft text-[#0052FF]" aria-hidden>
+                <ShieldCheck className="size-4.5" />
+              </span>
+              <div>
+                <h2 className="font-display text-lg text-foreground">Payment</h2>
+                <p className="text-xs text-muted-foreground">Money is only released when the station accepts.</p>
+              </div>
+            </div>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               <PaymentOption
                 selected={method === "mpesa"}
@@ -1052,12 +1126,14 @@ function CheckoutForm() {
             testMode={testMode}
             statusMessage={statusMessage}
             onSimulateApprove={simulateProviderApproval}
+            onRecheck={recheckPayment}
             reduce={reduce}
             transition={transition}
           />
         )}
       </AnimatePresence>
-    </Container>
+      </Container>
+    </>
   );
 }
 
@@ -1123,6 +1199,7 @@ function PaymentOverlay({
   testMode,
   statusMessage,
   onSimulateApprove,
+  onRecheck,
   reduce,
   transition,
 }: {
@@ -1133,6 +1210,7 @@ function PaymentOverlay({
   testMode?: boolean;
   statusMessage?: string | null;
   onSimulateApprove: () => void;
+  onRecheck: () => void;
   reduce?: boolean;
   transition?: Transition;
 }) {
@@ -1141,6 +1219,29 @@ function PaymentOverlay({
   const overlayTransition: Transition = r ? { duration: 0 } : { duration: 0.2 };
   const panelTransition: Transition = r ? { duration: 0 } : t;
   const isMpesa = method === "mpesa";
+  const [secondsLeft, setSecondsLeft] = useState(120);
+  const [rechecking, setRechecking] = useState(false);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setSecondsLeft((s) => (s > 0 ? s - 1 : 0));
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const recheck = async () => {
+    setRechecking(true);
+    try {
+      await onRecheck();
+    } finally {
+      setRechecking(false);
+    }
+  };
+
+  const progress = Math.max(0, Math.min(100, (secondsLeft / 120) * 100));
+  const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
+  const ss = String(secondsLeft % 60).padStart(2, "0");
+
   return (
     <motion.div
       className="fixed inset-0 z-[80] flex items-center justify-center p-4"
@@ -1194,6 +1295,50 @@ function PaymentOverlay({
             <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
               {busy ? "Placing your order…" : "Do not close this window"}
             </p>
+
+            <div className="mt-5 w-full rounded-2xl border border-border bg-surface-2/60 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Time remaining
+                </span>
+                <span className="font-mono text-sm tabular-nums text-foreground" aria-live="off">
+                  {mm}:{ss}
+                </span>
+              </div>
+              <div
+                className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-border"
+                role="progressbar"
+                aria-label="Time remaining to confirm payment"
+                aria-valuemin={0}
+                aria-valuemax={120}
+                aria-valuenow={secondsLeft}
+              >
+                <div
+                  className="h-full rounded-full bg-[#0052FF] transition-[width] duration-1000 ease-linear"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                {secondsLeft > 0
+                  ? "Check your phone for the M-Pesa prompt. Nothing is charged until you approve it."
+                  : "We haven't heard back yet. Re-check the payment status - you won't be charged twice."}
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-3 w-full"
+                onClick={recheck}
+                disabled={rechecking}
+              >
+                {rechecking ? (
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                ) : (
+                  <RefreshCcw className="size-4" aria-hidden />
+                )}
+                {rechecking ? "Checking…" : "Check payment status"}
+              </Button>
+            </div>
             {testMode && (
               <div className="mt-2 w-full rounded-xl border border-dashed border-warning/60 bg-warning/5 p-4">
                 <p className="font-mono text-[10px] uppercase tracking-widest text-warning">

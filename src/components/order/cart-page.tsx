@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/toast";
 import { EmptyState, LoadingState } from "@/components/ui/feedback";
 import { productImage } from "@/lib/product-images";
 import { useCart } from "@/components/order/cart-provider";
+import { OrderTypeBar } from "@/components/order/order-type-bar";
 import { JourneyLink } from "@/components/order/journey";
 import { QuantityStepper } from "@/components/order/quantity-stepper";
 import { businesses } from "@/lib/data/businesses";
@@ -78,7 +79,9 @@ export function CartPage() {
   const removable = problems.filter((p) => p.status === "missing" || p.status === "out-of-stock").length;
 
   return (
-    <Container className="py-14 lg:py-20">
+    <>
+      <OrderTypeBar />
+      <Container className="py-14 lg:py-20">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -213,7 +216,8 @@ export function CartPage() {
           </p>
         </div>
       </div>
-    </Container>
+      </Container>
+    </>
   );
 }
 

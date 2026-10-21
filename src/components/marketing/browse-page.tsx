@@ -9,17 +9,17 @@ import { Button } from "@/components/ui/button";
 import { BusinessCard } from "@/components/shared/business-card";
 import { EmptyState } from "@/components/ui/feedback";
 import { Stagger, StaggerItem } from "@/components/ui/animated-section";
-import { businesses, getBusinessesByCity } from "@/lib/data/businesses";
 import { CITIES } from "@/lib/constants";
 import {
   captureCurrentLocation,
   geolocationErrorMessage,
-  haversineMeters,
   townLocation,
   type CapturedLocation,
 } from "@/lib/geo";
+import { DISCOVERY_RADII_KM, discoverStations } from "@/lib/station-discovery";
 import { browseHref } from "@/lib/journey";
 import { rememberJourneyStep } from "@/components/order/journey";
+import { OrderTypeBar } from "@/components/order/order-type-bar";
 
 const StationMap = dynamic(() => import("@/components/ui/station-map").then((m) => m.StationMap), {
   ssr: false,
@@ -29,8 +29,6 @@ const StationMap = dynamic(() => import("@/components/ui/station-map").then((m) 
     </div>
   ),
 });
-
-const DISCOVERY_RADII_KM = [3, 5, 10, 20] as const;
 
 type LocationMode = "manual" | "current";
 
@@ -57,78 +55,16 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
     rememberJourneyStep("browse", href);
   }, [city, query]);
 
-  const discovery = useMemo(() => {
-    const source = locationMode === "current" ? businesses : getBusinessesByCity(city);
-    const q = query.trim().toLowerCase();
-    const searched = !q
-      ? source
-      : source.filter(
-          (b) =>
-            b.name.toLowerCase().includes(q) ||
-            b.city.toLowerCase().includes(q) ||
-            b.estates.some((e) => e.toLowerCase().includes(q)) ||
-            b.tagline.toLowerCase().includes(q)
-        );
-
-    if (locationMode !== "current" || !location) {
-      return {
-        results: searched
-          .map((business, index) => {
-            const hasValidLocation =
-              location !== null &&
-              Number.isFinite(location.lat) &&
-              Number.isFinite(location.lng) &&
-              Number.isFinite(business.lat) &&
-              Number.isFinite(business.lng);
-            const distanceKm = hasValidLocation
-              ? haversineMeters(location, business) / 1000
-              : undefined;
-            return { business, distanceKm, index };
-          })
-          .sort((a, b) => {
-            if (a.distanceKm === undefined && b.distanceKm === undefined) {
-              return a.index - b.index;
-            }
-            if (a.distanceKm === undefined) return 1;
-            if (b.distanceKm === undefined) return -1;
-            return a.distanceKm - b.distanceKm;
-          }),
-        radiusKm: null,
-      };
-    }
-
-    const radiusKm =
-      DISCOVERY_RADII_KM.find((radius) =>
-        searched.some(
-          (business) =>
-            Number.isFinite(business.lat) &&
-            Number.isFinite(business.lng) &&
-            haversineMeters(location, business) / 1000 <= radius
-        )
-      ) ?? DISCOVERY_RADII_KM[DISCOVERY_RADII_KM.length - 1];
-
-    return {
-      results: searched
-        .map((business, index) => {
-          if (!Number.isFinite(business.lat) || !Number.isFinite(business.lng)) {
-            return null;
-          }
-          const distanceKm = haversineMeters(location, business) / 1000;
-          return distanceKm <= radiusKm ? { business, distanceKm, index } : null;
-        })
-        .filter(
-          (
-            result
-          ): result is {
-            business: (typeof businesses)[number];
-            distanceKm: number;
-            index: number;
-          } => result !== null
-        )
-        .sort((a, b) => a.distanceKm - b.distanceKm),
-      radiusKm,
-    };
-  }, [city, location, locationMode, query]);
+  const discovery = useMemo(
+    () =>
+      discoverStations({
+        city,
+        query,
+        location,
+        byDistance: locationMode === "current",
+      }),
+    [city, location, locationMode, query]
+  );
 
   const mapStations = useMemo(
     () =>
@@ -198,6 +134,7 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
 
   return (
     <>
+      <OrderTypeBar />
       <section className="relative overflow-hidden border-b border-border bg-background">
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-radial-glow" />
         <Container className="relative py-14 lg:py-20">

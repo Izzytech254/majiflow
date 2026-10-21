@@ -22,7 +22,7 @@ import type { Order, OrderStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const STEPS: { status: OrderStatus; label: string; desc: string }[] = [
-  { status: "accepted", label: "Order accepted", desc: "The station confirmed your order." },
+  { status: "accepted", label: "Order received", desc: "The station confirmed your order." },
   { status: "preparing", label: "Being prepared", desc: "Your water is being filled and sealed." },
   { status: "rider_assigned", label: "Rider assigned", desc: "A rider is collecting your order." },
   { status: "out_for_delivery", label: "Out for delivery", desc: "The rider is on the road and will call before arrival." },
@@ -239,14 +239,14 @@ export function TrackOrderPage({ id }: { id: string }) {
                         aria-hidden
                         className={cn(
                           "absolute left-[23px] top-12 h-[calc(100%-2.4rem)] w-px",
-                          reachedIndex > i ? "bg-foreground" : "bg-border"
+                          reachedIndex > i ? "bg-[#0052FF]" : "bg-border"
                         )}
                       />
                     )}
                     <span
                       className={cn(
                         "relative z-10 flex size-12 shrink-0 items-center justify-center rounded-full text-white",
-                        reached ? "bg-foreground shadow-accent" : "border-2 border-border bg-white text-muted-foreground"
+                        reached ? "bg-[#0052FF] shadow-accent" : "border-2 border-border bg-white text-muted-foreground"
                       )}
                     >
                       {current ? (
