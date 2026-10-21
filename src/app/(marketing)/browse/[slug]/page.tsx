@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Clock, Droplets, MapPin, ShieldCheck, Smartphone, Star, Truck } from "lucide-react";
+import { ArrowLeft, Clock, MapPin, ShieldCheck, Smartphone, Star, Truck } from "lucide-react";
 import { Container } from "@/components/ui/container";
-import { Badge } from "@/components/ui/badge";
-import { ProductCard } from "@/components/shared/product-card";
 import { StationBadge } from "@/components/shared/station-badge";
 import { BusinessAvailability } from "@/components/shared/business-availability";
-import { EmptyState } from "@/components/ui/feedback";
 import { JourneyLink, JourneyRecorder } from "@/components/order/journey";
-import { StationAvailabilityNotice, StationCartBar } from "@/components/order/station-status";
+import { OrderTypeBar } from "@/components/order/order-type-bar";
+import { StationMenu } from "@/components/order/station-menu";
 import { getBusiness, businesses } from "@/lib/data/businesses";
 import { formatKES } from "@/lib/format";
 
@@ -39,8 +37,9 @@ export default async function BusinessProfile({ params }: PageProps) {
   const lowStockCount = business.products.filter((p) => p.stock <= p.stockLow).length;
 
   return (
-    <div className="pb-40 lg:pb-32">
+    <div>
       <JourneyRecorder step="station" href={`/browse/${business.slug}`} />
+      <OrderTypeBar />
       {/* Banner */}
       <section className="relative overflow-hidden bg-ink">
         <div aria-hidden className="absolute inset-0">
@@ -155,50 +154,11 @@ export default async function BusinessProfile({ params }: PageProps) {
       </section>
 
       {/* Menu */}
-      <section id="menu" className="scroll-mt-20 border-t border-border py-14 lg:py-16">
+      <section className="py-4 lg:py-6">
         <Container>
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <h2 className="font-display text-3xl text-foreground sm:text-4xl">
-                Choose your water
-              </h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Open an item for details and options, or add it straight to your cart.
-              </p>
-            </div>
-            <Badge variant="mono">{business.products.length} products</Badge>
-          </div>
-
-          <StationAvailabilityNotice business={business} className="mt-6" />
-
-          {business.products.length === 0 ? (
-            <EmptyState
-              className="mt-10"
-              icon={<Droplets className="size-7" aria-hidden />}
-              title="No items listed yet"
-              description={`${business.name} hasn't published its menu. Try another station nearby.`}
-              action={
-                <JourneyLink step="browse" className="text-sm font-semibold text-[#0052FF] hover:underline">
-                  Back to stations
-                </JourneyLink>
-              }
-            />
-          ) : (
-            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {business.products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  businessId={business.id}
-                  businessSlug={business.slug}
-                  openingHours={business.openingHours}
-                />
-              ))}
-            </div>
-          )}
+          <StationMenu business={business} />
         </Container>
       </section>
-      <StationCartBar business={business} />
     </div>
   );
 }

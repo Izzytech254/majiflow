@@ -63,6 +63,9 @@ export type OrderStatus =
 
 export type PaymentMethod = "mpesa" | "card";
 
+/** How the customer receives the order: a rider delivers it, or they collect it. */
+export type FulfillmentMethod = "delivery" | "pickup";
+
 /**
  * Payment lifecycle, written server-side only. Clients must never submit
  * `success` (or any terminal state): an order is created `pending` and moves
@@ -157,6 +160,8 @@ export interface Order {
   subtotal: number;
   deliveryFee: number;
   total: number;
+  /** Delivery by a rider, or collection from the station. Defaults to delivery. */
+  fulfilment?: FulfillmentMethod;
   payment: PaymentMethod;
   paymentState: PaymentState;
   status: OrderStatus;
