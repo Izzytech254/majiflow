@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { usePrefersReducedMotion } from "@/lib/motion";
+import { markLoaded } from "@/lib/load-progress";
 import { HERO_WASH, type HeroSlide } from "@/config/hero-slides";
 
 const SLIDE_DURATION = 500;
@@ -139,6 +140,9 @@ export function HeroSlider({ slides, interval = 7000 }: HeroSliderProps) {
                 className="object-cover"
                 preload={i === 0}
                 draggable={false}
+                onLoad={() => {
+                  if (i === 0) markLoaded("hero");
+                }}
               />
               <div className="absolute inset-0" style={{ background: HERO_WASH }} />
               {i === index && <SlideCopy slide={slide} />}

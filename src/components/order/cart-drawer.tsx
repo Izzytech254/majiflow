@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle, ArrowRight, PackageX, ShoppingCart, Trash2, Truck, X } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/feedback";
-import { DropLoader } from "@/components/motion/drop-loader";
+import { ButtonLoader } from "@/components/ui/button-loader";
+import { BlurImage } from "@/components/ui/blur-image";
 import { productImage } from "@/lib/product-images";
 import { businesses } from "@/lib/data/businesses";
 import { itemHref, resolveCart } from "@/lib/cart";
@@ -78,7 +78,7 @@ export function CartDrawer() {
 
             {!hydrated ? (
               <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-sm text-muted-foreground">
-                <DropLoader className="size-8" />
+                <ButtonLoader className="size-8" />
                 Loading your order…
               </div>
             ) : cart.lines.length === 0 ? (
@@ -134,7 +134,7 @@ export function CartDrawer() {
                           className={cn("flex gap-3 rounded-2xl border bg-white p-3", status === "ok" ? "border-border" : "border-danger/40")}
                         >
                           <Link href={itemHref(business.slug, product.id)} onClick={closeCart} className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-muted">
-                            <Image src={productImage(product.image)} alt="" fill sizes="4rem" className="object-cover" />
+                            <BlurImage src={productImage(product.image)} alt="" fill sizes="4rem" className="object-cover" />
                           </Link>
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-semibold text-foreground">{product.name}</p>

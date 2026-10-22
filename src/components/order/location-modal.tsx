@@ -34,7 +34,7 @@ import type { DeliveryAddress, FulfillmentMethod } from "@/lib/types";
 import { useCustomer } from "@/components/order/customer-provider";
 import { useOrderSession } from "@/components/order/order-session-provider";
 import { useMotionSafe } from "@/lib/motion";
-import { DropLoader } from "@/components/motion/drop-loader";
+import { ButtonLoader } from "@/components/ui/button-loader";
 
 const CenterPinMap = dynamic(
   () => import("@/components/ui/center-pin-map").then((m) => m.CenterPinMap),
@@ -42,7 +42,7 @@ const CenterPinMap = dynamic(
     ssr: false,
     loading: () => (
       <div className="flex h-full w-full items-center justify-center bg-surface-2">
-        <DropLoader className="size-6 text-muted-foreground" />
+        <ButtonLoader className="size-6 text-muted-foreground" />
       </div>
     ),
   }
@@ -333,7 +333,7 @@ export function LocationModal({ open, onClose, onConfirm }: LocationModalProps) 
                     disabled={locating}
                     className="mt-3 flex w-full items-center gap-3 rounded-xl border border-[var(--brand)]/30 bg-cta-soft px-4 py-3 text-left text-sm font-semibold text-[var(--brand)] transition-colors hover:border-[var(--brand)]"
                   >
-                    {locating ? <DropLoader className="size-5" /> : <Navigation className="size-5" aria-hidden />}
+                    {locating ? <ButtonLoader className="size-5" /> : <Navigation className="size-5" aria-hidden />}
                     {locating ? "Getting your location…" : "Use my current location"}
                   </button>
 

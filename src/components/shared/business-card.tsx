@@ -1,9 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
 import { MapPin, Star, Truck } from "lucide-react";
 import type { Business } from "@/lib/types";
 import { formatKES } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { BlurImage } from "@/components/ui/blur-image";
 import { Card } from "@/components/ui/card";
 import { StationBadge } from "@/components/shared/station-badge";
 import { BusinessAvailability } from "@/components/shared/business-availability";
@@ -36,7 +36,7 @@ export function BusinessCard({
       <Card className="flex h-full flex-col overflow-hidden border-border transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-layered">
         {/* Cover */}
         <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-          <Image
+          <BlurImage
             src={business.cover}
             alt=""
             fill

@@ -27,13 +27,12 @@ export function loadLeaflet(): Promise<LeafletNS> {
   }
   return leafletPromise;
 }
-
 /**
  * A calm basemap with the POI clutter stripped out, so brand-colored station
  * pins are the loudest thing on the map. CARTO's light tiles are keyless.
  */
 function mutedTiles(L: LeafletNS, map: Leaflet.Map) {
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+  return L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
     maxZoom: 20,
     subdomains: "abcd",
     attribution:
@@ -42,10 +41,19 @@ function mutedTiles(L: LeafletNS, map: Leaflet.Map) {
 }
 
 function streetsTiles(L: LeafletNS, map: Leaflet.Map) {
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  return L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   }).addTo(map);
+}
+
+export interface BaseMapOptions {
+  theme?: TileTheme;
+  zoomControl?: boolean;
+  scrollWheelZoom?: boolean;
+  /** Called once the first batch of tiles has painted. */
+  onTilesReady?: () => void;
 }
 
 export function createBaseMap(
@@ -53,16 +61,21 @@ export function createBaseMap(
   el: HTMLElement,
   center: [number, number] = NAIROBI_CENTER,
   zoom = 13,
-  options: { theme?: TileTheme; zoomControl?: boolean; scrollWheelZoom?: boolean } = {}
+  options: BaseMapOptions = {}
 ): Leaflet.Map {
-  const { theme = "streets", zoomControl = true, scrollWheelZoom = true } = options;
+  const {
+    theme = "streets",
+    zoomControl = true,
+    scrollWheelZoom = true,
+    onTilesReady,
+  } = options;
   const map = L.map(el, {
     attributionControl: true,
     zoomControl: false,
     scrollWheelZoom,
   }).setView(center, zoom);
-  if (theme === "muted") mutedTiles(L, map);
-  else streetsTiles(L, map);
+  const tiles = theme === "muted" ? mutedTiles(L, map) : streetsTiles(L, map);
+  if (onTilesReady) tiles.once("load", onTilesReady);
   if (zoomControl) L.control.zoom({ position: "bottomright" }).addTo(map);
   return map;
 }

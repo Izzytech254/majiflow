@@ -20,7 +20,7 @@ import {
   reverseGeocode,
 } from "@/lib/geo";
 import { cn } from "@/lib/utils";
-import { DropLoader } from "@/components/motion/drop-loader";
+import { ButtonLoader } from "@/components/ui/button-loader";
 
 const STEPS = ["Business details", "Location & delivery", "Choose plan", "Payment"];
 const STORAGE_KEY = "mf:business-registration";
@@ -781,7 +781,7 @@ export function BusinessRegister() {
                         <Button variant="secondary" onClick={captureLocation} disabled={locating}>
                           {locating ? (
                             <>
-                              <DropLoader className="size-4" /> Getting location…
+                              <ButtonLoader className="size-4" /> Getting location…
                             </>
                           ) : (
                             <>

@@ -20,13 +20,13 @@ import { DISCOVERY_RADII_KM, discoverStations } from "@/lib/station-discovery";
 import { browseHref } from "@/lib/journey";
 import { rememberJourneyStep } from "@/components/order/journey";
 import { OrderTypeBar } from "@/components/order/order-type-bar";
-import { DropLoader } from "@/components/motion/drop-loader";
+import { ButtonLoader } from "@/components/ui/button-loader";
 
 const StationMap = dynamic(() => import("@/components/ui/station-map").then((m) => m.StationMap), {
   ssr: false,
   loading: () => (
     <div className="flex h-full w-full items-center justify-center rounded-2xl border border-border bg-muted">
-      <DropLoader className="size-6 text-muted-foreground" />
+      <ButtonLoader className="size-6 text-muted-foreground" />
     </div>
   ),
 });
@@ -192,7 +192,7 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
                 disabled={locating}
               >
                 {locating ? (
-                  <DropLoader className="size-4" />
+                  <ButtonLoader className="size-4" />
                 ) : (
                   <Navigation className="size-4" aria-hidden />
                 )}
@@ -285,7 +285,7 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
               >
                 {locating && (
                   <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-                    <DropLoader className="size-4" />
+                    <ButtonLoader className="size-4" />
                     Updating distances…
                   </div>
                 )}

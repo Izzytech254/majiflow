@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { Info, Minus, Plus, ShoppingCart, X } from "lucide-react";
 import type { Business, BusinessProduct } from "@/lib/types";
@@ -9,6 +8,7 @@ import { maxOrderQuantity, productRequirements } from "@/lib/cart";
 import { formatKES } from "@/lib/format";
 import { productImage } from "@/lib/product-images";
 import { cn } from "@/lib/utils";
+import { BlurImage } from "@/components/ui/blur-image";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { useCart } from "@/components/order/cart-provider";
@@ -100,7 +100,7 @@ export function ProductSheet({ business, product, open, onClose }: ProductSheetP
             transition={panelTransition}
           >
             <div className="relative aspect-[16/9] shrink-0 bg-muted">
-              <Image
+              <BlurImage
                 src={productImage(product.image)}
                 alt={product.name}
                 fill

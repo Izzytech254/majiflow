@@ -1,11 +1,11 @@
 import { forwardRef, type ButtonHTMLAttributes } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
-import { DropLoader } from "@/components/motion/drop-loader";
+import { ButtonLoader } from "@/components/ui/button-loader";
 
 const buttonVariants = cva(
   [
-    "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium",
+    "relative inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium",
     "select-none transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]",
     "disabled:pointer-events-none disabled:opacity-50",
     "[&_svg]:shrink-0 [&_svg]:transition-transform [&_svg]:duration-200",
@@ -44,24 +44,43 @@ const buttonVariants = cva(
 export interface ButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  /** Shows the branded drop spinner and blocks interaction. */
+  /** Shows a thin brand-coloured ring and fades the label out. */
   loading?: boolean;
+  /** Swaps the ring for a tick once the action has succeeded. */
+  success?: boolean;
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, type = "button", loading = false, disabled, children, ...props }, ref) => (
-    <button
-      ref={ref}
-      type={type}
-      disabled={disabled || loading}
-      aria-busy={loading || undefined}
-      className={cn(buttonVariants({ variant, size }), className)}
-      {...props}
-    >
-      {loading && <DropLoader className="size-4" />}
-      {children}
-    </button>
-  )
+  (
+    { className, variant, size, type = "button", loading = false, success = false, disabled, children, ...props },
+    ref
+  ) => {
+    const busy = loading || success;
+    return (
+      <button
+        ref={ref}
+        type={type}
+        disabled={disabled || loading}
+        aria-busy={loading || undefined}
+        className={cn(buttonVariants({ variant, size }), className)}
+        {...props}
+      >
+        <span
+          className={cn(
+            "inline-flex items-center gap-2 transition-opacity duration-200",
+            busy ? "pointer-events-none opacity-0" : "opacity-100"
+          )}
+        >
+          {children}
+        </span>
+        {busy && (
+          <span className="absolute inset-0 grid place-items-center">
+            <ButtonLoader state={success ? "success" : "loading"} className="size-4" />
+          </span>
+        )}
+      </button>
+    );
+  }
 );
 Button.displayName = "Button";
 

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
@@ -20,6 +19,7 @@ import {
   User,
 } from "lucide-react";
 import { BrandMark } from "@/components/layout/brand-mark";
+import { BlurImage } from "@/components/ui/blur-image";
 import { WaterDrawer } from "@/components/ui/water-drawer";
 import { MobileTabBar } from "@/components/layout/mobile-tab-bar";
 import { PageTransition } from "@/components/layout/page-transition";
@@ -212,7 +212,7 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
           aria-hidden
           className="pointer-events-none fixed inset-y-0 left-0 right-0 z-0 lg:left-64"
         >
-          <Image
+          <BlurImage
             src={waterLiquid}
             alt=""
             fill

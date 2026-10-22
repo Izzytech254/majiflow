@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type MutableRefObject } from "react";
+import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import type * as Leaflet from "leaflet";
 import type { OrderLocation } from "@/lib/types";
 import {
@@ -13,6 +13,7 @@ import {
   type LeafletNS,
   type MapPoint,
 } from "@/lib/leaflet-client";
+import { MapPlaceholder } from "@/components/ui/map-placeholder";
 import "leaflet/dist/leaflet.css";
 
 export type { MapPoint };
@@ -41,6 +42,7 @@ export function OrderMap({
   const lineRef = useRef<Leaflet.Polyline | null>(null);
   const flewRef = useRef(false);
   const propsRef = useRef({ location, history });
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     propsRef.current = { location, history };
@@ -64,7 +66,9 @@ export function OrderMap({
           ? [address!.lat, address!.lng]
           : [-1.2921, 36.8219];
 
-      const map = createBaseMap(L, containerRef.current, center, 13);
+      const map = createBaseMap(L, containerRef.current, center, 13, {
+        onTilesReady: () => setReady(true),
+      });
       mapRef.current = map;
 
       if (finitePoint(station)) {
@@ -107,12 +111,15 @@ export function OrderMap({
   }, [location, history]);
 
   return (
-    <div
-      ref={containerRef}
-      className={`overflow-hidden rounded-xl border border-border bg-muted ${className}`}
-      role="application"
-      aria-label="Live order map"
-    />
+    <div className={`relative overflow-hidden rounded-xl border border-border bg-muted ${className}`}>
+      <div
+        ref={containerRef}
+        className="h-full w-full"
+        role="application"
+        aria-label="Live order map"
+      />
+      {!ready && <MapPlaceholder />}
+    </div>
   );
 }
 
