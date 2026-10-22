@@ -2,7 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { PwaRegister } from "@/components/pwa-register";
-import { AppSplash } from "@/components/layout/app-splash";
+import { SplashLoader } from "@/components/motion/splash-loader";
+import { TopProgressBar } from "@/components/motion/top-progress-bar";
+import { SPLASH_SESSION_KEY } from "@/config/loader";
 import { SITE_URL } from "@/lib/constants";
 import "./globals.css";
 
@@ -87,6 +89,15 @@ export const viewport: Viewport = {
   themeColor: "#0057E6",
 };
 
+/**
+ * Runs before the first paint. On a repeat visit inside the same session the
+ * splash is hidden outright, so the page appears straight away without the
+ * splash flashing back on screen.
+ */
+const splashGateScript = `try{if(sessionStorage.getItem(${JSON.stringify(
+  SPLASH_SESSION_KEY
+)})==="1"){document.documentElement.setAttribute("data-splash","off")}}catch(e){}`;
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
@@ -95,6 +106,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${inter.variable} ${fraunces.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <head>
+        <script dangerouslySetInnerHTML={{ __html: splashGateScript }} />
         {/* Entrance animations server-render at opacity:0. Without JS nothing ever
             reveals them, so force them visible to keep content readable. */}
         <noscript>
@@ -130,7 +142,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
         <Providers>{children}</Providers>
         <PwaRegister />
-        <AppSplash />
+        <TopProgressBar />
+        <SplashLoader />
       </body>
     </html>
   );

@@ -287,12 +287,9 @@ export function BusinessStationSetup() {
                     "Station published to the public directory."
                   )
                 }
+                loading={busy}
               >
-                {busy ? (
-                  <RefreshCw className="size-4 animate-spin" aria-hidden />
-                ) : (
-                  <Rocket className="size-4" aria-hidden />
-                )}
+                {busy ? null : <Rocket className="size-4" aria-hidden />}
                 {station.business.isPublished ? "Published" : "Publish station"}
               </Button>
               {station.business.isPublished && (
@@ -357,12 +354,8 @@ function TrialCard({
                 ))}
               </Select>
             </Field>
-            <Button className="gap-2" disabled={busy} onClick={() => void onStart(plan)}>
-              {busy ? (
-                <RefreshCw className="size-4 animate-spin" aria-hidden />
-              ) : (
-                <CheckCircle2 className="size-4" aria-hidden />
-              )}
+            <Button className="gap-2" disabled={busy} loading={busy} onClick={() => void onStart(plan)}>
+              {busy ? null : <CheckCircle2 className="size-4" aria-hidden />}
               Start 14-day free trial
             </Button>
           </div>
@@ -503,12 +496,8 @@ function ListingCard({
               Address, city, phone and email came from your approved application and cannot be
               changed here. Contact support if any of them are wrong.
             </p>
-            <Button type="submit" className="gap-2" disabled={busy}>
-              {busy ? (
-                <RefreshCw className="size-4 animate-spin" aria-hidden />
-              ) : (
-                <CheckCircle2 className="size-4" aria-hidden />
-              )}
+            <Button type="submit" className="gap-2" disabled={busy} loading={busy}>
+              {busy ? null : <CheckCircle2 className="size-4" aria-hidden />}
               Save listing
             </Button>
           </form>

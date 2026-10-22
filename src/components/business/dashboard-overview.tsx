@@ -7,6 +7,7 @@ import {
 import { OrderStatusBadge } from "@/components/ui/order-status-badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/feedback";
+import { ButtonLoader } from "@/components/ui/button-loader";
 import { formatKES } from "@/lib/format";
 import { percentChange, resolveDateRange, summarizeStation } from "@/lib/analytics";
 import { useBusiness } from "@/components/business/business-provider";
@@ -322,8 +323,8 @@ function Header({ business, delayed }: { business: string; delayed?: boolean }) 
       </div>
       {delayed && (
         <p role="status" className="flex items-center gap-2 rounded-xl border border-warning/25 bg-muted px-3 py-2 text-xs text-foreground/80">
-          <RefreshCw className="size-3.5 animate-spin" aria-hidden /> Still loading - the store is taking longer than
-          usual.
+          <ButtonLoader className="size-3.5 text-[var(--brand)]" /> Still loading - the store is taking
+          longer than usual.
         </p>
       )}
     </div>

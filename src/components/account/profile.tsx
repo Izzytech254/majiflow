@@ -33,7 +33,8 @@ import {
   type CapturedLocation,
 } from "@/lib/geo";
 import type { DeliveryAddress } from "@/lib/types";
-import { DropLoader } from "@/components/motion/drop-loader";
+import { ButtonLoader } from "@/components/ui/button-loader";
+import { SkeletonCard } from "@/components/ui/skeleton-card";
 
 type Errors = Record<string, string>;
 
@@ -106,10 +107,12 @@ export function ProfilePage() {
   if (!hydrated) {
     return (
       <Container className="py-6 lg:py-8">
-        <div className="h-40 animate-pulse rounded-2xl bg-muted" />
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <div className="h-44 animate-pulse rounded-2xl bg-muted" />
-          <div className="h-44 animate-pulse rounded-2xl bg-muted" />
+        <div className="space-y-4">
+          <SkeletonCard variant="metric" className="h-40 w-full" />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SkeletonCard variant="metric" className="h-44 w-full" />
+            <SkeletonCard variant="metric" className="h-44 w-full" />
+          </div>
         </div>
       </Container>
     );
@@ -542,7 +545,7 @@ function LocationCard({
             </div>
             <Button type="button" variant="outline" size="sm" onClick={onCapture} disabled={locating}>
               {locating ? (
-                <DropLoader className="size-4" />
+                <ButtonLoader className="size-4" />
               ) : (
                 <Navigation className="size-4" aria-hidden />
               )}
@@ -567,7 +570,7 @@ function LocationCard({
             </div>
             <Button type="button" size="sm" className="group mt-4" onClick={onCapture} disabled={locating}>
               {locating ? (
-                <DropLoader className="size-4" />
+                <ButtonLoader className="size-4" />
               ) : (
                 <Navigation className="size-4" aria-hidden />
               )}

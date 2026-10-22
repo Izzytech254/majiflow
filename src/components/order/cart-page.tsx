@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Droplets, AlertCircle, ArrowLeft, PackageX, ShoppingCart, Trash2, Truck } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { EmptyState, LoadingState } from "@/components/ui/feedback";
+import { BlurImage } from "@/components/ui/blur-image";
 import { productImage } from "@/lib/product-images";
 import { useCart } from "@/components/order/cart-provider";
 import { OrderTypeBar } from "@/components/order/order-type-bar";
@@ -262,7 +262,7 @@ function CartRow({
       )}
     >
       <Link href={href} tabIndex={-1} aria-hidden className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-muted">
-        <Image src={productImage(product.image)} alt="" fill sizes="3.5rem" className="object-cover" />
+        <BlurImage src={productImage(product.image)} alt="" fill sizes="3.5rem" className="object-cover" />
       </Link>
       <div className="min-w-0 flex-1">
         <Link href={href} className="block truncate text-[15px] font-semibold text-foreground hover:text-[var(--brand)] hover:underline">

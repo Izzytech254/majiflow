@@ -32,9 +32,9 @@ import { createOrder, fetchOrder, generateOrderNumber, OrderValidationError, pos
 import { resolveCart } from "@/lib/cart";
 import { useMotionSafe } from "@/lib/motion";
 import type { DeliveryAddress, Order, PaymentMethod } from "@/lib/types";
-import { DropLoader } from "@/components/motion/drop-loader";
-import { MpesaJug } from "@/components/motion/mpesa-jug";
-import { SuccessIllustration } from "@/components/motion/success-illustration";
+import { ButtonLoader } from "@/components/ui/button-loader";
+import { MpesaWait } from "@/components/motion/mpesa-wait";
+import { SuccessCheck } from "@/components/motion/success-check";
 
 type PayState = "idle" | "working" | "awaiting-provider" | "failed" | "stale";
 type FieldErrors = Record<string, string>;
@@ -628,7 +628,7 @@ function CheckoutForm() {
     return (
       <Container className="py-24">
         <div className="mx-auto max-w-md text-center">
-          <SuccessIllustration className="mx-auto w-56" />
+          <SuccessCheck className="mx-auto" />
           <h1 className="mt-2 font-display text-3xl text-foreground">Order confirmed</h1>
           <p className="mt-3 leading-relaxed text-muted-foreground">
             <strong className="text-foreground">{lastOrder.orderNumber}</strong> ·{" "}
@@ -819,7 +819,7 @@ function CheckoutForm() {
                   disabled={locating}
                 >
                   {locating ? (
-                    <DropLoader className="size-4" />
+                    <ButtonLoader className="size-4" />
                   ) : (
                     <Navigation className="size-4" aria-hidden />
                   )}
@@ -1080,7 +1080,7 @@ function CheckoutForm() {
           {(payState === "working" || payState === "awaiting-provider") && (
             <div className="mt-4">
               <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <DropLoader className="size-4 text-[var(--brand)]" />
+                <ButtonLoader className="size-4 text-[var(--brand)]" />
                 {payState === "working" ? "Creating your order…" : "Waiting for provider confirmation…"}
               </p>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
@@ -1312,24 +1312,18 @@ function PaymentOverlay({
         <div className="flex flex-col items-center px-6 py-8 text-center">
           <div className="flex flex-col items-center gap-3">
             {isMpesa ? (
-              <MpesaJug className="w-44" />
+              <MpesaWait
+                detail={`An STK push for ${formatKES(amount)} was sent to ${phone}.`}
+              />
             ) : (
-              <DropLoader className="size-10 text-[var(--brand)]" />
-            )}
-            <p className="text-sm text-muted-foreground">
-              {isMpesa ? (
-                <>
-                  An STK push for <strong className="text-foreground">{formatKES(amount)}</strong> was
-                  sent to <strong className="text-foreground">{phone}</strong>. Enter your M-Pesa PIN
-                  and press Send.
-                </>
-              ) : (
-                <>
+              <>
+                <ButtonLoader className="size-10 text-[var(--brand)]" />
+                <p className="text-sm text-muted-foreground">
                   Verifying <strong className="text-foreground">{formatKES(amount)}</strong> with the
                   card provider…
-                </>
-              )}
-            </p>
+                </p>
+              </>
+            )}
             <p className="text-sm text-muted-foreground">
               {statusMessage ?? "Waiting for provider confirmation…"}
             </p>
@@ -1373,7 +1367,7 @@ function PaymentOverlay({
                 disabled={rechecking}
               >
                 {rechecking ? (
-                  <DropLoader className="size-4" />
+                  <ButtonLoader className="size-4" />
                 ) : (
                   <RefreshCcw className="size-4" aria-hidden />
                 )}

@@ -6,7 +6,8 @@ import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { OrderStatusBadge } from "@/components/ui/order-status-badge";
-import { EmptyState, Skeleton } from "@/components/ui/feedback";
+import { EmptyState } from "@/components/ui/feedback";
+import { SkeletonCard } from "@/components/ui/skeleton-card";
 import { useCustomer } from "@/components/order/customer-provider";
 import { AccountError, itemsSummary, useAccountResource, useReorder } from "@/components/account/account-ui";
 import { accountApi } from "@/lib/account-client";
@@ -104,7 +105,7 @@ export function AccountPage() {
                     <p className="text-xs text-muted-foreground">{s.label}</p>
                   </div>
                 ))
-              : [1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-32 rounded-2xl" />)}
+              : [1, 2, 3, 4].map((i) => <SkeletonCard key={i} variant="metric" />)}
           </section>
 
           <div className="mt-8 grid gap-8 lg:grid-cols-[1.5fr_0.9fr]">
@@ -136,7 +137,7 @@ export function AccountPage() {
                 {!summary ? (
                   <div className="mt-4 space-y-3" role="status" aria-label="Loading orders">
                     {[1, 2].map((i) => (
-                      <Skeleton key={i} className="h-24 rounded-2xl" />
+                      <SkeletonCard key={i} variant="row" />
                     ))}
                   </div>
                 ) : summary.recentOrders.length === 0 ? (
@@ -175,7 +176,7 @@ export function AccountPage() {
               </div>
               <div className="mt-4 flex flex-col gap-3">
                 {!summary ? (
-                  <Skeleton className="h-20 rounded-2xl" />
+                  <SkeletonCard variant="row" />
                 ) : summary.addresses.length === 0 ? (
                   <Link
                     href="/account/addresses"

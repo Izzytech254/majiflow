@@ -13,6 +13,7 @@ import { useToast } from "@/components/ui/toast";
 import { useCart } from "@/components/order/cart-provider";
 import { QuantityStepper } from "@/components/order/quantity-stepper";
 import { useBusinessAvailability } from "@/components/shared/business-availability";
+import { SkeletonCard } from "@/components/ui/skeleton-card";
 
 /** Quantity, line total and the next step for the item being viewed. */
 export function ItemPurchasePanel({ business, product }: { business: Business; product: BusinessProduct }) {
@@ -37,7 +38,7 @@ export function ItemPurchasePanel({ business, product }: { business: Business; p
           : null;
 
   if (!hydrated) {
-    return <div aria-hidden className="h-[9.5rem] animate-pulse rounded-2xl bg-muted" />;
+    return <div aria-hidden><SkeletonCard variant="product" className="h-[9.5rem] w-full" /></div>;
   }
 
   if (inCart) {

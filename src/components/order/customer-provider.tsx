@@ -11,6 +11,7 @@ import {
 import type { CustomerAccountProfile, SavedAddress } from "@/lib/account";
 import { accountApi } from "@/lib/account-client";
 import type { DeliveryAddress } from "@/lib/types";
+import { markLoaded } from "@/lib/load-progress";
 
 export interface CustomerProfile {
   name: string;
@@ -168,6 +169,10 @@ export function CustomerProvider({ children }: { children: ReactNode }) {
       })
       .catch(() => {
         // Public browsing and guest checkout remain available if session lookup is unavailable.
+      })
+      .finally(() => {
+        // The first data fetch settled, so the splash can move on.
+        markLoaded("data");
       });
     return () => {
       active = false;

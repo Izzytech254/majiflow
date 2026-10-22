@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import type { BusinessProduct, WeeklyOperatingHours } from "@/lib/types";
 import { formatKES } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { BlurImage } from "@/components/ui/blur-image";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/toast";
@@ -99,7 +99,7 @@ export function ProductCard({ product, businessId, businessSlug, openingHours, c
         }}
         className="relative block aspect-[4/3] overflow-hidden bg-muted"
       >
-        <Image
+        <BlurImage
           src={productImage(product.image)}
           alt=""
           fill
