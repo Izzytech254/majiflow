@@ -4,7 +4,7 @@ import { BrandMark } from "@/components/layout/brand-mark";
 export function SiteFooter() {
   const year = new Date().getFullYear();
   return (
-    <footer className="border-t border-border bg-white text-foreground">
+    <footer className="bg-muted text-foreground">
       <div className="mx-auto max-w-[1100px] px-4 py-10 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between">
