@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { MapPin } from "lucide-react";
 import type * as Leaflet from "leaflet";
 import { createBaseMap, loadLeaflet, NAIROBI_CENTER } from "@/lib/leaflet-client";
+import { MapPlaceholder } from "@/components/ui/map-placeholder";
 import { reverseGeocode, type GeocodedAddress } from "@/lib/geo";
 import "leaflet/dist/leaflet.css";
 
@@ -37,6 +38,7 @@ export function CenterPinMap({
   const onChangeRef = useRef(onChange);
   const onAddressRef = useRef(onAddress);
   const [locating, setLocating] = useState(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     onChangeRef.current = onChange;
@@ -57,6 +59,7 @@ export function CenterPinMap({
         theme: "muted",
         zoomControl: false,
         scrollWheelZoom: true,
+        onTilesReady: () => setReady(true),
       });
       mapRef.current = map;
       map.whenReady(() => map.invalidateSize());
@@ -103,13 +106,14 @@ export function CenterPinMap({
         role="application"
         aria-label="Move the map to set your delivery point"
       />
+      {!ready && <MapPlaceholder />}
       {/* Fixed centre pin */}
       <div aria-hidden className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-full">
         <span className="flex flex-col items-center">
-          <span className="flex size-10 items-center justify-center rounded-full bg-[#0052FF] text-white shadow-[0_8px_20px_-4px_rgba(0,82,255,.7)] ring-4 ring-white">
+          <span className="flex size-10 items-center justify-center rounded-full bg-[var(--brand)] text-white shadow-[0_8px_20px_-4px_rgba(0,87,230,.7)] ring-4 ring-white">
             <MapPin className="size-5" />
           </span>
-          <span className="h-3 w-1.5 rounded-b-full bg-[#0052FF]" />
+          <span className="h-3 w-1.5 rounded-b-full bg-[var(--brand)]" />
         </span>
       </div>
       <span className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-white/95 px-3 py-1 text-[11px] font-medium text-muted-foreground shadow-soft backdrop-blur">

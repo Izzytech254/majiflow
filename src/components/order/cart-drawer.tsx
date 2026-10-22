@@ -5,13 +5,14 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle, ArrowRight, PackageX, ShoppingCart, Trash2, Truck, X } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { EmptyState } from "@/components/ui/feedback";
+
+import { ButtonLoader } from "@/components/ui/button-loader";
+import { cn } from "@/lib/utils";
 import { productImage } from "@/lib/product-images";
 import { businesses } from "@/lib/data/businesses";
 import { itemHref, resolveCart } from "@/lib/cart";
 import { computeCartTotals, lineSubtotal } from "@/lib/pricing";
 import { formatKES } from "@/lib/format";
-import { cn } from "@/lib/utils";
 import { useMotionSafe } from "@/lib/motion";
 import { useCart } from "@/components/order/cart-provider";
 import { useCartUi } from "@/components/order/cart-ui-provider";
@@ -61,9 +62,9 @@ export function CartDrawer() {
             transition={panelTransition}
           >
             <header className="flex shrink-0 items-center gap-3 border-b border-border px-5 py-4">
-              <ShoppingCart className="size-5 text-[#0052FF]" aria-hidden />
               <h2 className="min-w-0 flex-1 font-display text-lg text-foreground">
-                Your order{count > 0 && <span className="text-muted-foreground"> · {count}</span>}
+                Here is your order
+                {count > 0 && <span className="text-muted-foreground"> · {count}</span>}
               </h2>
               <button
                 type="button"
@@ -76,21 +77,24 @@ export function CartDrawer() {
             </header>
 
             {!hydrated ? (
-              <div className="flex flex-1 items-center justify-center p-8 text-sm text-muted-foreground">
+              <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-sm text-muted-foreground">
+                <ButtonLoader className="size-8" />
                 Loading your order…
               </div>
             ) : cart.lines.length === 0 ? (
               <div className="flex flex-1 items-center justify-center p-6">
-                <EmptyState
-                  icon={<ShoppingCart className="size-7" aria-hidden />}
-                  title="Your order is empty"
-                  description="Browse a station near you and add a refill - it takes seconds."
-                  action={
-                    <Link href="/browse" onClick={closeCart} className={buttonVariants({ size: "lg" })}>
-                      Browse stations
-                    </Link>
-                  }
-                />
+                <div className="flex flex-col items-center gap-4 text-center">
+                  <ShoppingCart className="size-10 text-muted-foreground" aria-hidden />
+                  <div className="space-y-1">
+                    <p className="font-display text-lg text-foreground">Here is your order</p>
+                    <p className="text-sm text-muted-foreground">
+                      Your cart is empty. Add items to start your order again.
+                    </p>
+                  </div>
+                  <Link href="/browse" onClick={closeCart} className={buttonVariants({ size: "lg" })}>
+                    Browse menu
+                  </Link>
+                </div>
               </div>
             ) : (
               <>
@@ -205,7 +209,7 @@ export function CartDrawer() {
                   <Link
                     href="/cart"
                     onClick={closeCart}
-                    className="mt-2 block text-center text-xs font-semibold text-[#0052FF] hover:underline"
+                    className="mt-2 block text-center text-xs font-semibold text-[var(--brand)] hover:underline"
                   >
                     View full cart
                   </Link>

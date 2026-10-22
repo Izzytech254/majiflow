@@ -206,13 +206,13 @@ export function BusinessOrders() {
             className={cn(
               "shrink-0 rounded-xl border px-4 py-2 text-sm font-medium transition-colors",
               tab === t.id
-                ? "border-[#0052FF] bg-transparent/8 text-[#0052FF]"
+                ? "border-[var(--brand)] bg-transparent/8 text-[var(--brand)]"
                 : "border-border bg-white text-muted-foreground hover:text-foreground"
             )}
             aria-pressed={tab === t.id}
           >
             {t.label}
-            <span className={cn("ml-2 font-mono text-xs", tab === t.id ? "text-[#0052FF]" : "text-muted-foreground")}>
+            <span className={cn("ml-2 font-mono text-xs", tab === t.id ? "text-[var(--brand)]" : "text-muted-foreground")}>
               {t.count}
             </span>
           </button>
@@ -244,7 +244,7 @@ export function BusinessOrders() {
                       {o.customer}
                       <Link
                         href={`/business/orders/${o.id}`}
-                        className="ml-2 font-mono text-xs font-normal text-muted-foreground hover:text-[#0052FF] hover:underline"
+                        className="ml-2 font-mono text-xs font-normal text-muted-foreground hover:text-[var(--brand)] hover:underline"
                       >
                         {o.orderNumber}
                       </Link>

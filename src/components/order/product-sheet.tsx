@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { Info, Minus, Plus, ShoppingCart, X } from "lucide-react";
 import type { Business, BusinessProduct } from "@/lib/types";
@@ -9,6 +8,7 @@ import { maxOrderQuantity, productRequirements } from "@/lib/cart";
 import { formatKES } from "@/lib/format";
 import { productImage } from "@/lib/product-images";
 import { cn } from "@/lib/utils";
+import { BlurImage } from "@/components/ui/blur-image";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { useCart } from "@/components/order/cart-provider";
@@ -100,7 +100,7 @@ export function ProductSheet({ business, product, open, onClose }: ProductSheetP
             transition={panelTransition}
           >
             <div className="relative aspect-[16/9] shrink-0 bg-muted">
-              <Image
+              <BlurImage
                 src={productImage(product.image)}
                 alt={product.name}
                 fill
@@ -133,7 +133,7 @@ export function ProductSheet({ business, product, open, onClose }: ProductSheetP
                 <ul className="mt-4 space-y-2">
                   {requirements.map((r) => (
                     <li key={r.text} className="flex items-start gap-2 rounded-xl border border-border bg-surface-2 p-3 text-xs text-foreground/85">
-                      <Info className="mt-0.5 size-4 shrink-0 text-[#0052FF]" aria-hidden />
+                      <Info className="mt-0.5 size-4 shrink-0 text-[var(--brand)]" aria-hidden />
                       <span>
                         {r.text}
                         {r.alternative && (
@@ -146,7 +146,7 @@ export function ProductSheet({ business, product, open, onClose }: ProductSheetP
               )}
 
               {inCart ? (
-                <div className="mt-5 rounded-2xl border border-[#0052FF]/25 bg-cta-soft/50 p-4">
+                <div className="mt-5 rounded-2xl border border-[var(--brand)]/25 bg-cta-soft/50 p-4">
                   <p className="text-sm font-semibold text-foreground">
                     {inCart.quantity} in your order
                   </p>

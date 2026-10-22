@@ -27,7 +27,7 @@ export function PageHero({
     <section
       className={cn(
         "relative flex min-h-[100svh] w-full scroll-mt-16 flex-col justify-center overflow-hidden",
-        tone === "dark" ? "bg-ink text-white" : "bg-background",
+        tone === "dark" ? "bg-ink text-white" : "bg-surface-2",
         "border-b",
         tone === "dark" ? "border-white/10" : "border-border",
         className
@@ -43,7 +43,7 @@ export function PageHero({
             className="pointer-events-none absolute inset-0"
             style={{
               backgroundImage:
-                "radial-gradient(ellipse 70% 60% at 82% -10%, rgba(0,82,255,0.38), transparent 62%), radial-gradient(ellipse 60% 50% at 0% 110%, rgba(77,124,255,0.18), transparent 60%)",
+                "radial-gradient(ellipse 70% 60% at 82% -10%, rgba(0,87,230,0.38), transparent 62%), radial-gradient(ellipse 60% 50% at 0% 110%, rgba(0,194,214,0.16), transparent 60%)",
             }}
           />
         </>

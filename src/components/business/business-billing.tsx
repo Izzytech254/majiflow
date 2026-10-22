@@ -29,7 +29,7 @@ export function BusinessBilling() {
       </div>
 
       <div className="flex items-start gap-3 rounded-2xl border border-border bg-white p-5 shadow-card">
-        <AlertCircle className="mt-0.5 size-5 shrink-0 text-[#0052FF]" aria-hidden />
+        <AlertCircle className="mt-0.5 size-5 shrink-0 text-[var(--brand)]" aria-hidden />
         <div>
           <p className="text-sm font-semibold text-foreground">Your next invoice</p>
           <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
@@ -47,7 +47,7 @@ export function BusinessBilling() {
               key={p.id}
               className={cn(
                 "relative flex flex-col rounded-2xl border bg-white p-6 shadow-card",
-                isCurrent ? "border-[#0052FF] ring-2 ring-[#0052FF]/15" : "border-border"
+                isCurrent ? "border-[var(--brand)] ring-2 ring-[var(--brand)]/15" : "border-border"
               )}
             >
               {isCurrent && (
@@ -67,7 +67,7 @@ export function BusinessBilling() {
               <ul className="mt-5 flex-1 space-y-2.5 text-sm text-muted-foreground">
                 {p.features.slice(0, 4).map((f) => (
                   <li key={f} className="flex gap-2">
-                    <Check className="mt-0.5 size-4 shrink-0 text-[#0052FF]" aria-hidden /> {f}
+                    <Check className="mt-0.5 size-4 shrink-0 text-[var(--brand)]" aria-hidden /> {f}
                   </li>
                 ))}
               </ul>
@@ -87,7 +87,7 @@ export function BusinessBilling() {
       <section className="rounded-2xl border border-border bg-white shadow-card">
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <h2 className="flex items-center gap-2 font-display text-lg text-foreground">
-            <CreditCard className="size-5 text-[#0052FF]" aria-hidden /> Invoices
+            <CreditCard className="size-5 text-[var(--brand)]" aria-hidden /> Invoices
           </h2>
         </div>
         <div className="p-6">

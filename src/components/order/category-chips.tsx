@@ -74,8 +74,8 @@ export function CategoryChips({
             className={cn(
               "shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-all",
               active === c.id
-                ? "border-[#0052FF] bg-[#0052FF] text-white shadow-accent"
-                : "border-border bg-white text-muted-foreground hover:border-[#0052FF]/40 hover:text-[#0052FF]"
+                ? "border-[var(--brand)] bg-[var(--brand)] text-white shadow-accent"
+                : "border-border bg-white text-muted-foreground hover:border-[var(--brand)]/40 hover:text-[var(--brand)]"
             )}
           >
             {c.label}

@@ -13,6 +13,7 @@ import { useToast } from "@/components/ui/toast";
 import { useCart } from "@/components/order/cart-provider";
 import { QuantityStepper } from "@/components/order/quantity-stepper";
 import { useBusinessAvailability } from "@/components/shared/business-availability";
+import { SkeletonCard } from "@/components/ui/skeleton-card";
 
 /** Quantity, line total and the next step for the item being viewed. */
 export function ItemPurchasePanel({ business, product }: { business: Business; product: BusinessProduct }) {
@@ -37,12 +38,12 @@ export function ItemPurchasePanel({ business, product }: { business: Business; p
           : null;
 
   if (!hydrated) {
-    return <div aria-hidden className="h-[9.5rem] animate-pulse rounded-2xl bg-muted" />;
+    return <div aria-hidden><SkeletonCard variant="product" className="h-[9.5rem] w-full" /></div>;
   }
 
   if (inCart) {
     return (
-      <div className="rounded-2xl border border-[#0052FF]/25 bg-[#0052FF]/5 p-4 sm:p-5">
+      <div className="rounded-2xl border border-[var(--brand)]/25 bg-[var(--brand)]/5 p-4 sm:p-5">
         <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <CheckCircle2 className="size-4 text-success" aria-hidden /> In your cart
         </p>

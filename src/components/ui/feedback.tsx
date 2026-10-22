@@ -1,17 +1,15 @@
-import { WaterDroplets } from "@/components/ui/water-loader";
+import { ButtonLoader } from "@/components/ui/button-loader";
 import { cn } from "@/lib/utils";
-
-export function Skeleton({ className }: { className?: string }) {
-  return (
-    <div aria-hidden className={cn("rounded-lg bg-muted animate-pulse", className)} />
-  );
-}
 
 interface LoadingStateProps {
   label?: string;
   className?: string;
 }
 
+/**
+ * A calm, brand-coloured waiting state for content we cannot shape into a
+ * skeleton yet.
+ */
 export function LoadingState({ label = "Loading…", className }: LoadingStateProps) {
   return (
     <div
@@ -19,7 +17,7 @@ export function LoadingState({ label = "Loading…", className }: LoadingStatePr
       aria-live="polite"
       className={cn("flex flex-col items-center justify-center gap-4 py-16 text-center", className)}
     >
-      <WaterDroplets />
+      <ButtonLoader className="size-7 text-[var(--brand)]" label={label} />
       <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">{label}</p>
     </div>
   );

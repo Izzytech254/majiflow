@@ -26,7 +26,7 @@ export function OrderTypeBar({ className }: { className?: string }) {
           <span
             className={cn(
               "flex size-9 shrink-0 items-center justify-center rounded-xl",
-              pickup ? "bg-surface-3 text-foreground" : "bg-cta-soft text-[#0052FF]"
+              pickup ? "bg-surface-3 text-foreground" : "bg-cta-soft text-[var(--brand)]"
             )}
             aria-hidden
           >
@@ -35,14 +35,14 @@ export function OrderTypeBar({ className }: { className?: string }) {
           <div className="min-w-0 flex-1">
             <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               {pickup ? "Pickup" : "Delivery"}
-              {!pickup && session.address && <MapPin className="size-3 text-[#0052FF]" aria-hidden />}
+              {!pickup && session.address && <MapPin className="size-3 text-[var(--brand)]" aria-hidden />}
             </p>
             <p className="truncate text-sm font-medium text-foreground">{label}</p>
           </div>
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-white px-3.5 py-2 text-sm font-semibold text-foreground transition-colors hover:border-[#0052FF]/50 hover:text-[#0052FF]"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-white px-3.5 py-2 text-sm font-semibold text-foreground transition-colors hover:border-[var(--brand)]/50 hover:text-[var(--brand)]"
           >
             <Pencil className="size-3.5" aria-hidden /> Edit
           </button>

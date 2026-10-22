@@ -124,7 +124,7 @@ export function BusinessProducts() {
                 aria-checked={isLive}
                 className={cn(
                   "mt-4 flex w-full items-center justify-center gap-2 rounded-xl border py-2 text-sm font-semibold transition-colors",
-                  isLive ? "border-border text-foreground hover:bg-muted" : "border-[#0052FF] text-[#0052FF]"
+                  isLive ? "border-border text-foreground hover:bg-muted" : "border-[var(--brand)] text-[var(--brand)]"
                 )}
               >
                 {isLive ? <Pause className="size-4" aria-hidden /> : <Wrench className="size-4" aria-hidden />}

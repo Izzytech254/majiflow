@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Transition } from "framer-motion";
 import {
-  AlertCircle, ArrowLeft, CheckCircle2, CreditCard, Loader2, MapPin, Navigation, RefreshCcw, ShieldCheck, Smartphone, Truck, User } from "lucide-react";
+  AlertCircle, ArrowLeft, CheckCircle2, CreditCard, MapPin, Navigation, RefreshCcw, ShieldCheck, Smartphone, Truck, User } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { LoadingState } from "@/components/ui/feedback";
@@ -32,6 +32,9 @@ import { createOrder, fetchOrder, generateOrderNumber, OrderValidationError, pos
 import { resolveCart } from "@/lib/cart";
 import { useMotionSafe } from "@/lib/motion";
 import type { DeliveryAddress, Order, PaymentMethod } from "@/lib/types";
+import { ButtonLoader } from "@/components/ui/button-loader";
+import { MpesaWait } from "@/components/motion/mpesa-wait";
+import { SuccessCheck } from "@/components/motion/success-check";
 
 type PayState = "idle" | "working" | "awaiting-provider" | "failed" | "stale";
 type FieldErrors = Record<string, string>;
@@ -625,10 +628,8 @@ function CheckoutForm() {
     return (
       <Container className="py-24">
         <div className="mx-auto max-w-md text-center">
-          <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-success-soft text-success">
-            <CheckCircle2 className="size-9" aria-hidden />
-          </span>
-          <h1 className="mt-6 font-display text-3xl text-foreground">Order confirmed</h1>
+          <SuccessCheck className="mx-auto" />
+          <h1 className="mt-2 font-display text-3xl text-foreground">Order confirmed</h1>
           <p className="mt-3 leading-relaxed text-muted-foreground">
             <strong className="text-foreground">{lastOrder.orderNumber}</strong> ·{" "}
             {lastOrder.businessName} · <strong className="text-foreground">{formatKES(lastOrder.total)}</strong>
@@ -693,7 +694,7 @@ function CheckoutForm() {
       <div className="mb-8">
         <Link
           href="/cart"
-          className="mb-3 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[#0052FF] hover:underline"
+          className="mb-3 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[var(--brand)] hover:underline"
         >
           <ArrowLeft className="size-4" aria-hidden /> Back to cart
         </Link>
@@ -713,12 +714,12 @@ function CheckoutForm() {
         {/* Delivery details */}
         <div className="flex min-w-0 flex-col gap-8">
           {loggedIn && !profileComplete && (
-            <div className="flex items-start gap-3 rounded-2xl border border-[#0052FF]/20 bg-transparent/5 p-4">
-              <AlertCircle className="mt-0.5 size-5 shrink-0 text-[#0052FF]" aria-hidden />
+            <div className="flex items-start gap-3 rounded-2xl border border-[var(--brand)]/20 bg-transparent/5 p-4">
+              <AlertCircle className="mt-0.5 size-5 shrink-0 text-[var(--brand)]" aria-hidden />
               <p className="text-sm text-foreground/85">
                 <strong className="font-semibold text-foreground">Finish your profile</strong> to
                 speed up checkout.{" "}
-                <Link href="/account/profile" className="font-semibold text-[#0052FF] hover:underline">
+                <Link href="/account/profile" className="font-semibold text-[var(--brand)] hover:underline">
                   Complete your delivery details
                 </Link>
               </p>
@@ -726,7 +727,7 @@ function CheckoutForm() {
           )}
           <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
             <div className="flex items-center gap-3">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-cta-soft text-[#0052FF]" aria-hidden>
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-cta-soft text-[var(--brand)]" aria-hidden>
                 <User className="size-4.5" />
               </span>
               <div>
@@ -781,7 +782,7 @@ function CheckoutForm() {
 
           <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
             <div className="flex items-center gap-3">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-cta-soft text-[#0052FF]" aria-hidden>
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-cta-soft text-[var(--brand)]" aria-hidden>
                 <MapPin className="size-4.5" />
               </span>
               <div>
@@ -793,7 +794,7 @@ function CheckoutForm() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-start gap-3">
                   <span
-                    className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-transparent/10 text-[#0052FF]"
+                    className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-transparent/10 text-[var(--brand)]"
                     aria-hidden
                   >
                     <MapPin className="size-4.5" />
@@ -818,7 +819,7 @@ function CheckoutForm() {
                   disabled={locating}
                 >
                   {locating ? (
-                    <Loader2 className="size-4 animate-spin" aria-hidden />
+                    <ButtonLoader className="size-4" />
                   ) : (
                     <Navigation className="size-4" aria-hidden />
                   )}
@@ -839,7 +840,7 @@ function CheckoutForm() {
                 />
               ) : (
                 <p className="flex items-center gap-2 rounded-xl border border-dashed border-border bg-muted/20 px-4 py-3 text-xs text-muted-foreground">
-                  <MapPin className="size-4 shrink-0 text-[#0052FF]" aria-hidden />
+                  <MapPin className="size-4 shrink-0 text-[var(--brand)]" aria-hidden />
                   Add a pinned location so the rider finds you faster.
                 </p>
               )}
@@ -923,7 +924,7 @@ function CheckoutForm() {
           {/* Payment method */}
           <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
             <div className="flex items-center gap-3">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-cta-soft text-[#0052FF]" aria-hidden>
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-cta-soft text-[var(--brand)]" aria-hidden>
                 <ShieldCheck className="size-4.5" />
               </span>
               <div>
@@ -999,7 +1000,7 @@ function CheckoutForm() {
                 setSaveProfile(e.target.checked);
                 writeConsent(e.target.checked);
               }}
-              className="mt-0.5 size-4 shrink-0 accent-[#0052FF]"
+              className="mt-0.5 size-4 shrink-0 accent-[var(--brand)]"
               aria-describedby="profile-save-note"
             />
             <span className="text-xs leading-relaxed text-muted-foreground">
@@ -1016,11 +1017,11 @@ function CheckoutForm() {
               type="checkbox"
               checked={shareLocation}
               onChange={(e) => setShareLocation(e.target.checked)}
-              className="mt-0.5 size-4 shrink-0 accent-[#0052FF]"
+              className="mt-0.5 size-4 shrink-0 accent-[var(--brand)]"
             />
             <span className="text-xs leading-relaxed text-muted-foreground">
               <span className="inline-flex items-center gap-1.5 font-semibold text-foreground">
-                <Navigation className="size-3.5 text-[#0052FF]" aria-hidden /> Share my live location
+                <Navigation className="size-3.5 text-[var(--brand)]" aria-hidden /> Share my live location
               </span>{" "}
               with the delivery person so they can see and find you.
               <span className="block text-muted-foreground/80">
@@ -1035,7 +1036,7 @@ function CheckoutForm() {
               type="checkbox"
               checked={smsUpdates}
               onChange={(e) => setSmsUpdates(e.target.checked)}
-              className="mt-0.5 size-4 shrink-0 accent-[#0052FF]"
+              className="mt-0.5 size-4 shrink-0 accent-[var(--brand)]"
             />
             <span className="text-xs leading-relaxed text-muted-foreground">
               <span className="font-semibold text-foreground">Text me order updates</span> - accepted, rider on
@@ -1079,7 +1080,7 @@ function CheckoutForm() {
           {(payState === "working" || payState === "awaiting-provider") && (
             <div className="mt-4">
               <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <Loader2 className="size-4 animate-spin text-[#0052FF]" aria-hidden />
+                <ButtonLoader className="size-4 text-[var(--brand)]" />
                 {payState === "working" ? "Creating your order…" : "Waiting for provider confirmation…"}
               </p>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
@@ -1195,8 +1196,8 @@ function PaymentOption({
       aria-pressed={selected}
       className={`flex items-center gap-3.5 rounded-xl border p-4 text-left transition-all min-h-[64px] ${
         selected
-          ? "border-[#0052FF] bg-transparent/5 ring-2 ring-[#0052FF]/20"
-          : "border-border bg-white hover:border-[#0052FF]/40"
+          ? "border-[var(--brand)] bg-transparent/5 ring-2 ring-[var(--brand)]/20"
+          : "border-border bg-white hover:border-[var(--brand)]/40"
       }`}
     >
       <span className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${selected ? "bg-foreground text-white" : "bg-muted text-muted-foreground"}`}>
@@ -1214,7 +1215,7 @@ function PaymentOption({
         <span className="block truncate text-xs text-muted-foreground">{subtitle}</span>
       </span>
       <span
-        className={`size-4 shrink-0 rounded-full border-2 ${selected ? "border-[#0052FF] bg-transparent" : "border-border bg-white"}`}
+        className={`size-4 shrink-0 rounded-full border-2 ${selected ? "border-[var(--brand)] bg-transparent" : "border-border bg-white"}`}
         style={selected ? { boxShadow: "inset 0 0 0 3px white" } : undefined}
         aria-hidden
       />
@@ -1310,21 +1311,19 @@ function PaymentOverlay({
 
         <div className="flex flex-col items-center px-6 py-8 text-center">
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="size-10 animate-spin text-[#0052FF]" aria-hidden />
-            <p className="text-sm text-muted-foreground">
-              {isMpesa ? (
-                <>
-                  An STK push for <strong className="text-foreground">{formatKES(amount)}</strong> was
-                  sent to <strong className="text-foreground">{phone}</strong>. Enter your M-Pesa PIN
-                  and press Send.
-                </>
-              ) : (
-                <>
+            {isMpesa ? (
+              <MpesaWait
+                detail={`An STK push for ${formatKES(amount)} was sent to ${phone}.`}
+              />
+            ) : (
+              <>
+                <ButtonLoader className="size-10 text-[var(--brand)]" />
+                <p className="text-sm text-muted-foreground">
                   Verifying <strong className="text-foreground">{formatKES(amount)}</strong> with the
                   card provider…
-                </>
-              )}
-            </p>
+                </p>
+              </>
+            )}
             <p className="text-sm text-muted-foreground">
               {statusMessage ?? "Waiting for provider confirmation…"}
             </p>
@@ -1350,7 +1349,7 @@ function PaymentOverlay({
                 aria-valuenow={secondsLeft}
               >
                 <div
-                  className="h-full rounded-full bg-[#0052FF] transition-[width] duration-1000 ease-linear"
+                  className="h-full rounded-full bg-[var(--brand)] transition-[width] duration-1000 ease-linear"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -1368,7 +1367,7 @@ function PaymentOverlay({
                 disabled={rechecking}
               >
                 {rechecking ? (
-                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                  <ButtonLoader className="size-4" />
                 ) : (
                   <RefreshCcw className="size-4" aria-hidden />
                 )}

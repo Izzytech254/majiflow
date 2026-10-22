@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type * as Leaflet from "leaflet";
 import {
   createBaseMap,
@@ -11,6 +11,7 @@ import {
   youPin,
   type LeafletNS,
 } from "@/lib/leaflet-client";
+import { MapPlaceholder } from "@/components/ui/map-placeholder";
 import "leaflet/dist/leaflet.css";
 
 export interface StationPinData {
@@ -58,6 +59,7 @@ export function StationMap({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Leaflet.Map | null>(null);
   const LRef = useRef<LeafletNS | null>(null);
+  const [ready, setReady] = useState(false);
   const markersRef = useRef<Map<string, Leaflet.Marker>>(new Map());
   const userRef = useRef<{ marker: Leaflet.Marker; circle: Leaflet.Circle } | null>(null);
   const selectRef = useRef(onSelect);
@@ -79,7 +81,9 @@ export function StationMap({
       if (disposed || !containerRef.current) return;
       LRef.current = L;
       const start = center ?? (userLocation ? [userLocation.lat, userLocation.lng] : undefined);
-      const map = createBaseMap(L, containerRef.current, start ?? undefined, zoom);
+      const map = createBaseMap(L, containerRef.current, start ?? undefined, zoom, {
+        onTilesReady: () => setReady(true),
+      });
       mapRef.current = map;
       map.whenReady(() => map.invalidateSize());
     })();
@@ -127,7 +131,7 @@ export function StationMap({
            <span style="color:#6b675d">${escapeHtml(s.city)} · KES ${s.deliveryFee} delivery${
              typeof s.distanceKm === "number" ? ` · ${s.distanceKm.toFixed(1)} km` : ""
            }</span>
-           <a href="/browse/${encodeURIComponent(s.slug)}" style="display:inline-block;margin-top:6px;color:#0052FF;font-weight:600">View menu →</a>
+           <a href="/browse/${encodeURIComponent(s.slug)}" style="display:inline-block;margin-top:6px;color:var(--brand);font-weight:600">View menu →</a>
          </div>`
       );
     }
@@ -193,11 +197,14 @@ export function StationMap({
   }, [stations.map((s) => s.id).join(","), userLocation?.lat, userLocation?.lng]);
 
   return (
-    <div
-      ref={containerRef}
-      className={`overflow-hidden rounded-2xl border border-border bg-muted ${className}`}
-      role="application"
-      aria-label="Map of refill stations"
-    />
+    <div className={`relative overflow-hidden rounded-2xl border border-border bg-muted ${className}`}>
+      <div
+        ref={containerRef}
+        className="h-full w-full"
+        role="application"
+        aria-label="Map of refill stations"
+      />
+      {!ready && <MapPlaceholder />}
+    </div>
   );
 }
