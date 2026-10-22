@@ -462,7 +462,7 @@ export function mapDatabaseBusinessToPublic(
     subscription: subscription?.plan ?? application.plan,
     description: application.description || `${business.name} water refill and delivery.`,
     products: [],
-    accent: "#0052FF",
+    accent: "#0057E6",
     cover: bioWaterCover,
     lat: Number(application.latitude) || -1.2921,
     lng: Number(application.longitude) || 36.8219,

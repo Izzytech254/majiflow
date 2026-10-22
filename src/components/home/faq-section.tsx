@@ -24,7 +24,7 @@ export function FaqSection() {
       <AnimatedSection delay={0.1} className="mt-10 text-center">
         <p className="text-sm text-muted-foreground">
           Something else on your mind?{" "}
-          <Link href="/faqs" className="font-semibold text-[#0052FF] hover:underline">
+          <Link href="/faqs" className="font-semibold text-[var(--brand)] hover:underline">
             View all FAQs
           </Link>
         </p>

@@ -36,7 +36,7 @@ export function BusinessBenefits() {
           <Stagger className="grid gap-4 sm:grid-cols-2">
             {benefits.map((b) => (
               <StaggerItem key={b.title}>
-                <div className="group flex h-full flex-col rounded-2xl border border-border bg-background p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#0052FF]/25 hover:bg-white hover:shadow-layered">
+                <div className="group flex h-full flex-col rounded-2xl border border-border bg-background p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[var(--brand)]/25 hover:bg-white hover:shadow-layered">
                   <span className="flex size-11 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110">
                     <b.icon className="size-5 text-black" aria-hidden />
                   </span>
@@ -73,7 +73,7 @@ export function BusinessBenefits() {
                 </p>
               </div>
             </div>
-            <div className="flex items-start gap-3 rounded-2xl border border-[#0052FF]/20 bg-transparent/5 p-4">
+            <div className="flex items-start gap-3 rounded-2xl border border-[var(--brand)]/20 bg-transparent/5 p-4">
               <MessageSquare className="mt-0.5 size-5 shrink-0 text-black" aria-hidden />
               <div>
                 <p className="text-sm font-semibold text-foreground">Reports from real order records</p>
@@ -90,7 +90,7 @@ export function BusinessBenefits() {
               </Link>
               <p className="mt-3 text-sm text-muted-foreground">
                 No setup fees, and you can cancel any time.{" "}
-                <Link href="/pricing" className="font-semibold text-[#0052FF] hover:underline">
+                <Link href="/pricing" className="font-semibold text-[var(--brand)] hover:underline">
                   See plans
                 </Link>
               </p>

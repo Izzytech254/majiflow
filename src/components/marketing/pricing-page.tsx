@@ -59,7 +59,7 @@ export function PricingPage() {
           </div>
 
           <div className="mt-10 flex flex-col items-center gap-3 rounded-2xl border border-border bg-card p-5 text-center shadow-card sm:flex-row sm:text-left">
-            <ShieldCheck className="size-5 shrink-0 text-[#0052FF]" aria-hidden />
+            <ShieldCheck className="size-5 shrink-0 text-[var(--brand)]" aria-hidden />
             <p className="text-sm leading-relaxed text-foreground/85">
               No surprise fees, ever. You keep the full KES price customers pay, and you can cancel
               any time.
@@ -87,7 +87,7 @@ export function PricingPage() {
                   </th>
                   {planIds.map((id) => (
                     <th key={id} scope="col" className="px-6 py-4 text-center">
-                      <span className={cn("font-display text-base", planMap[id].highlighted && "text-[#0052FF]")}>
+                      <span className={cn("font-display text-base", planMap[id].highlighted && "text-[var(--brand)]")}>
                         {planMap[id].name}
                       </span>
                     </th>
@@ -164,7 +164,7 @@ function BillingToggle({ annual, onChange }: { annual: boolean; onChange: (v: bo
           aria-pressed={annual === option.id}
           className={cn(
             "rounded-full px-4 py-1.5 font-semibold transition-colors",
-            annual === option.id ? "bg-[#0052FF] text-white" : "text-muted-foreground hover:text-foreground"
+            annual === option.id ? "bg-[var(--brand)] text-white" : "text-muted-foreground hover:text-foreground"
           )}
         >
           {option.label}

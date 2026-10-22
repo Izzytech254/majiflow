@@ -37,11 +37,11 @@ export function MobileTabBar({ items, className }: { items: TabItem[]; className
             <>
               <span className="relative">
                 <item.icon
-                  className={cn("size-5", active ? "text-[#0052FF]" : "text-muted-foreground")}
+                  className={cn("size-5", active ? "text-[var(--brand)]" : "text-muted-foreground")}
                   aria-hidden
                 />
                 {item.badge ? (
-                  <span className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#0052FF] px-1 text-[10px] font-bold text-white">
+                  <span className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--brand)] px-1 text-[10px] font-bold text-white">
                     {item.badge}
                   </span>
                 ) : null}
@@ -49,7 +49,7 @@ export function MobileTabBar({ items, className }: { items: TabItem[]; className
               <span
                 className={cn(
                   "text-[11px] font-medium",
-                  active ? "text-[#0052FF]" : "text-muted-foreground"
+                  active ? "text-[var(--brand)]" : "text-muted-foreground"
                 )}
               >
                 {item.label}

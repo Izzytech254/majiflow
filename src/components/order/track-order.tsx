@@ -22,7 +22,7 @@ import type { Order, OrderStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const STEPS: { status: OrderStatus; label: string; desc: string }[] = [
-  { status: "accepted", label: "Order accepted", desc: "The station confirmed your order." },
+  { status: "accepted", label: "Order received", desc: "The station confirmed your order." },
   { status: "preparing", label: "Being prepared", desc: "Your water is being filled and sealed." },
   { status: "rider_assigned", label: "Rider assigned", desc: "A rider is collecting your order." },
   { status: "out_for_delivery", label: "Out for delivery", desc: "The rider is on the road and will call before arrival." },
@@ -200,7 +200,7 @@ export function TrackOrderPage({ id }: { id: string }) {
           <section className="rounded-2xl border border-border bg-white p-6 shadow-card sm:p-8 lg:col-span-2">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="flex items-center gap-2.5 font-display text-lg text-foreground">
-                <MapPin className="size-5 text-[#0052FF]" aria-hidden /> Live tracking
+                <MapPin className="size-5 text-[var(--brand)]" aria-hidden /> Live tracking
               </h2>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                 {live ? "Updating live" : order.consent?.location ? "Waiting for your location" : "Station & address"}
@@ -219,7 +219,7 @@ export function TrackOrderPage({ id }: { id: string }) {
         {/* Timeline */}
         <section className="rounded-2xl border border-border bg-white p-6 shadow-card sm:p-8">
           <h2 className="flex items-center gap-2.5 font-display text-lg text-foreground">
-            <Truck className="size-5 text-[#0052FF]" aria-hidden /> Delivery progress
+            <Truck className="size-5 text-[var(--brand)]" aria-hidden /> Delivery progress
           </h2>
           {cancelled ? (
             <p className="mt-6 text-sm text-muted-foreground">This order closed before delivery.</p>
@@ -239,14 +239,14 @@ export function TrackOrderPage({ id }: { id: string }) {
                         aria-hidden
                         className={cn(
                           "absolute left-[23px] top-12 h-[calc(100%-2.4rem)] w-px",
-                          reachedIndex > i ? "bg-foreground" : "bg-border"
+                          reachedIndex > i ? "bg-[var(--brand)]" : "bg-border"
                         )}
                       />
                     )}
                     <span
                       className={cn(
                         "relative z-10 flex size-12 shrink-0 items-center justify-center rounded-full text-white",
-                        reached ? "bg-foreground shadow-accent" : "border-2 border-border bg-white text-muted-foreground"
+                        reached ? "bg-[var(--brand)] shadow-accent" : "border-2 border-border bg-white text-muted-foreground"
                       )}
                     >
                       {current ? (
@@ -278,7 +278,7 @@ export function TrackOrderPage({ id }: { id: string }) {
           {rider && (
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/40 p-4">
               <p className="flex items-center gap-2 text-sm text-foreground">
-                <Bike className="size-5 text-[#0052FF]" aria-hidden />
+                <Bike className="size-5 text-[var(--brand)]" aria-hidden />
                 <span>
                   Your rider is <span className="font-semibold">{rider.name}</span>
                 </span>
@@ -348,7 +348,7 @@ export function TrackOrderPage({ id }: { id: string }) {
             </dl>
             <div className="mt-4 flex items-center justify-between rounded-lg bg-muted/60 px-3.5 py-2.5">
               <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Smartphone className="size-4 text-[#0052FF]" aria-hidden /> {order.payment === "mpesa" ? "M-Pesa" : "Card"}
+                <Smartphone className="size-4 text-[var(--brand)]" aria-hidden /> {order.payment === "mpesa" ? "M-Pesa" : "Card"}
               </span>
               <Badge variant={payment.tone}>{payment.label}</Badge>
             </div>
@@ -356,7 +356,7 @@ export function TrackOrderPage({ id }: { id: string }) {
 
           <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
             <h2 className="flex items-center gap-2 font-display text-lg text-foreground">
-              <MapPin className="size-5 text-[#0052FF]" aria-hidden /> Delivery address
+              <MapPin className="size-5 text-[var(--brand)]" aria-hidden /> Delivery address
             </h2>
             <p className="mt-3 text-sm font-semibold text-foreground">
               {[...new Set([order.address.street, order.address.estate, order.address.city].filter(Boolean))].join(", ") ||
@@ -369,7 +369,7 @@ export function TrackOrderPage({ id }: { id: string }) {
               <p className="mt-2 text-xs italic text-muted-foreground">“{order.address.notes}”</p>
             )}
             <p className="mt-3 flex items-center gap-2 text-sm text-foreground/80">
-              <Phone className="size-4 text-[#0052FF]" aria-hidden /> {formatPhone(order.customerPhone)}
+              <Phone className="size-4 text-[var(--brand)]" aria-hidden /> {formatPhone(order.customerPhone)}
             </p>
           </section>
 
@@ -386,13 +386,13 @@ export function TrackOrderPage({ id }: { id: string }) {
 
           <section aria-labelledby="privacy-heading" className="rounded-2xl border border-border bg-white p-6 shadow-card">
             <h2 id="privacy-heading" className="flex items-center gap-2 font-display text-lg text-foreground">
-              <ShieldCheck className="size-5 text-[#0052FF]" aria-hidden /> Privacy & updates
+              <ShieldCheck className="size-5 text-[var(--brand)]" aria-hidden /> Privacy & updates
             </h2>
             <div className="mt-4 space-y-3">
               <label className="flex cursor-pointer items-start gap-3">
                 <input
                   type="checkbox"
-                  className="mt-0.5 size-5 shrink-0 accent-[#0052FF]"
+                  className="mt-0.5 size-5 shrink-0 accent-[var(--brand)]"
                   checked={Boolean(order.consent?.location) && active}
                   disabled={consentBusy || !active}
                   onChange={(e) => void changeConsent({ location: e.target.checked })}
@@ -410,7 +410,7 @@ export function TrackOrderPage({ id }: { id: string }) {
               <label className="flex cursor-pointer items-start gap-3">
                 <input
                   type="checkbox"
-                  className="mt-0.5 size-5 shrink-0 accent-[#0052FF]"
+                  className="mt-0.5 size-5 shrink-0 accent-[var(--brand)]"
                   checked={order.consent?.smsUpdates !== false}
                   disabled={consentBusy}
                   onChange={(e) => void changeConsent({ smsUpdates: e.target.checked })}

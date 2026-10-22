@@ -10,8 +10,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import Image from "next/image";
 import { useMotionSafe } from "@/lib/motion";
+import { BlurImage } from "@/components/ui/blur-image";
 
 export const CART_TARGET_SELECTOR = "[data-cart-target]";
 
@@ -178,7 +178,7 @@ function FlyThumb({ flight, onFinished }: { flight: Flight; onFinished: () => vo
       }}
     >
       {flight.src ? (
-        <Image
+        <BlurImage
           src={flight.src}
           alt={flight.alt ?? ""}
           fill

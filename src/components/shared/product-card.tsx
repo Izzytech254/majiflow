@@ -1,18 +1,18 @@
 "use client";
 
-import { useRef, useState } from "react";
-import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ShoppingCart } from "lucide-react";
+import { Plus } from "lucide-react";
 import type { BusinessProduct, WeeklyOperatingHours } from "@/lib/types";
 import { formatKES } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { BlurImage } from "@/components/ui/blur-image";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { productImage } from "@/lib/product-images";
 import { useCart } from "@/components/order/cart-provider";
+import { useOptionalCartUi } from "@/components/order/cart-ui-provider";
 import { useFlyToCart } from "@/components/order/fly-to-cart";
 import { useBusinessAvailability } from "@/components/shared/business-availability";
 import { QuantityStepper } from "@/components/order/quantity-stepper";
@@ -24,16 +24,26 @@ interface ProductCardProps {
   businessSlug: string;
   openingHours: WeeklyOperatingHours | undefined;
   className?: string;
+  /** Open the product sheet (options, quantity). Falls back to the item link. */
+  onOpen?: (product: BusinessProduct) => void;
 }
 
-export function ProductCard({ product, businessId, businessSlug, openingHours, className }: ProductCardProps) {
+export function ProductCard({ product, businessId, businessSlug, openingHours, className, onOpen }: ProductCardProps) {
   const { items, addItem, updateQuantity } = useCart();
+  const cartUi = useOptionalCartUi();
   const { toast } = useToast();
   const availability = useBusinessAvailability(openingHours);
   const fly = useFlyToCart();
-  const [qty, setQty] = useState(1);
   const [flying, setFlying] = useState(false);
   const imageRef = useRef<HTMLAnchorElement | null>(null);
+  // The fly-to-cart animation lands after ~1s; the card may be gone by then.
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
   const cartItem = items.find(
     (i) => i.businessId === businessId && i.productId === product.id
   );
@@ -44,14 +54,14 @@ export function ProductCard({ product, businessId, businessSlug, openingHours, c
   const closed = availability.state !== "open";
   const closedLabel =
     availability.state === "closed" ? "Station closed" : "Hours unavailable";
-  const pick = Math.min(qty, Math.max(1, max));
 
   const handleAdd = () => {
     if (closed || soldOut) return;
     const add = () => {
-      addItem({ businessId, productId: product.id, quantity: pick });
-      toast({ kind: "success", title: "Added to cart", message: `${pick} × ${product.name}` });
-      setQty(1);
+      const line = { businessId, productId: product.id, quantity: 1 };
+      if (cartUi) cartUi.requestAdd(line);
+      else addItem(line);
+      toast({ kind: "success", title: "Added to order", message: `1 × ${product.name}` });
     };
     const fromEl = imageRef.current;
     if (!fromEl) {
@@ -65,7 +75,7 @@ export function ProductCard({ product, businessId, businessSlug, openingHours, c
       alt: product.name,
       onDone: () => {
         add();
-        setFlying(false);
+        if (mountedRef.current) setFlying(false);
       },
     });
   };
@@ -82,9 +92,14 @@ export function ProductCard({ product, businessId, businessSlug, openingHours, c
         ref={imageRef}
         tabIndex={-1}
         aria-hidden
+        onClick={(e) => {
+          if (!onOpen) return;
+          e.preventDefault();
+          onOpen(product);
+        }}
         className="relative block aspect-[4/3] overflow-hidden bg-muted"
       >
-        <Image
+        <BlurImage
           src={productImage(product.image)}
           alt=""
           fill
@@ -109,9 +124,17 @@ export function ProductCard({ product, businessId, businessSlug, openingHours, c
         )}
       </Link>
 
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
         <h3 className="line-clamp-1 text-[15px] font-semibold leading-snug text-foreground">
-          <Link href={href} className="rounded-sm hover:text-[#0052FF] hover:underline focus-visible:outline-2 focus-visible:outline-[#0052FF]">
+          <Link
+            href={href}
+            onClick={(e) => {
+              if (!onOpen) return;
+              e.preventDefault();
+              onOpen(product);
+            }}
+            className="rounded-sm hover:text-[var(--brand)] hover:underline focus-visible:outline-2 focus-visible:outline-[var(--brand)]"
+          >
             {product.name}
           </Link>
         </h3>
@@ -120,45 +143,45 @@ export function ProductCard({ product, businessId, businessSlug, openingHours, c
         </p>
 
         <div className="mt-3 flex items-baseline gap-2">
-          <span className="text-xl font-bold tracking-tight text-foreground">{formatKES(product.price)}</span>
+          <span className="text-lg font-bold tracking-tight text-foreground">{formatKES(product.price)}</span>
           <span className="font-mono text-[11px] uppercase text-muted-foreground">/ {product.unit}</span>
           {product.oldPrice && (
             <span className="text-xs text-muted-foreground line-through">{formatKES(product.oldPrice)}</span>
           )}
         </div>
 
-        <div className="mt-auto pt-4">
+        <div className="mt-3 flex items-center justify-between gap-2 pt-1">
+          <button
+            type="button"
+            onClick={() => onOpen?.(product)}
+            className="text-xs font-semibold text-[var(--brand)] hover:underline"
+          >
+            View options
+          </button>
+
           {soldOut ? (
-            <Button disabled className="h-11 w-full">
-              Out of stock
-            </Button>
+            <span className="text-xs font-medium text-muted-foreground">Out of stock</span>
           ) : closed ? (
-            <Button disabled className="h-11 w-full">
-              {closedLabel}
-            </Button>
+            <span className="text-xs font-medium text-muted-foreground">{closedLabel}</span>
           ) : cartItem ? (
             <QuantityStepper
               value={cartItem.quantity}
               min={0}
               max={max}
               label={product.name}
-              display={`${cartItem.quantity} in cart`}
+              size="sm"
               onChange={(n) => updateQuantity(businessId, product.id, n)}
-              className="w-full justify-between bg-muted/50"
             />
           ) : (
-            <div className="flex items-center gap-2">
-              <QuantityStepper value={pick} max={max} label={product.name} onChange={setQty} size="sm" />
-              <Button
-                onClick={handleAdd}
-                disabled={flying}
-                className="h-11 flex-1"
-                aria-label={`Add ${pick} ${product.name} to cart`}
-              >
-                <ShoppingCart className="size-4" aria-hidden />
-                Add
-              </Button>
-            </div>
+            <button
+              type="button"
+              onClick={handleAdd}
+              disabled={flying}
+              aria-label={`Add ${product.name} to order`}
+              className="flex size-11 items-center justify-center rounded-full bg-[var(--brand)] text-white shadow-accent transition-transform hover:scale-105 active:scale-95 disabled:opacity-60"
+            >
+              <Plus className="size-6" aria-hidden />
+            </button>
           )}
         </div>
       </div>

@@ -156,7 +156,7 @@ export function OrderHistoryPage() {
                   {resource.data.orders.map((o) => (
                     <tr key={o.id} className="border-b border-border last:border-0 hover:bg-muted/30">
                       <td className="px-5 py-4 font-mono text-xs text-muted-foreground">
-                        <Link href={`/account/orders/${o.id}`} className="font-semibold text-[#0052FF] hover:underline">
+                        <Link href={`/account/orders/${o.id}`} className="font-semibold text-[var(--brand)] hover:underline">
                           {o.orderNumber}
                         </Link>
                         <span className="mt-0.5 block">

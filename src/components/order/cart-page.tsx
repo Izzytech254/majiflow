@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Droplets, AlertCircle, ArrowLeft, PackageX, ShoppingCart, Trash2, Truck } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { EmptyState, LoadingState } from "@/components/ui/feedback";
+import { BlurImage } from "@/components/ui/blur-image";
 import { productImage } from "@/lib/product-images";
 import { useCart } from "@/components/order/cart-provider";
+import { OrderTypeBar } from "@/components/order/order-type-bar";
 import { JourneyLink } from "@/components/order/journey";
 import { QuantityStepper } from "@/components/order/quantity-stepper";
 import { businesses } from "@/lib/data/businesses";
@@ -78,7 +79,9 @@ export function CartPage() {
   const removable = problems.filter((p) => p.status === "missing" || p.status === "out-of-stock").length;
 
   return (
-    <Container className="py-14 lg:py-20">
+    <>
+      <OrderTypeBar />
+      <Container className="py-14 lg:py-20">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -90,7 +93,7 @@ export function CartPage() {
         </div>
         <JourneyLink
           step="station"
-          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[#0052FF] hover:underline"
+          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[var(--brand)] hover:underline"
         >
           <ArrowLeft className="size-4" aria-hidden /> Keep shopping
         </JourneyLink>
@@ -213,7 +216,8 @@ export function CartPage() {
           </p>
         </div>
       </div>
-    </Container>
+      </Container>
+    </>
   );
 }
 
@@ -258,10 +262,10 @@ function CartRow({
       )}
     >
       <Link href={href} tabIndex={-1} aria-hidden className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-muted">
-        <Image src={productImage(product.image)} alt="" fill sizes="3.5rem" className="object-cover" />
+        <BlurImage src={productImage(product.image)} alt="" fill sizes="3.5rem" className="object-cover" />
       </Link>
       <div className="min-w-0 flex-1">
-        <Link href={href} className="block truncate text-[15px] font-semibold text-foreground hover:text-[#0052FF] hover:underline">
+        <Link href={href} className="block truncate text-[15px] font-semibold text-foreground hover:text-[var(--brand)] hover:underline">
           {product.name}
         </Link>
         <Link href={`/browse/${business.slug}#menu`} className="mt-0.5 block text-xs text-muted-foreground hover:underline">

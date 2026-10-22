@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
-  ArrowLeft, Building2, Check, CreditCard, Loader2, MapPin, MapPinCheck, Navigation, PartyPopper, Store, TriangleAlert } from "lucide-react";
+  ArrowLeft, Building2, Check, CreditCard, MapPin, MapPinCheck, Navigation, PartyPopper, Store, TriangleAlert } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
@@ -20,6 +20,7 @@ import {
   reverseGeocode,
 } from "@/lib/geo";
 import { cn } from "@/lib/utils";
+import { ButtonLoader } from "@/components/ui/button-loader";
 
 const STEPS = ["Business details", "Location & delivery", "Choose plan", "Payment"];
 const STORAGE_KEY = "mf:business-registration";
@@ -469,7 +470,7 @@ export function BusinessRegister() {
       <div className="mx-auto max-w-3xl">
         <div className="text-center">
           <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-            <Store className="size-3.5 text-[#0052FF]" aria-hidden /> Business onboarding
+            <Store className="size-3.5 text-[var(--brand)]" aria-hidden /> Business onboarding
           </p>
           <h1 className="mt-3 font-display text-3xl text-foreground sm:text-4xl">
             Get your station online in <span className="text-gradient">one lunch break</span>
@@ -490,7 +491,7 @@ export function BusinessRegister() {
                   i < step
                     ? "bg-foreground text-white"
                     : i === step
-                      ? "bg-transparent/10 text-[#0052FF] ring-2 ring-[#0052FF]/25"
+                      ? "bg-transparent/10 text-[var(--brand)] ring-2 ring-[var(--brand)]/25"
                       : "bg-muted text-muted-foreground"
                 )}
               >
@@ -507,7 +508,7 @@ export function BusinessRegister() {
           {step === 0 && (
             <div className="space-y-5">
               <h2 className="flex items-center gap-2 font-display text-xl text-foreground">
-                <Building2 className="size-5 text-[#0052FF]" aria-hidden /> Tell us about the business
+                <Building2 className="size-5 text-[var(--brand)]" aria-hidden /> Tell us about the business
               </h2>
               {ownerSession === "other" && (
                 <div className="rounded-2xl border border-warning/25 bg-transparent/5 p-4">
@@ -526,7 +527,7 @@ export function BusinessRegister() {
                 </div>
               )}
               {ownerSession === "anonymous" && (
-                <div className="rounded-2xl border border-[#0052FF]/20 bg-[#0052FF]/5 p-4">
+                <div className="rounded-2xl border border-[var(--brand)]/20 bg-[var(--brand)]/5 p-4">
                   <p className="text-sm font-semibold text-foreground">Create your business owner account</p>
                   <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                     Your application is private to this account. We never save your password in the registration draft.
@@ -597,10 +598,10 @@ export function BusinessRegister() {
               {/* What do you sell */}
               <div className="space-y-2">
                 <p className="text-[13px] font-semibold text-foreground">
-                  What do you sell?<span className="text-[#0052FF]"> *</span>
+                  What do you sell?<span className="text-[var(--brand)]"> *</span>
                 </p>
                 <div role="group" aria-label="What do you sell?" className="flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[#0052FF]/30 bg-transparent/5 px-3 py-1.5 text-sm font-medium text-[#0052FF]">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--brand)]/30 bg-transparent/5 px-3 py-1.5 text-sm font-medium text-[var(--brand)]">
                     <Check className="size-3.5" aria-hidden /> Water refills
                   </span>
                   {EXTRA_SERVICES.map((service) => {
@@ -619,8 +620,8 @@ export function BusinessRegister() {
                         className={cn(
                           "rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
                           on
-                            ? "border-[#0052FF] bg-transparent/10 text-[#0052FF]"
-                            : "border-border bg-white text-muted-foreground hover:border-[#0052FF]/40 hover:text-[#0052FF]"
+                            ? "border-[var(--brand)] bg-transparent/10 text-[var(--brand)]"
+                            : "border-border bg-white text-muted-foreground hover:border-[var(--brand)]/40 hover:text-[var(--brand)]"
                         )}
                       >
                         {service}
@@ -641,8 +642,8 @@ export function BusinessRegister() {
                     className={cn(
                       "rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
                       draft.sellsOther.includes("Other")
-                        ? "border-[#0052FF] bg-transparent/10 text-[#0052FF]"
-                        : "border-border bg-white text-muted-foreground hover:border-[#0052FF]/40 hover:text-[#0052FF]"
+                        ? "border-[var(--brand)] bg-transparent/10 text-[var(--brand)]"
+                        : "border-border bg-white text-muted-foreground hover:border-[var(--brand)]/40 hover:text-[var(--brand)]"
                     )}
                   >
                     Other
@@ -688,7 +689,7 @@ export function BusinessRegister() {
           {step === 1 && (
             <div className="space-y-5">
               <h2 className="flex items-center gap-2 font-display text-xl text-foreground">
-                <MapPin className="size-5 text-[#0052FF]" aria-hidden /> Where do you deliver?
+                <MapPin className="size-5 text-[var(--brand)]" aria-hidden /> Where do you deliver?
               </h2>
               <Field label="Station address" required error={errors.address}>
                 <Input
@@ -722,7 +723,7 @@ export function BusinessRegister() {
               {/* Business location capture */}
               <div className="space-y-2">
                 <p className="text-[13px] font-semibold text-foreground">
-                  Business location<span className="text-[#0052FF]"> *</span>
+                  Business location<span className="text-[var(--brand)]"> *</span>
                 </p>
                 <div
                   className={cn(
@@ -757,7 +758,7 @@ export function BusinessRegister() {
                           type="button"
                           onClick={captureLocation}
                           disabled={locating}
-                          className="mt-2 text-xs font-semibold text-[#0052FF] hover:underline disabled:opacity-50"
+                          className="mt-2 text-xs font-semibold text-[var(--brand)] hover:underline disabled:opacity-50"
                         >
                           {locating ? "Updating…" : "Use my exact location instead"}
                         </button>
@@ -766,7 +767,7 @@ export function BusinessRegister() {
                   ) : (
                     <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex items-start gap-3">
-                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-transparent/10 text-[#0052FF]">
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-transparent/10 text-[var(--brand)]">
                           <MapPin className="size-5" aria-hidden />
                         </span>
                         <div>
@@ -780,7 +781,7 @@ export function BusinessRegister() {
                         <Button variant="secondary" onClick={captureLocation} disabled={locating}>
                           {locating ? (
                             <>
-                              <Loader2 className="size-4 animate-spin" aria-hidden /> Getting location…
+                              <ButtonLoader className="size-4" /> Getting location…
                             </>
                           ) : (
                             <>
@@ -791,7 +792,7 @@ export function BusinessRegister() {
                         <button
                           type="button"
                           onClick={useTownLocation}
-                          className="text-xs font-semibold text-[#0052FF] hover:underline"
+                          className="text-xs font-semibold text-[var(--brand)] hover:underline"
                         >
                           Can&apos;t allow? Use {draft.city} instead
                         </button>
@@ -849,7 +850,7 @@ export function BusinessRegister() {
                     onClick={() => update("plan", p.id)}
                     className={cn(
                       "rounded-2xl border p-4 text-left transition-all",
-                      draft.plan === p.id ? "border-[#0052FF] ring-2 ring-[#0052FF]/15" : "border-border hover:border-[#0052FF]/40"
+                      draft.plan === p.id ? "border-[var(--brand)] ring-2 ring-[var(--brand)]/15" : "border-border hover:border-[var(--brand)]/40"
                     )}
                     aria-pressed={draft.plan === p.id}
                   >
@@ -868,7 +869,7 @@ export function BusinessRegister() {
               <ul className="space-y-2 rounded-2xl bg-muted/50 p-5 text-sm text-muted-foreground">
                 {selected.features.map((f) => (
                   <li key={f} className="flex gap-2">
-                    <Check className="mt-0.5 size-4 shrink-0 text-[#0052FF]" aria-hidden /> {f}
+                    <Check className="mt-0.5 size-4 shrink-0 text-[var(--brand)]" aria-hidden /> {f}
                   </li>
                 ))}
               </ul>
@@ -878,9 +879,9 @@ export function BusinessRegister() {
           {step === 3 && (
             <div className="space-y-5">
               <h2 className="flex items-center gap-2 font-display text-xl text-foreground">
-                <CreditCard className="size-5 text-[#0052FF]" aria-hidden /> How should we bill you?
+                <CreditCard className="size-5 text-[var(--brand)]" aria-hidden /> How should we bill you?
               </h2>
-              <div className="rounded-2xl border border-[#0052FF]/25 bg-transparent/5 p-5">
+              <div className="rounded-2xl border border-[var(--brand)]/25 bg-transparent/5 p-5">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="font-display text-lg text-foreground">{selected.name} plan</p>
@@ -909,7 +910,7 @@ export function BusinessRegister() {
                   type="checkbox"
                   checked={draft.autoCharge}
                   onChange={(e) => update("autoCharge", e.target.checked)}
-                  className="mt-0.5 size-4 accent-[#0052FF]"
+                  className="mt-0.5 size-4 accent-[var(--brand)]"
                 />
                 <span className="text-sm leading-relaxed text-muted-foreground">
                   Charge my M-Pesa on the 1st of each month after my trial. I can cancel anytime -
@@ -935,8 +936,8 @@ export function BusinessRegister() {
                 Continue
               </Button>
             ) : (
-              <Button size="lg" className="group" onClick={submit} disabled={submitting}>
-                {submitting ? <><Loader2 className="size-4 animate-spin" aria-hidden /> Submitting…</> : "Submit application"}
+              <Button size="lg" className="group" onClick={submit} loading={submitting}>
+                {submitting ? "Submitting…" : "Submit application"}
               </Button>
             )}
           </div>
@@ -944,7 +945,7 @@ export function BusinessRegister() {
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-[#0052FF] hover:underline">
+          <Link href="/login" className="font-semibold text-[var(--brand)] hover:underline">
             Log in
           </Link>
         </p>

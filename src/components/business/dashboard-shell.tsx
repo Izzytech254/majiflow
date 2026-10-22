@@ -88,7 +88,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
         <SidebarLink key={item.href} href={item.href} label={item.label} icon={item.icon} active={pathname === item.href} badge={item.badge} onClick={() => setOpen(false)} />
       ))}
       <div className="mt-auto rounded-xl bg-transparent/5 p-3">
-        <p className="font-mono text-[10px] uppercase tracking-widest text-[#0052FF]">Trial</p>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--brand)]">Trial</p>
         <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-transparent/15">
           <div className="h-full w-[60%] rounded-full bg-foreground" />
         </div>
@@ -121,7 +121,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
           ) : (
             <Link
               href="/business/applications"
-              className="rounded-xl border border-[#0052FF]/25 bg-[#0052FF]/5 px-3 py-2 text-sm font-semibold text-[#0052FF]"
+              className="rounded-xl border border-[var(--brand)]/25 bg-[var(--brand)]/5 px-3 py-2 text-sm font-semibold text-[var(--brand)]"
             >
               Application pending
             </Link>
@@ -198,7 +198,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
 function PendingBusinessState() {
   return (
     <div className="mx-auto max-w-2xl rounded-3xl border border-border bg-white p-8 text-center shadow-card sm:p-12">
-      <ClipboardCheck className="mx-auto size-10 text-[#0052FF]" aria-hidden />
+      <ClipboardCheck className="mx-auto size-10 text-[var(--brand)]" aria-hidden />
       <h1 className="mt-5 font-display text-3xl text-foreground">Your application is being reviewed</h1>
       <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">
         Your dashboard will be enabled after your station is approved. Until then, you can track your
@@ -236,10 +236,10 @@ function SidebarLink({
       aria-current={active ? "page" : undefined}
       className={cn(
         "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-        active ? "bg-transparent/8 text-[#0052FF]" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+        active ? "bg-transparent/8 text-[var(--brand)]" : "text-muted-foreground hover:bg-muted hover:text-foreground"
       )}
     >
-      <Icon className={cn("size-4.5", active && "text-[#0052FF]")} aria-hidden />
+      <Icon className={cn("size-4.5", active && "text-[var(--brand)]")} aria-hidden />
       {label}
       {badge && (
         <span className="ml-auto rounded-full bg-transparent-soft px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-warning">

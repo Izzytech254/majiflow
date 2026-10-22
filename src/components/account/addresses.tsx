@@ -184,7 +184,7 @@ function AddressForm({
           <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm text-foreground">
             <input
               type="checkbox"
-              className="size-5 accent-[#0052FF]"
+              className="size-5 accent-[var(--brand)]"
               checked={draft.makeDefault}
               onChange={(e) => set("makeDefault", e.target.checked)}
             />

@@ -38,7 +38,7 @@ export function PricingSection() {
 
       <p className="mt-8 text-center text-sm text-muted-foreground">
         No setup fees and no commission on orders.{" "}
-        <Link href="/pricing" className="font-semibold text-[#0052FF] hover:underline">
+        <Link href="/pricing" className="font-semibold text-[var(--brand)] hover:underline">
           Compare plans
         </Link>
       </p>
@@ -64,7 +64,7 @@ function BillingToggle({ annual, onChange }: { annual: boolean; onChange: (v: bo
           aria-pressed={annual === option.id}
           className={cn(
             "rounded-full px-4 py-1.5 font-semibold transition-colors",
-            annual === option.id ? "bg-[#0052FF] text-white" : "text-muted-foreground hover:text-foreground"
+            annual === option.id ? "bg-[var(--brand)] text-white" : "text-muted-foreground hover:text-foreground"
           )}
         >
           {option.label}

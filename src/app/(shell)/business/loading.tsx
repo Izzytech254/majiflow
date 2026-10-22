@@ -1,18 +1,22 @@
-import { Skeleton } from "@/components/ui/feedback";
+import { SkeletonBlock, SkeletonCard } from "@/components/ui/skeleton-card";
+import { RouteProgressTrigger } from "@/components/motion/top-progress-bar";
 
 export default function Loading() {
   return (
-    <div className="space-y-6">
-      <Skeleton className="h-9 w-64" />
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
-          <Skeleton key={i} className="h-32 w-full" />
-        ))}
+    <>
+      <RouteProgressTrigger />
+      <div className="space-y-6">
+        <SkeletonBlock className="h-9 w-64" />
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {[0, 1, 2, 3].map((i) => (
+            <SkeletonCard key={i} variant="metric" />
+          ))}
+        </div>
+        <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
+          <SkeletonCard variant="metric" className="h-72 w-full" />
+          <SkeletonCard variant="metric" className="h-72 w-full" />
+        </div>
       </div>
-      <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
-        <Skeleton className="h-72 w-full" />
-        <Skeleton className="h-72 w-full" />
-      </div>
-    </div>
+    </>
   );
 }
