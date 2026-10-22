@@ -1,18 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle, ArrowRight, PackageX, ShoppingCart, Trash2, Truck, X } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { EmptyState } from "@/components/ui/feedback";
+
 import { ButtonLoader } from "@/components/ui/button-loader";
-import { BlurImage } from "@/components/ui/blur-image";
+import { cn } from "@/lib/utils";
 import { productImage } from "@/lib/product-images";
 import { businesses } from "@/lib/data/businesses";
 import { itemHref, resolveCart } from "@/lib/cart";
 import { computeCartTotals, lineSubtotal } from "@/lib/pricing";
 import { formatKES } from "@/lib/format";
-import { cn } from "@/lib/utils";
 import { useMotionSafe } from "@/lib/motion";
 import { useCart } from "@/components/order/cart-provider";
 import { useCartUi } from "@/components/order/cart-ui-provider";
@@ -62,9 +62,9 @@ export function CartDrawer() {
             transition={panelTransition}
           >
             <header className="flex shrink-0 items-center gap-3 border-b border-border px-5 py-4">
-              <ShoppingCart className="size-5 text-[var(--brand)]" aria-hidden />
               <h2 className="min-w-0 flex-1 font-display text-lg text-foreground">
-                Your order{count > 0 && <span className="text-muted-foreground"> · {count}</span>}
+                Here is your order
+                {count > 0 && <span className="text-muted-foreground"> · {count}</span>}
               </h2>
               <button
                 type="button"
@@ -83,16 +83,18 @@ export function CartDrawer() {
               </div>
             ) : cart.lines.length === 0 ? (
               <div className="flex flex-1 items-center justify-center p-6">
-                <EmptyState
-                  icon={<ShoppingCart className="size-7" aria-hidden />}
-                  title="Your order is empty"
-                  description="Browse a station near you and add a refill - it takes seconds."
-                  action={
-                    <Link href="/browse" onClick={closeCart} className={buttonVariants({ size: "lg" })}>
-                      Browse stations
-                    </Link>
-                  }
-                />
+                <div className="flex flex-col items-center gap-4 text-center">
+                  <ShoppingCart className="size-10 text-muted-foreground" aria-hidden />
+                  <div className="space-y-1">
+                    <p className="font-display text-lg text-foreground">Here is your order</p>
+                    <p className="text-sm text-muted-foreground">
+                      Your cart is empty. Add items to start your order again.
+                    </p>
+                  </div>
+                  <Link href="/browse" onClick={closeCart} className={buttonVariants({ size: "lg" })}>
+                    Browse menu
+                  </Link>
+                </div>
               </div>
             ) : (
               <>
@@ -134,7 +136,7 @@ export function CartDrawer() {
                           className={cn("flex gap-3 rounded-2xl border bg-white p-3", status === "ok" ? "border-border" : "border-danger/40")}
                         >
                           <Link href={itemHref(business.slug, product.id)} onClick={closeCart} className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-muted">
-                            <BlurImage src={productImage(product.image)} alt="" fill sizes="4rem" className="object-cover" />
+                            <Image src={productImage(product.image)} alt="" fill sizes="4rem" className="object-cover" />
                           </Link>
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-semibold text-foreground">{product.name}</p>

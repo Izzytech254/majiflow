@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import { easeOut } from "@/lib/constants";
-import { OrderCard } from "@/components/home/order-card";
 import { HeroSlider } from "@/components/home/hero-slider";
 import { HERO_SLIDES, HERO_SLIDE_INTERVAL } from "@/config/hero-slides";
 import { usePrefersReducedMotion } from "@/lib/motion";
@@ -11,17 +10,19 @@ export function Hero() {
   const reduce = usePrefersReducedMotion();
 
   return (
-    <section className="relative isolate flex min-h-[100svh] w-full flex-col overflow-hidden bg-black lg:h-[866px] lg:min-h-[640px] lg:justify-center">
+    <section className="relative isolate -mt-16 flex min-h-[70svh] w-full flex-col overflow-hidden bg-black pt-16 lg:min-h-[520px]">
       <HeroSlider slides={HERO_SLIDES} interval={HERO_SLIDE_INTERVAL} />
 
-      <div className="pointer-events-none relative z-20 mx-auto flex w-full max-w-[90rem] flex-1 items-center px-5 pb-10 pt-[290px] sm:px-8 lg:flex-none lg:justify-start lg:py-0 lg:pl-12 lg:pr-12">
+      <div className="pointer-events-none relative z-20 mx-auto flex w-full max-w-[1100px] flex-1 items-center px-4 pb-10 pt-10 sm:px-6 lg:px-8">
         <motion.div
-          initial={reduce ? false : { y: 24 }}
-          animate={{ y: 0 }}
-          transition={{ duration: 0.8, delay: 0.08, ease: easeOut }}
-          className="pointer-events-auto w-full lg:w-[608px]"
+          initial={reduce ? false : { y: 16, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.1, ease: easeOut }}
+          className="pointer-events-none max-w-[520px]"
         >
-          <OrderCard />
+          <p className="font-display text-4xl font-semibold leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl">
+            {HERO_SLIDES[0].headline}
+          </p>
         </motion.div>
       </div>
     </section>
