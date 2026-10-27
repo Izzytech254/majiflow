@@ -1,0 +1,84 @@
+{
+  "completedTurns": 1,
+  "endedAt": "2026-10-23T10:35:58.790Z",
+  "failedTurns": 3,
+  "harness": "ori",
+  "lastEventType": "turn.failed",
+  "runIds": [
+    {
+      "cwd": "/home/boss",
+      "model": "~anthropic/claude-opus-latest",
+      "prompt": "hola",
+      "runId": "084dd97e-409b-465a-b9e9-05841c6f28fc",
+      "source": {
+        "surface": "code"
+      }
+    },
+    {
+      "cwd": "/home/boss",
+      "model": "poolside/laguna-xs-2.1:free",
+      "prompt": "hola",
+      "runId": "a6d2de24-4c4b-4484-a4d2-52c80158e81f",
+      "source": {
+        "surface": "code"
+      }
+    },
+    {
+      "cwd": "/home/boss/Documents/Projects/majiflow",
+      "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "prompt": "hey check my project only the frontend dont change anything just analyze it",
+      "runId": "41f589c0-12d6-4f5a-8a8f-0d67f14ccdad",
+      "source": {
+        "surface": "code"
+      }
+    },
+    {
+      "cwd": "/home/boss/Documents/Projects/majiflow",
+      "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "prompt": "what have you seen",
+      "runId": "3a3c5f8c-ca0f-489e-8ce7-11830e3e369e",
+      "source": {
+        "surface": "code"
+      }
+    }
+  ],
+  "sessionId": "a6446d3c-dc3d-4d99-a734-a8a4bd50b21d",
+  "startedAt": "2026-10-23T10:25:09.613Z",
+  "usage": {
+    "cacheCreationTokens": 0,
+    "cacheReadTokens": 328320,
+    "contextTokens": 0,
+    "generationIds": [
+      "gen-1792751166-HaQrSZxB5YtCPJf1K6aS",
+      "gen-1792751334-zOiu6zI4fyQrpu2hlght",
+      "gen-1792751341-vN9rj6goDH6jn11UKS22",
+      "gen-1792751382-E7PB4KbtCzsu4rDB7MUR",
+      "gen-1792751437-UMxDKfAEsQb0NIUPdrEs",
+      "gen-1792751443-xbgINK2vUkbqfi583wYS",
+      "gen-1792751456-AYZ5GZc2fzaPrl68C0oS",
+      "gen-1792751461-Bqq0y3InJkPlNMWxzOdu",
+      "gen-1792751466-FQdkl3YvIP6WPxbFnWih",
+      "gen-1792751472-QE7EYP8LBKveu0ouKekM",
+      "gen-1792751476-JEoZOd3SBwupt8wIYJCj",
+      "gen-1792751493-no2punzsLAs2EdACXmgo",
+      "gen-1792751500-Z18qNqgvuOIVyHlw17BC",
+      "gen-1792751506-OHSVO93Py13dfc85ssVJ",
+      "gen-1792751515-z9wNFDc49IGkTtrEjICz",
+      "gen-1792751524-toHExYUNbmcnUZJxk0Jv",
+      "gen-1792751532-nwxrUA6DLdx2WBqtnTHL",
+      "gen-1792751547-i17WbCkN3rLae4cEKohs",
+      "gen-1792751555-NgAlSGTK7a4o348K4iHx",
+      "gen-1792751561-41FcA6j1QGiLh8R2PniM",
+      "gen-1792751584-KiTPuNlU9yElzkIdd25D",
+      "gen-1792751592-d5Zb7BWbiCBpbsecrTvD",
+      "gen-1792751602-XSlEhp4nLWc0olwAK6OE",
+      "gen-1792751610-EEu93zJrVCLrT9Pp5H9r",
+      "gen-1792751622-XfsXpZO9FDuHsXG3DT8H",
+      "gen-1792751631-l2ZdVy0lSoEKawU2DHtj",
+      "gen-1792751641-OYFbBUAkwCbaYpaLlgwf",
+      "gen-1792751664-o9d5PVcXhrxXC6h0Yc2Y"
+    ],
+    "inputTokens": 277588,
+    "outputTokens": 1442
+  }
+}

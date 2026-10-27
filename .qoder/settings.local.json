@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash --noprofile --norc -c 'git status')",
+      "Bash(bash --noprofile --norc -c 'git remote -v; echo ---; git branch -vv; echo ---; git stash list')",
+      "Bash(true)",
+      "Bash(wc -l /dev/null)",
+      "Read(//dev/**)",
+      "Bash(cd /home/boss/Documents/Projects/majiflow && node -v && pnpm -v)",
+      "Bash(rm src/components/layout/mobile-tab-bar.tsx src/components/layout/marketing-tab-bar.tsx && echo deleted)",
+      "Bash(pnpm tsc:*)",
+      "Bash(grep -o '\"content\":\"[^\"]*REDESIGN[^\"]*\"' /home/boss/.qoder/projects/-home-boss-Documents-Projects-majiflow/2f550fd6-3a0a-4063-8194-50d0957d7da0.jsonl | head -5)"
+    ]
+  }
+}
