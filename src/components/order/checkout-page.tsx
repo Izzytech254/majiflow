@@ -258,7 +258,7 @@ export function CheckoutPage() {
               {items.map((line) => (
                 <div key={`${line.productId ?? line.id ?? ''}-${line.storeId ?? ''}-${line.name ?? ''}`} className="flex items-center gap-3 py-3">
                   <div className="relative size-14 overflow-hidden rounded-xl bg-surface-2">
-                    <Image src={line.image} alt={line.name} fill className="object-cover" />
+                    {line.image ? <Image src={line.image} alt={line.name} fill className="object-cover" /> : <div className="size-full bg-surface-2" />}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-foreground">{line.name}</p>
