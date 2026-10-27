@@ -45,35 +45,32 @@ export function StationsDrawer({
     Number.isFinite(location.lng);
 
   useEffect(() => {
-    if (!open || !hasCoordinates) {
+    if (!open) {
       setStations([]);
       return;
     }
     let cancelled = false;
     setLoading(true);
-    const params = new URLSearchParams({
-      lat: String(location!.lat),
-      lng: String(location!.lng),
-    });
-    fetch(`/api/stations/nearby?${params.toString()}`, { cache: "no-store" })
-      .then((res) => res.json())
-      .then((data: { stations?: Business[] }) => {
-        if (cancelled) return;
-        const list = Array.isArray(data.stations) ? data.stations : [];
-        const results: NearbyStationResult[] = list.map((station: any) => ({
-          station,
-          distanceKm: typeof station.distanceKm === "number" ? station.distanceKm : undefined,
-          etaMinutes: typeof station.etaMinutes === "number" ? station.etaMinutes : station.avgDeliveryMinutes,
-          delivers: true,
-        }));
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { businesses } = require("@/lib/data/businesses");
+      const list = Array.isArray(businesses) ? (businesses as Business[]) : [];
+      const results: NearbyStationResult[] = list.map((station: Business) => ({
+        station,
+        distanceKm: undefined,
+        etaMinutes: station.avgDeliveryMinutes,
+        delivers: true,
+      }));
+      if (!cancelled) {
         setStations(results);
-      })
-      .catch(() => {
-        if (!cancelled) setStations([]);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+        setLoading(false);
+      }
+    } catch {
+      if (!cancelled) {
+        setStations([]);
+        setLoading(false);
+      }
+    }
     return () => {
       cancelled = true;
     };

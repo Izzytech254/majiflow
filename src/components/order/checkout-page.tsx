@@ -138,7 +138,7 @@ export function CheckoutPage() {
       <div className="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-center justify-center px-4 text-center">
         <h1 className="font-display text-2xl font-bold text-foreground">Your cart is empty</h1>
         <p className="mt-2 text-muted-foreground">Add items from a station to checkout.</p>
-        <Button asChild className="mt-6">
+        <Button className="mt-6">
           <Link href="/browse">Browse stations</Link>
         </Button>
       </div>
@@ -148,7 +148,7 @@ export function CheckoutPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 pb-10 pt-6 sm:px-6 lg:px-8">
       <div className="mb-6 flex items-center gap-3">
-        <Button variant="ghost" size="icon" asChild>
+        <Button variant="ghost" size="icon">
           <Link href="/cart">
             <ArrowLeft className="size-5" />
           </Link>
@@ -256,7 +256,7 @@ export function CheckoutPage() {
             <h2 className="font-semibold text-foreground">Items</h2>
             <div className="mt-3 flex flex-col divide-y divide-border">
               {items.map((line) => (
-                <div key={line.id} className="flex items-center gap-3 py-3">
+                <div key={`${line.productId ?? line.id ?? ''}-${line.storeId ?? ''}-${line.name ?? ''}`} className="flex items-center gap-3 py-3">
                   <div className="relative size-14 overflow-hidden rounded-xl bg-surface-2">
                     <Image src={line.image} alt={line.name} fill className="object-cover" />
                   </div>

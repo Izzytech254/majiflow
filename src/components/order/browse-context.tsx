@@ -127,14 +127,14 @@ export function BrowseContextProvider({ children }: { children: ReactNode }) {
       return;
     }
     let cancelled = false;
-    fetch(`/api/stations/${encodeURIComponent(selectedId)}`, { cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: Business | null) => {
-        if (!cancelled) setSelectedStation(data ?? null);
-      })
-      .catch(() => {
-        if (!cancelled) setSelectedStation(null);
-      });
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { getBusiness } = require("@/lib/data/businesses");
+      const biz = getBusiness(selectedId);
+      if (!cancelled) setSelectedStation((biz as Business | undefined) ?? null);
+    } catch {
+      if (!cancelled) setSelectedStation(null);
+    }
     return () => {
       cancelled = true;
     };
