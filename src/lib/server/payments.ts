@@ -80,7 +80,7 @@ export async function initiatePayment(input: InitiatePaymentInput): Promise<Paym
 
 export async function getPaymentStatus(paymentId: string): Promise<(PaymentInitiation & { payment?: unknown }) | null> {
   void paymentId;
-  return { paymentId, status: "pending", payment: { paymentId, status: "pending" } };
+  return { paymentId, status: "unpaid", payment: { paymentId, status: "unpaid" } } as any;
 }
 
 export function sumOrderTotals(ordersList: Order[]): { subtotal: number; deliveryFee: number; total: number } {
