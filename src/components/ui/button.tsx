@@ -56,8 +56,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const busy = loading || success;
     if (asChild && children && typeof children === "object" && !Array.isArray(children)) {
-      const child = children as any;
-      const childProps = child.props || {};
+      const child = children as React.ReactElement;
+      const childProps = (child.props as Record<string, unknown>) || {};
       return (
         <button
           ref={ref}
@@ -66,8 +66,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           aria-busy={loading || undefined}
           className={cn(buttonVariants({ variant, size }), className, childProps.className)}
           {...props}
-          onClick={(e) => {
-            childProps.onClick?.(e);
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+            (childProps.onClick as ((e: React.MouseEvent<HTMLButtonElement>) => void) | undefined)?.(e);
             props.onClick?.(e);
           }}
         >

@@ -13,6 +13,7 @@ export interface InitiatePaymentInput {
   phone: string;
   method: PaymentMethod;
   idempotencyKey: string;
+  [key: string]: unknown;
 }
 
 export interface PaymentInitiation {
@@ -38,7 +39,7 @@ function money(value: number): number {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
-export async function initiatePayment(input: InitiatePaymentInput): Promise<any> {
+export async function initiatePayment(input: InitiatePaymentInput): Promise<PaymentInitiation & { payment?: unknown } & Record<string, unknown>> {
   if (!Array.isArray(input.orderIds) || input.orderIds.length === 0) {
     throw new PaymentError("No orders to pay for.");
   }
@@ -77,7 +78,7 @@ export async function initiatePayment(input: InitiatePaymentInput): Promise<any>
   };
 }
 
-export async function getPaymentStatus(paymentId: string): Promise<any | null> {
+export async function getPaymentStatus(paymentId: string): Promise<(PaymentInitiation & { payment?: unknown }) | null> {
   void paymentId;
   return { paymentId, status: "pending", payment: { paymentId, status: "pending" } };
 }
@@ -88,21 +89,21 @@ export function sumOrderTotals(ordersList: Order[]): { subtotal: number; deliver
   return { subtotal: money(subtotal), deliveryFee: money(deliveryFee), total: money(subtotal + deliveryFee) };
 }
 
-export async function findPaymentForOrder(orderId: string) {
+export async function findPaymentForOrder(orderId: string): Promise<unknown> {
   void orderId;
   return null;
 }
 
-export async function getPayment(paymentId: string): Promise<any> {
+export async function getPayment(paymentId: string): Promise<unknown> {
   const s = await getPaymentStatus(paymentId); return s;
 }
 
-export async function requestRefund(input: any, amount?: number) {
+export async function requestRefund(input: unknown, amount?: number) {
   void input; void amount;
   return { ok: true, id: "r1", status: "pending", refunds: [] };
 }
 
-export async function confirmRefund(input: any, _maybe?: any) {
+export async function confirmRefund(input: unknown, _maybe?: unknown) {
   void input; void _maybe;
   return { ok: true, id: "r1", status: "succeeded", providerReference: "ref1" };
 }
@@ -127,7 +128,8 @@ export function parseDarajaCallback(body: unknown): { orderId?: string; outcome?
   return { outcome: "failed" };
 }
 
-export async function reconcilePayment(paymentId: string, _ctx?: any) {
+export async function reconcilePayment(paymentId: string, _ctx?: unknown) {
+  void _ctx;
   const status = await getPaymentStatus(paymentId);
   if (!status) return null;
   return {
@@ -142,9 +144,9 @@ export async function reconcilePayment(paymentId: string, _ctx?: any) {
   };
 }
 
-export async function createPaymentForOrders(input: InitiatePaymentInput): Promise<any> {
+export async function createPaymentForOrders(input: InitiatePaymentInput): Promise<Record<string, unknown>> {
   const res = await initiatePayment(input);
-  return { payment: res.payment || res, ...res };
+  return { payment: (res as { payment?: unknown }).payment || res, ...(res as Record<string, unknown>) };
 }
 
 export { normalizePhone };
@@ -162,7 +164,7 @@ export function adminKeyOk(key: string | null | undefined): boolean {
   return key === expected;
 }
 
-export async function recordPaymentTransition(input: any, maybe?: any) {
+export async function recordPaymentTransition(input: unknown, maybe?: unknown) {
   void input; void maybe;
   return { ok: true };
 }
