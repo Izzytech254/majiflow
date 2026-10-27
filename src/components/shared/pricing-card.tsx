@@ -23,12 +23,12 @@ export function PricingCard({ plan, annual, href = "/business/register", classNa
     <div
       className={cn(
         "relative flex h-full flex-col rounded-2xl border bg-card p-6 shadow-card",
-        highlighted ? "border-[#0052FF] ring-2 ring-[#0052FF]/15" : "border-border",
+        highlighted ? "border-[var(--brand)] ring-2 ring-[var(--brand)]/15" : "border-border",
         className
       )}
     >
       {highlighted && (
-        <span className="absolute -top-3 left-6 rounded-full bg-[#0052FF] px-3 py-1 text-[11px] font-semibold text-white">
+        <span className="absolute -top-3 left-6 rounded-full bg-[var(--brand)] px-3 py-1 text-[11px] font-semibold text-white">
           Most popular
         </span>
       )}

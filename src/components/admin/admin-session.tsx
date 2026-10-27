@@ -47,7 +47,7 @@ export function AdminSignIn() {
       aria-labelledby="admin-signin-heading"
       noValidate
     >
-      <span className="flex size-12 items-center justify-center rounded-xl bg-muted text-[#0052FF]">
+      <span className="flex size-12 items-center justify-center rounded-xl bg-muted text-[var(--brand)]">
         <LockKeyhole className="size-6" aria-hidden />
       </span>
       <h1 id="admin-signin-heading" className="mt-4 font-display text-2xl text-foreground">

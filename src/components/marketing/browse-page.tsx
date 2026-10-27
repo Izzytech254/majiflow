@@ -2,35 +2,34 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { AlertCircle, List, Loader2, Map as MapIcon, Navigation, Search } from "lucide-react";
+import { AlertCircle, List, Map as MapIcon, Navigation, Search } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Input } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { BusinessCard } from "@/components/shared/business-card";
 import { EmptyState } from "@/components/ui/feedback";
 import { Stagger, StaggerItem } from "@/components/ui/animated-section";
-import { businesses, getBusinessesByCity } from "@/lib/data/businesses";
 import { CITIES } from "@/lib/constants";
 import {
   captureCurrentLocation,
   geolocationErrorMessage,
-  haversineMeters,
   townLocation,
   type CapturedLocation,
 } from "@/lib/geo";
+import { DISCOVERY_RADII_KM, discoverStations } from "@/lib/station-discovery";
 import { browseHref } from "@/lib/journey";
 import { rememberJourneyStep } from "@/components/order/journey";
+import { OrderTypeBar } from "@/components/order/order-type-bar";
+import { ButtonLoader } from "@/components/ui/button-loader";
 
 const StationMap = dynamic(() => import("@/components/ui/station-map").then((m) => m.StationMap), {
   ssr: false,
   loading: () => (
     <div className="flex h-full w-full items-center justify-center rounded-2xl border border-border bg-muted">
-      <Loader2 className="size-5 animate-spin text-muted-foreground" aria-hidden />
+      <ButtonLoader className="size-6 text-muted-foreground" />
     </div>
   ),
 });
-
-const DISCOVERY_RADII_KM = [3, 5, 10, 20] as const;
 
 type LocationMode = "manual" | "current";
 
@@ -57,78 +56,16 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
     rememberJourneyStep("browse", href);
   }, [city, query]);
 
-  const discovery = useMemo(() => {
-    const source = locationMode === "current" ? businesses : getBusinessesByCity(city);
-    const q = query.trim().toLowerCase();
-    const searched = !q
-      ? source
-      : source.filter(
-          (b) =>
-            b.name.toLowerCase().includes(q) ||
-            b.city.toLowerCase().includes(q) ||
-            b.estates.some((e) => e.toLowerCase().includes(q)) ||
-            b.tagline.toLowerCase().includes(q)
-        );
-
-    if (locationMode !== "current" || !location) {
-      return {
-        results: searched
-          .map((business, index) => {
-            const hasValidLocation =
-              location !== null &&
-              Number.isFinite(location.lat) &&
-              Number.isFinite(location.lng) &&
-              Number.isFinite(business.lat) &&
-              Number.isFinite(business.lng);
-            const distanceKm = hasValidLocation
-              ? haversineMeters(location, business) / 1000
-              : undefined;
-            return { business, distanceKm, index };
-          })
-          .sort((a, b) => {
-            if (a.distanceKm === undefined && b.distanceKm === undefined) {
-              return a.index - b.index;
-            }
-            if (a.distanceKm === undefined) return 1;
-            if (b.distanceKm === undefined) return -1;
-            return a.distanceKm - b.distanceKm;
-          }),
-        radiusKm: null,
-      };
-    }
-
-    const radiusKm =
-      DISCOVERY_RADII_KM.find((radius) =>
-        searched.some(
-          (business) =>
-            Number.isFinite(business.lat) &&
-            Number.isFinite(business.lng) &&
-            haversineMeters(location, business) / 1000 <= radius
-        )
-      ) ?? DISCOVERY_RADII_KM[DISCOVERY_RADII_KM.length - 1];
-
-    return {
-      results: searched
-        .map((business, index) => {
-          if (!Number.isFinite(business.lat) || !Number.isFinite(business.lng)) {
-            return null;
-          }
-          const distanceKm = haversineMeters(location, business) / 1000;
-          return distanceKm <= radiusKm ? { business, distanceKm, index } : null;
-        })
-        .filter(
-          (
-            result
-          ): result is {
-            business: (typeof businesses)[number];
-            distanceKm: number;
-            index: number;
-          } => result !== null
-        )
-        .sort((a, b) => a.distanceKm - b.distanceKm),
-      radiusKm,
-    };
-  }, [city, location, locationMode, query]);
+  const discovery = useMemo(
+    () =>
+      discoverStations({
+        city,
+        query,
+        location,
+        byDistance: locationMode === "current",
+      }),
+    [city, location, locationMode, query]
+  );
 
   const mapStations = useMemo(
     () =>
@@ -198,7 +135,8 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
 
   return (
     <>
-      <section className="relative overflow-hidden border-b border-border bg-background">
+      <OrderTypeBar />
+      <section className="relative overflow-hidden border-b border-border bg-surface-2">
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-radial-glow" />
         <Container className="relative py-14 lg:py-20">
           <div className="mx-auto max-w-2xl text-center">
@@ -238,8 +176,8 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
                   aria-pressed={city === c}
                   className={`min-h-11 rounded-full border px-4 py-2 text-sm font-medium transition-all ${
                     city === c
-                      ? "border-[#0052FF] bg-[#0052FF] text-white shadow-accent"
-                      : "border-border bg-white text-muted-foreground hover:border-[#0052FF]/40 hover:text-[#0052FF]"
+                      ? "border-[var(--brand)] bg-[var(--brand)] text-white shadow-accent"
+                      : "border-border bg-white text-muted-foreground hover:border-[var(--brand)]/40 hover:text-[var(--brand)]"
                   }`}
                 >
                   {c === "All cities" ? "Every city" : c}
@@ -254,7 +192,7 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
                 disabled={locating}
               >
                 {locating ? (
-                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                  <ButtonLoader className="size-4" />
                 ) : (
                   <Navigation className="size-4" aria-hidden />
                 )}
@@ -297,7 +235,7 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
                   onClick={() => setView("list")}
                   aria-pressed={view === "list"}
                   className={`inline-flex min-h-9 items-center gap-2 rounded-full px-4 text-sm font-medium transition-colors ${
-                    view === "list" ? "bg-[#0052FF] text-white" : "text-muted-foreground hover:text-foreground"
+                    view === "list" ? "bg-[var(--brand)] text-white" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   <List className="size-4" aria-hidden /> List
@@ -307,7 +245,7 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
                   onClick={() => setView("map")}
                   aria-pressed={view === "map"}
                   className={`inline-flex min-h-9 items-center gap-2 rounded-full px-4 text-sm font-medium transition-colors ${
-                    view === "map" ? "bg-[#0052FF] text-white" : "text-muted-foreground hover:text-foreground"
+                    view === "map" ? "bg-[var(--brand)] text-white" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   <MapIcon className="size-4" aria-hidden /> Map
@@ -347,7 +285,7 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
               >
                 {locating && (
                   <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-                    <Loader2 className="size-4 animate-spin" aria-hidden />
+                    <ButtonLoader className="size-4" />
                     Updating distances…
                   </div>
                 )}
@@ -358,7 +296,7 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
                         data-station-id={business.id}
                         onMouseEnter={() => setSelectedId(business.id)}
                         className={`h-full rounded-2xl transition-shadow ${
-                          selectedId === business.id ? "ring-2 ring-[#0052FF] ring-offset-2 ring-offset-background" : ""
+                          selectedId === business.id ? "ring-2 ring-[var(--brand)] ring-offset-2 ring-offset-background" : ""
                         }`}
                       >
                         <BusinessCard business={business} distanceKm={distanceKm} />
@@ -380,7 +318,7 @@ export function BrowsePage({ initialCity, initialQuery = "" }: { initialCity: st
                 action={
                   <button
                     onClick={() => setQuery("")}
-                    className="mt-2 font-semibold text-[#0052FF] hover:underline"
+                    className="mt-2 font-semibold text-[var(--brand)] hover:underline"
                   >
                     Clear search
                   </button>

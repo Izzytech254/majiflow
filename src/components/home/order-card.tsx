@@ -49,7 +49,7 @@ export function OrderCard({ defaultCity = "Nairobi" }: { defaultCity?: string })
           <label htmlFor="hero-search" className="text-sm font-semibold text-foreground">
             Estate, street or station
           </label>
-          <div className="relative flex w-full items-center rounded-xl border border-border bg-white transition-colors focus-within:border-[#0052FF]">
+          <div className="relative flex w-full items-center rounded-xl border border-border bg-white transition-colors focus-within:border-[var(--brand)]">
             <Search
               className="pointer-events-none absolute left-4 size-5 text-muted-foreground"
               aria-hidden

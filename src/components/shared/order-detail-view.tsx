@@ -133,7 +133,7 @@ export function OrderDetailView({
         <div>
           <Link
             href={backHref}
-            className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:text-[#0052FF]"
+            className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:text-[var(--brand)]"
           >
             <ArrowLeft className="size-3.5" aria-hidden /> {backLabel}
           </Link>
@@ -158,7 +158,7 @@ export function OrderDetailView({
         <section className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="flex items-center gap-2.5 font-display text-lg text-foreground">
-              <MapPin className="size-5 text-[#0052FF]" aria-hidden /> Live tracking
+              <MapPin className="size-5 text-[var(--brand)]" aria-hidden /> Live tracking
             </h2>
             <span
               className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[10px] uppercase tracking-widest ${
@@ -199,7 +199,7 @@ export function OrderDetailView({
               <p className="mt-2 text-xs italic text-muted-foreground">“{order.address.notes}”</p>
             )}
             <p className="mt-3 flex items-center gap-2 text-sm text-foreground/80">
-              <Phone className="size-4 text-[#0052FF]" aria-hidden /> {formatPhone(order.customerPhone)}
+              <Phone className="size-4 text-[var(--brand)]" aria-hidden /> {formatPhone(order.customerPhone)}
             </p>
           </div>
         </section>

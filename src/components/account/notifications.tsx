@@ -72,7 +72,7 @@ function PreferenceToggle({
         />
         <span
           aria-hidden
-          className="h-7 w-12 rounded-full bg-muted transition-colors peer-checked:bg-[#0052FF] peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-disabled:opacity-60"
+          className="h-7 w-12 rounded-full bg-muted transition-colors peer-checked:bg-[var(--brand)] peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-disabled:opacity-60"
         />
         <span
           aria-hidden
@@ -166,7 +166,7 @@ export function NotificationsPage() {
                         href={`/account/orders/${n.orderId}`}
                         className={cn(
                           "flex items-start gap-3 rounded-2xl border bg-card p-4 shadow-card transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                          unread ? "border-[#0052FF]/40" : "border-border"
+                          unread ? "border-[var(--brand)]/40" : "border-border"
                         )}
                       >
                         <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-black">
@@ -185,7 +185,7 @@ export function NotificationsPage() {
                             <time dateTime={n.at}>{formatRelativeTime(n.at)}</time>
                           </p>
                         </div>
-                        {unread && <span aria-hidden className="mt-2 size-2 shrink-0 rounded-full bg-[#0052FF]" />}
+                        {unread && <span aria-hidden className="mt-2 size-2 shrink-0 rounded-full bg-[var(--brand)]" />}
                       </Link>
                     </li>
                   );

@@ -6,13 +6,14 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Transition } from "framer-motion";
 import {
-  AlertCircle, ArrowLeft, CheckCircle2, CreditCard, Loader2, MapPin, Navigation, ShieldCheck, Smartphone, Truck } from "lucide-react";
+  AlertCircle, ArrowLeft, CheckCircle2, CreditCard, MapPin, Navigation, RefreshCcw, ShieldCheck, Smartphone, Truck, User } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { LoadingState } from "@/components/ui/feedback";
 import { OrderMap } from "@/components/ui/order-map";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
 import { useCart } from "@/components/order/cart-provider";
+import { OrderTypeBar } from "@/components/order/order-type-bar";
 import { useCustomer, type CustomerProfile } from "@/components/order/customer-provider";
 import { useToast } from "@/components/ui/toast";
 import { businesses } from "@/lib/data/businesses";
@@ -31,6 +32,9 @@ import { createOrder, fetchOrder, generateOrderNumber, OrderValidationError, pos
 import { resolveCart } from "@/lib/cart";
 import { useMotionSafe } from "@/lib/motion";
 import type { DeliveryAddress, Order, PaymentMethod } from "@/lib/types";
+import { ButtonLoader } from "@/components/ui/button-loader";
+import { MpesaWait } from "@/components/motion/mpesa-wait";
+import { SuccessCheck } from "@/components/motion/success-check";
 
 type PayState = "idle" | "working" | "awaiting-provider" | "failed" | "stale";
 type FieldErrors = Record<string, string>;
@@ -154,6 +158,16 @@ function CheckoutForm() {
   const orderIdsRef = useRef<string[] | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [testMode, setTestMode] = useState(false);
+
+  // The mobile pay bar owns the bottom of the screen; tell the toast stack to
+  // sit above it so notifications never cover the pay button.
+  useEffect(() => {
+    if (payState !== "idle") return;
+    document.documentElement.dataset.checkoutPayBar = "true";
+    return () => {
+      delete document.documentElement.dataset.checkoutPayBar;
+    };
+  }, [payState]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -342,6 +356,51 @@ function CheckoutForm() {
       });
     } catch {
       /* the poller surfaces the real state either way */
+    }
+  };
+
+  /**
+   * Re-reads the payment status from the server. Read-only: it never creates a
+   * second charge, it just asks the provider state we already have.
+   */
+  const recheckPayment = async () => {
+    const paymentId = paymentIdRef.current;
+    if (!paymentId) return;
+    try {
+      const res = await fetch(`/api/payments/${encodeURIComponent(paymentId)}`, { cache: "no-store" });
+      if (!res.ok) return;
+      const data = (await res.json()) as { payment?: { status?: string; failureReason?: string | null } };
+      const status = data.payment?.status ?? "pending";
+      if (status === "success") {
+        const created = orderIdsRef.current ?? [];
+        const confirmed: Order[] = [];
+        for (const id of created) {
+          const fresh = await fetchOrder(id);
+          if (fresh) confirmed.push(fresh);
+        }
+        const first = confirmed[0];
+        if (!first) return;
+        setLastOrder(first);
+        clear();
+        setPayState("idle");
+        toast({
+          kind: "success",
+          title: "Payment confirmed",
+          message: `Order ${first.orderNumber} is paid and with ${first.businessName}.`,
+        });
+        window.setTimeout(() => router.push(`/order/${first.id}`), 1200);
+      } else if (status !== "pending") {
+        setStatusMessage(
+          status === "cancelled"
+            ? "Payment was cancelled - no money left your account."
+            : status === "timeout"
+              ? "Confirmation took too long - no money left your account."
+              : "Payment failed - no money left your account."
+        );
+        setPayState("failed");
+      }
+    } catch {
+      /* transient - the poller keeps watching */
     }
   };
 
@@ -567,25 +626,23 @@ function CheckoutForm() {
 
   if (lastOrder) {
     return (
-      <Container className="py-24 text-center">
-        <div className="mx-auto max-w-md">
-          <span className="flex size-16 items-center justify-center rounded-2xl bg-transparent-soft text-success">
-            <CheckCircle2 className="size-9" aria-hidden />
-          </span>
-          <h1 className="mt-6 font-display text-3xl text-foreground">Order confirmed</h1>
-          <p className="mt-3 text-muted-foreground">
+      <Container className="py-24">
+        <div className="mx-auto max-w-md text-center">
+          <SuccessCheck className="mx-auto" />
+          <h1 className="mt-2 font-display text-3xl text-foreground">Order confirmed</h1>
+          <p className="mt-3 leading-relaxed text-muted-foreground">
             <strong className="text-foreground">{lastOrder.orderNumber}</strong> ·{" "}
             {lastOrder.businessName} · <strong className="text-foreground">{formatKES(lastOrder.total)}</strong>
           </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            We&apos;re taking you to live tracking in a moment.
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            Thanks for ordering. We&apos;ll text you as it moves along, and you can follow it live from here.
           </p>
-          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link href={`/order/${lastOrder.id}`}>
-              <Button size="lg">Track order</Button>
+              <Button size="lg" className="w-full sm:w-auto">Track order</Button>
             </Link>
             <Link href="/browse">
-              <Button size="lg" variant="outline">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto">
                 Continue browsing
               </Button>
             </Link>
@@ -631,11 +688,13 @@ function CheckoutForm() {
   }
 
   return (
-    <Container className="py-14 lg:py-20">
+    <>
+      <OrderTypeBar />
+      <Container className="py-14 pb-32 lg:py-20">
       <div className="mb-8">
         <Link
           href="/cart"
-          className="mb-3 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[#0052FF] hover:underline"
+          className="mb-3 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[var(--brand)] hover:underline"
         >
           <ArrowLeft className="size-4" aria-hidden /> Back to cart
         </Link>
@@ -646,83 +705,35 @@ function CheckoutForm() {
       </div>
 
       <form
+        id="checkout-form"
         ref={formRef}
         onSubmit={submitDelivery}
         className="grid gap-8 lg:grid-cols-[1.5fr_0.9fr]"
         noValidate
       >
         {/* Delivery details */}
-        <div className="flex flex-col gap-8">
+        <div className="flex min-w-0 flex-col gap-8">
           {loggedIn && !profileComplete && (
-            <div className="flex items-start gap-3 rounded-2xl border border-[#0052FF]/20 bg-transparent/5 p-4">
-              <AlertCircle className="mt-0.5 size-5 shrink-0 text-[#0052FF]" aria-hidden />
+            <div className="flex items-start gap-3 rounded-2xl border border-[var(--brand)]/20 bg-transparent/5 p-4">
+              <AlertCircle className="mt-0.5 size-5 shrink-0 text-[var(--brand)]" aria-hidden />
               <p className="text-sm text-foreground/85">
                 <strong className="font-semibold text-foreground">Finish your profile</strong> to
                 speed up checkout.{" "}
-                <Link href="/account/profile" className="font-semibold text-[#0052FF] hover:underline">
+                <Link href="/account/profile" className="font-semibold text-[var(--brand)] hover:underline">
                   Complete your delivery details
                 </Link>
               </p>
             </div>
           )}
           <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
-            <h2 className="flex items-center gap-2.5 font-display text-lg text-foreground">
-              <MapPin className="size-5 text-[#0052FF]" aria-hidden /> Delivery details
-            </h2>
-            <div className="mt-5 rounded-xl border border-border bg-muted/30 p-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-start gap-3">
-                  <span
-                    className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-transparent/10 text-[#0052FF]"
-                    aria-hidden
-                  >
-                    <MapPin className="size-4.5" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-foreground">
-                      {location ? "Delivering to your shared location" : "Delivery location"}
-                    </p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {[street, estate, city].filter(Boolean).join(" · ") || "No town or area set yet"}
-                      {location && typeof location.accuracy === "number" && location.accuracy > 0
-                        ? ` · ±${Math.round(location.accuracy)} m`
-                        : ""}
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={allowNewLocation}
-                  disabled={locating}
-                >
-                  {locating ? (
-                    <Loader2 className="size-4 animate-spin" aria-hidden />
-                  ) : (
-                    <Navigation className="size-4" aria-hidden />
-                  )}
-                  {locating ? "Locating…" : "Allow new location"}
-                </Button>
+            <div className="flex items-center gap-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-cta-soft text-[var(--brand)]" aria-hidden>
+                <User className="size-4.5" />
+              </span>
+              <div>
+                <h2 className="font-display text-lg text-foreground">Contact</h2>
+                <p className="text-xs text-muted-foreground">Who we call when your water arrives.</p>
               </div>
-              {locationError && (
-                <p className="mt-3 flex items-start gap-2 text-xs text-danger">
-                  <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden /> {locationError}
-                </p>
-              )}
-            </div>
-            <div className="mt-4">
-              {location ? (
-                <OrderMap
-                  address={{ lat: location.lat, lng: location.lng, label: "Your delivery point" }}
-                  className="h-[220px] w-full"
-                />
-              ) : (
-                <p className="flex items-center gap-2 rounded-xl border border-dashed border-border bg-muted/20 px-4 py-3 text-xs text-muted-foreground">
-                  <MapPin className="size-4 shrink-0 text-[#0052FF]" aria-hidden />
-                  Add a pinned location so the rider finds you faster.
-                </p>
-              )}
             </div>
             <div className="mt-5 grid gap-5 sm:grid-cols-2">
               <Field label="Full name" required error={touch ? errors.name : undefined}>
@@ -766,6 +777,75 @@ function CheckoutForm() {
                   />
                 </Field>
               </div>
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
+            <div className="flex items-center gap-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-cta-soft text-[var(--brand)]" aria-hidden>
+                <MapPin className="size-4.5" />
+              </span>
+              <div>
+                <h2 className="font-display text-lg text-foreground">Delivery</h2>
+                <p className="text-xs text-muted-foreground">Pin the spot so the rider finds you first time.</p>
+              </div>
+            </div>
+            <div className="mt-5 rounded-xl border border-border bg-muted/30 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <span
+                    className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-transparent/10 text-[var(--brand)]"
+                    aria-hidden
+                  >
+                    <MapPin className="size-4.5" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-foreground">
+                      {location ? "Delivering to your shared location" : "Delivery location"}
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {[street, estate, city].filter(Boolean).join(" · ") || "No town or area set yet"}
+                      {location && typeof location.accuracy === "number" && location.accuracy > 0
+                        ? ` · ±${Math.round(location.accuracy)} m`
+                        : ""}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={allowNewLocation}
+                  disabled={locating}
+                >
+                  {locating ? (
+                    <ButtonLoader className="size-4" />
+                  ) : (
+                    <Navigation className="size-4" aria-hidden />
+                  )}
+                  {locating ? "Locating…" : "Allow new location"}
+                </Button>
+              </div>
+              {locationError && (
+                <p className="mt-3 flex items-start gap-2 text-xs text-danger">
+                  <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden /> {locationError}
+                </p>
+              )}
+            </div>
+            <div className="mt-4">
+              {location ? (
+                <OrderMap
+                  address={{ lat: location.lat, lng: location.lng, label: "Your delivery point" }}
+                  className="h-[220px] w-full"
+                />
+              ) : (
+                <p className="flex items-center gap-2 rounded-xl border border-dashed border-border bg-muted/20 px-4 py-3 text-xs text-muted-foreground">
+                  <MapPin className="size-4 shrink-0 text-[var(--brand)]" aria-hidden />
+                  Add a pinned location so the rider finds you faster.
+                </p>
+              )}
+            </div>
+            <div className="mt-5 grid gap-5 sm:grid-cols-2">
               <Field label="Town" required error={touch ? errors.city : undefined}>
                 <Select
                   name="city"
@@ -843,9 +923,15 @@ function CheckoutForm() {
 
           {/* Payment method */}
           <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
-            <h2 className="flex items-center gap-2.5 font-display text-lg text-foreground">
-              <ShieldCheck className="size-5 text-[#0052FF]" aria-hidden /> Payment method
-            </h2>
+            <div className="flex items-center gap-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-cta-soft text-[var(--brand)]" aria-hidden>
+                <ShieldCheck className="size-4.5" />
+              </span>
+              <div>
+                <h2 className="font-display text-lg text-foreground">Payment</h2>
+                <p className="text-xs text-muted-foreground">Money is only released when the station accepts.</p>
+              </div>
+            </div>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               <PaymentOption
                 selected={method === "mpesa"}
@@ -873,7 +959,7 @@ function CheckoutForm() {
         </div>
 
         {/* Summary + pay */}
-        <div className="h-fit rounded-2xl border border-border bg-white p-6 shadow-layered lg:sticky lg:top-24">
+        <div className="h-fit min-w-0 rounded-2xl border border-border bg-white p-6 shadow-layered lg:sticky lg:top-24">
           <h2 className="font-display text-xl text-foreground">Your order</h2>
           <ul className="mt-4 space-y-2.5">
             {rows.map((r) => (
@@ -914,7 +1000,7 @@ function CheckoutForm() {
                 setSaveProfile(e.target.checked);
                 writeConsent(e.target.checked);
               }}
-              className="mt-0.5 size-4 shrink-0 accent-[#0052FF]"
+              className="mt-0.5 size-4 shrink-0 accent-[var(--brand)]"
               aria-describedby="profile-save-note"
             />
             <span className="text-xs leading-relaxed text-muted-foreground">
@@ -931,11 +1017,11 @@ function CheckoutForm() {
               type="checkbox"
               checked={shareLocation}
               onChange={(e) => setShareLocation(e.target.checked)}
-              className="mt-0.5 size-4 shrink-0 accent-[#0052FF]"
+              className="mt-0.5 size-4 shrink-0 accent-[var(--brand)]"
             />
             <span className="text-xs leading-relaxed text-muted-foreground">
               <span className="inline-flex items-center gap-1.5 font-semibold text-foreground">
-                <Navigation className="size-3.5 text-[#0052FF]" aria-hidden /> Share my live location
+                <Navigation className="size-3.5 text-[var(--brand)]" aria-hidden /> Share my live location
               </span>{" "}
               with the delivery person so they can see and find you.
               <span className="block text-muted-foreground/80">
@@ -950,7 +1036,7 @@ function CheckoutForm() {
               type="checkbox"
               checked={smsUpdates}
               onChange={(e) => setSmsUpdates(e.target.checked)}
-              className="mt-0.5 size-4 shrink-0 accent-[#0052FF]"
+              className="mt-0.5 size-4 shrink-0 accent-[var(--brand)]"
             />
             <span className="text-xs leading-relaxed text-muted-foreground">
               <span className="font-semibold text-foreground">Text me order updates</span> - accepted, rider on
@@ -994,7 +1080,7 @@ function CheckoutForm() {
           {(payState === "working" || payState === "awaiting-provider") && (
             <div className="mt-4">
               <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <Loader2 className="size-4 animate-spin text-[#0052FF]" aria-hidden />
+                <ButtonLoader className="size-4 text-[var(--brand)]" />
                 {payState === "working" ? "Creating your order…" : "Waiting for provider confirmation…"}
               </p>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
@@ -1041,6 +1127,31 @@ function CheckoutForm() {
         </div>
       </form>
 
+      {/* Mobile: the total and the pay action stay reachable without scrolling
+          back up to the summary card. */}
+      {payState === "idle" && (
+        <div className="fixed inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-40 border-t border-border bg-white/95 px-4 pb-3 pt-3 backdrop-blur lg:hidden">
+          <div className="flex items-center gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Total
+              </p>
+              <p className="font-display text-xl leading-tight text-foreground">
+                {formatKES(total)}
+              </p>
+            </div>
+            <button
+              type="submit"
+              form="checkout-form"
+              disabled={stationBlockers.length > 0}
+              className="shrink-0 rounded-xl bg-orange-500 px-6 py-3.5 text-sm font-semibold text-white shadow-[0_4px_14px_-4px_rgb(249,115,22)] transition-colors hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {method === "mpesa" ? "Pay with M-Pesa" : "Pay by card"}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Payment overlay: status display only. Nothing here can mark an order paid. */}
       <AnimatePresence>
         {(payState === "working" || payState === "awaiting-provider") && (
@@ -1052,12 +1163,14 @@ function CheckoutForm() {
             testMode={testMode}
             statusMessage={statusMessage}
             onSimulateApprove={simulateProviderApproval}
+            onRecheck={recheckPayment}
             reduce={reduce}
             transition={transition}
           />
         )}
       </AnimatePresence>
-    </Container>
+      </Container>
+    </>
   );
 }
 
@@ -1083,8 +1196,8 @@ function PaymentOption({
       aria-pressed={selected}
       className={`flex items-center gap-3.5 rounded-xl border p-4 text-left transition-all min-h-[64px] ${
         selected
-          ? "border-[#0052FF] bg-transparent/5 ring-2 ring-[#0052FF]/20"
-          : "border-border bg-white hover:border-[#0052FF]/40"
+          ? "border-[var(--brand)] bg-transparent/5 ring-2 ring-[var(--brand)]/20"
+          : "border-border bg-white hover:border-[var(--brand)]/40"
       }`}
     >
       <span className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${selected ? "bg-foreground text-white" : "bg-muted text-muted-foreground"}`}>
@@ -1102,7 +1215,7 @@ function PaymentOption({
         <span className="block truncate text-xs text-muted-foreground">{subtitle}</span>
       </span>
       <span
-        className={`size-4 shrink-0 rounded-full border-2 ${selected ? "border-[#0052FF] bg-transparent" : "border-border bg-white"}`}
+        className={`size-4 shrink-0 rounded-full border-2 ${selected ? "border-[var(--brand)] bg-transparent" : "border-border bg-white"}`}
         style={selected ? { boxShadow: "inset 0 0 0 3px white" } : undefined}
         aria-hidden
       />
@@ -1123,6 +1236,7 @@ function PaymentOverlay({
   testMode,
   statusMessage,
   onSimulateApprove,
+  onRecheck,
   reduce,
   transition,
 }: {
@@ -1133,6 +1247,7 @@ function PaymentOverlay({
   testMode?: boolean;
   statusMessage?: string | null;
   onSimulateApprove: () => void;
+  onRecheck: () => void;
   reduce?: boolean;
   transition?: Transition;
 }) {
@@ -1141,6 +1256,29 @@ function PaymentOverlay({
   const overlayTransition: Transition = r ? { duration: 0 } : { duration: 0.2 };
   const panelTransition: Transition = r ? { duration: 0 } : t;
   const isMpesa = method === "mpesa";
+  const [secondsLeft, setSecondsLeft] = useState(120);
+  const [rechecking, setRechecking] = useState(false);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setSecondsLeft((s) => (s > 0 ? s - 1 : 0));
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const recheck = async () => {
+    setRechecking(true);
+    try {
+      await onRecheck();
+    } finally {
+      setRechecking(false);
+    }
+  };
+
+  const progress = Math.max(0, Math.min(100, (secondsLeft / 120) * 100));
+  const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
+  const ss = String(secondsLeft % 60).padStart(2, "0");
+
   return (
     <motion.div
       className="fixed inset-0 z-[80] flex items-center justify-center p-4"
@@ -1173,27 +1311,69 @@ function PaymentOverlay({
 
         <div className="flex flex-col items-center px-6 py-8 text-center">
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="size-10 animate-spin text-[#0052FF]" aria-hidden />
-            <p className="text-sm text-muted-foreground">
-              {isMpesa ? (
-                <>
-                  An STK push for <strong className="text-foreground">{formatKES(amount)}</strong> was
-                  sent to <strong className="text-foreground">{phone}</strong>. Enter your M-Pesa PIN
-                  and press Send.
-                </>
-              ) : (
-                <>
+            {isMpesa ? (
+              <MpesaWait
+                detail={`An STK push for ${formatKES(amount)} was sent to ${phone}.`}
+              />
+            ) : (
+              <>
+                <ButtonLoader className="size-10 text-[var(--brand)]" />
+                <p className="text-sm text-muted-foreground">
                   Verifying <strong className="text-foreground">{formatKES(amount)}</strong> with the
                   card provider…
-                </>
-              )}
-            </p>
+                </p>
+              </>
+            )}
             <p className="text-sm text-muted-foreground">
               {statusMessage ?? "Waiting for provider confirmation…"}
             </p>
             <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
               {busy ? "Placing your order…" : "Do not close this window"}
             </p>
+
+            <div className="mt-5 w-full rounded-2xl border border-border bg-surface-2/60 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Time remaining
+                </span>
+                <span className="font-mono text-sm tabular-nums text-foreground" aria-live="off">
+                  {mm}:{ss}
+                </span>
+              </div>
+              <div
+                className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-border"
+                role="progressbar"
+                aria-label="Time remaining to confirm payment"
+                aria-valuemin={0}
+                aria-valuemax={120}
+                aria-valuenow={secondsLeft}
+              >
+                <div
+                  className="h-full rounded-full bg-[var(--brand)] transition-[width] duration-1000 ease-linear"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                {secondsLeft > 0
+                  ? "Check your phone for the M-Pesa prompt. Nothing is charged until you approve it."
+                  : "We haven't heard back yet. Re-check the payment status - you won't be charged twice."}
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-3 w-full"
+                onClick={recheck}
+                disabled={rechecking}
+              >
+                {rechecking ? (
+                  <ButtonLoader className="size-4" />
+                ) : (
+                  <RefreshCcw className="size-4" aria-hidden />
+                )}
+                {rechecking ? "Checking…" : "Check payment status"}
+              </Button>
+            </div>
             {testMode && (
               <div className="mt-2 w-full rounded-xl border border-dashed border-warning/60 bg-warning/5 p-4">
                 <p className="font-mono text-[10px] uppercase tracking-widest text-warning">

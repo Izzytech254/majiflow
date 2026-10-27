@@ -2,12 +2,13 @@
 
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
+import { usePrefersReducedMotion } from "@/lib/motion";
 
 /** Soft fade between routes so navigation feels smooth. */
 export function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const reduce = useReducedMotion();
+  const reduce = usePrefersReducedMotion();
 
   return (
     <motion.div

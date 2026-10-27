@@ -6,7 +6,8 @@ import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { OrderStatusBadge } from "@/components/ui/order-status-badge";
-import { EmptyState, Skeleton } from "@/components/ui/feedback";
+import { EmptyState } from "@/components/ui/feedback";
+import { SkeletonCard } from "@/components/ui/skeleton-card";
 import { useCustomer } from "@/components/order/customer-provider";
 import { AccountError, itemsSummary, useAccountResource, useReorder } from "@/components/account/account-ui";
 import { accountApi } from "@/lib/account-client";
@@ -97,14 +98,14 @@ export function AccountPage() {
             {summary
               ? stats.map((s) => (
                   <div key={s.label} className="rounded-2xl border border-border bg-white p-4 shadow-card sm:p-5">
-                    <span className="flex size-9 items-center justify-center rounded-lg bg-transparent/10 text-[#0052FF]">
+                    <span className="flex size-9 items-center justify-center rounded-lg bg-transparent/10 text-[var(--brand)]">
                       <s.icon className="size-4.5" aria-hidden />
                     </span>
                     <p className="mt-3 font-display text-2xl text-foreground">{s.value}</p>
                     <p className="text-xs text-muted-foreground">{s.label}</p>
                   </div>
                 ))
-              : [1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-32 rounded-2xl" />)}
+              : [1, 2, 3, 4].map((i) => <SkeletonCard key={i} variant="metric" />)}
           </section>
 
           <div className="mt-8 grid gap-8 lg:grid-cols-[1.5fr_0.9fr]">
@@ -136,7 +137,7 @@ export function AccountPage() {
                 {!summary ? (
                   <div className="mt-4 space-y-3" role="status" aria-label="Loading orders">
                     {[1, 2].map((i) => (
-                      <Skeleton key={i} className="h-24 rounded-2xl" />
+                      <SkeletonCard key={i} variant="row" />
                     ))}
                   </div>
                 ) : summary.recentOrders.length === 0 ? (
@@ -175,11 +176,11 @@ export function AccountPage() {
               </div>
               <div className="mt-4 flex flex-col gap-3">
                 {!summary ? (
-                  <Skeleton className="h-20 rounded-2xl" />
+                  <SkeletonCard variant="row" />
                 ) : summary.addresses.length === 0 ? (
                   <Link
                     href="/account/addresses"
-                    className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-white p-8 text-center transition-colors hover:border-[#0052FF]/40"
+                    className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-white p-8 text-center transition-colors hover:border-[var(--brand)]/40"
                   >
                     <Plus className="size-6 text-black" aria-hidden />
                     <p className="text-sm font-medium text-muted-foreground">No saved addresses yet</p>
@@ -190,7 +191,7 @@ export function AccountPage() {
                     {summary.addresses.map((a) => (
                       <div key={a.id} className="rounded-2xl border border-border bg-white p-5 shadow-card">
                         <div className="flex items-center gap-2">
-                          <MapPin className="size-4 text-[#0052FF]" aria-hidden />
+                          <MapPin className="size-4 text-[var(--brand)]" aria-hidden />
                           <p className="text-sm font-semibold text-foreground">
                             {a.label} · {a.estate}
                             {a.building && <span className="font-normal text-muted-foreground"> · {a.building}</span>}
@@ -210,8 +211,8 @@ export function AccountPage() {
               </div>
 
               {lastOrder && (
-                <div className="mt-6 rounded-2xl border border-[#0052FF]/20 bg-transparent/5 p-5">
-                  <p className="font-mono text-[11px] uppercase tracking-widest text-[#0052FF]">Quick reorder</p>
+                <div className="mt-6 rounded-2xl border border-[var(--brand)]/20 bg-transparent/5 p-5">
+                  <p className="font-mono text-[11px] uppercase tracking-widest text-[var(--brand)]">Quick reorder</p>
                   <p className="mt-1.5 text-sm text-foreground/85">
                     Your last order was <strong className="font-semibold">{itemsSummary(lastOrder)}</strong> from{" "}
                     {lastOrder.businessName}.

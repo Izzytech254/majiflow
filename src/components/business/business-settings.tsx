@@ -78,7 +78,7 @@ export function BusinessSettings() {
         <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
           <div className="flex items-center justify-between gap-3">
             <h2 className="flex items-center gap-2 font-display text-lg text-foreground">
-              <Store className="size-5 text-[#0052FF]" aria-hidden /> Business profile
+              <Store className="size-5 text-[var(--brand)]" aria-hidden /> Business profile
             </h2>
             <Badge variant="muted">Read only</Badge>
           </div>
@@ -111,7 +111,7 @@ export function BusinessSettings() {
           {/* Hours */}
           <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
             <h2 className="flex items-center gap-2 font-display text-lg text-foreground">
-              <Clock className="size-5 text-[#0052FF]" aria-hidden /> Operating hours
+              <Clock className="size-5 text-[var(--brand)]" aria-hidden /> Operating hours
             </h2>
             <ul className="mt-4 space-y-2">
               {hours.map((h) => (
@@ -131,7 +131,7 @@ export function BusinessSettings() {
           {/* Notifications */}
           <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
             <h2 className="flex items-center gap-2 font-display text-lg text-foreground">
-              <Bell className="size-5 text-[#0052FF]" aria-hidden /> Notifications
+              <Bell className="size-5 text-[var(--brand)]" aria-hidden /> Notifications
             </h2>
             <ul className="mt-4 space-y-3">
               {(
@@ -177,7 +177,7 @@ export function BusinessSettings() {
       {/* Delivery */}
       <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
         <h2 className="flex items-center gap-2 font-display text-lg text-foreground">
-          <Truck className="size-5 text-[#0052FF]" aria-hidden /> Delivery & fees
+          <Truck className="size-5 text-[var(--brand)]" aria-hidden /> Delivery & fees
         </h2>
         <div className="mt-5 grid gap-5 sm:grid-cols-3">
           <Field label="Flat delivery fee">
@@ -210,7 +210,7 @@ export function BusinessSettings() {
       <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 font-display text-lg text-foreground">
-            <Smartphone className="size-5 text-[#0052FF]" aria-hidden /> Payment methods
+            <Smartphone className="size-5 text-[var(--brand)]" aria-hidden /> Payment methods
           </h2>
         </div>
         <ul className="mt-5 space-y-3">

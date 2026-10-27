@@ -96,7 +96,7 @@ export function AdminBusinessApplications() {
   return (
     <Container className="py-10 lg:py-14">
       <div>
-        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#0052FF]">Operations</p>
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--brand)]">Operations</p>
         <h1 className="mt-2 font-display text-3xl text-foreground sm:text-4xl">Business applications</h1>
         <p className="mt-2 text-sm text-muted-foreground">Review submitted applications and record the decision.</p>
       </div>
@@ -135,7 +135,7 @@ export function AdminBusinessApplications() {
                             maxLength={2000}
                             rows={2}
                             placeholder="Explain why this application is being rejected"
-                            className="mt-1 block w-full rounded-xl border border-border px-3 py-2 text-sm font-normal outline-none focus:border-[#0052FF]"
+                            className="mt-1 block w-full rounded-xl border border-border px-3 py-2 text-sm font-normal outline-none focus:border-[var(--brand)]"
                           />
                         </label>
                         <Button size="sm" disabled={updating} onClick={() => void update(application, "approved")}>Approve</Button>

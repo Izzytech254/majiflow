@@ -39,7 +39,7 @@ export function BusinessPromotions() {
       </div>
 
       {note && (
-        <div role="status" className="flex items-center justify-between rounded-xl border border-[#0052FF]/25 bg-transparent/5 px-4 py-3 text-sm text-[#0052FF]">
+        <div role="status" className="flex items-center justify-between rounded-xl border border-[var(--brand)]/25 bg-transparent/5 px-4 py-3 text-sm text-[var(--brand)]">
           {note}
           <button onClick={() => setNote(null)} className="font-semibold" aria-label="Dismiss">
             Dismiss
@@ -57,7 +57,7 @@ export function BusinessPromotions() {
             <h2 className="mt-3 font-display text-lg text-foreground">{p.name}</h2>
             <p className="mt-1 text-sm text-muted-foreground">{p.discount}</p>
             <p className="mt-2 flex items-center gap-1.5 text-xs text-foreground/70">
-              <Users2 className="size-3.5 text-[#0052FF]" aria-hidden /> Target: {p.audience}
+              <Users2 className="size-3.5 text-[var(--brand)]" aria-hidden /> Target: {p.audience}
             </p>
             <div className="mt-4 border-t border-border pt-3">
               <div className="flex justify-between text-xs text-muted-foreground">
@@ -72,7 +72,7 @@ export function BusinessPromotions() {
             </div>
             <button
               onClick={() => toggle(p.id)}
-              className="mt-4 w-full rounded-xl border border-[#0052FF]/30 py-2 text-sm font-semibold text-[#0052FF] transition-colors hover:bg-transparent/5"
+              className="mt-4 w-full rounded-xl border border-[var(--brand)]/30 py-2 text-sm font-semibold text-[var(--brand)] transition-colors hover:bg-transparent/5"
             >
               {p.active ? "Pause" : "Reactivate"}
             </button>

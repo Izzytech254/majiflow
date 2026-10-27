@@ -23,7 +23,7 @@ export function AccordionItem({ value, question, children, defaultOpen }: Accord
     <div
       className={cn(
         "overflow-hidden rounded-xl border bg-white transition-colors",
-        open ? "border-[#0052FF]/25 shadow-card" : "border-border"
+        open ? "border-[var(--brand)]/25 shadow-card" : "border-border"
       )}
     >
       <h3>
@@ -39,7 +39,7 @@ export function AccordionItem({ value, question, children, defaultOpen }: Accord
             className={cn(
               "flex size-7 shrink-0 items-center justify-center rounded-full border transition-all duration-300",
               open
-                ? "rotate-180 border-[#0052FF] bg-[#0052FF] text-white"
+                ? "rotate-180 border-[var(--brand)] bg-[var(--brand)] text-white"
                 : "border-border text-muted-foreground"
             )}
           >

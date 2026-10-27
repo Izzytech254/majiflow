@@ -1,23 +1,23 @@
 import { Hero } from "@/components/home/hero";
-import { TrustMetrics } from "@/components/home/trust-metrics";
-import { HowItWorks } from "@/components/home/how-it-works";
-import { BusinessBenefits } from "@/components/home/business-benefits";
-import { FeaturedBusinesses } from "@/components/home/featured-businesses";
-import { DashboardFeature } from "@/components/home/dashboard-feature";
-import { PricingSection } from "@/components/home/pricing-section";
-import { FaqSection } from "@/components/home/faq-section";
+import { OrderTypeBar } from "@/components/home/order-type-bar";
+import { PromotionsStrip } from "@/components/home/promotions-strip";
+import { BrowseCategories } from "@/components/home/browse-categories";
+import { GiftBanner } from "@/components/home/gift-banner";
+import { AppDownload } from "@/components/home/app-download";
+import { VendorBanner } from "@/components/home/vendor-banner";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 export default function HomePage() {
   return (
     <>
       <Hero />
-      <TrustMetrics />
-      <HowItWorks />
-      <BusinessBenefits />
-      <FeaturedBusinesses />
-      <DashboardFeature />
-      <PricingSection />
-      <FaqSection />
+      <OrderTypeBar />
+      <PromotionsStrip />
+      <BrowseCategories />
+      <GiftBanner />
+      <AppDownload />
+      <VendorBanner />
+      <SiteFooter />
     </>
   );
 }

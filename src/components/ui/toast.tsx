@@ -34,7 +34,7 @@ export function useToast() {
 const meta: Record<ToastKind, { icon: ReactNode; ring: string }> = {
   success: { icon: <CheckCircle2 className="size-4.5 text-success" aria-hidden />, ring: "bg-success-soft" },
   error: { icon: <AlertCircle className="size-4.5 text-danger" aria-hidden />, ring: "bg-danger-soft" },
-  info: { icon: <Info className="size-4.5 text-[#0052FF]" aria-hidden />, ring: "bg-[#0052FF]/10" },
+  info: { icon: <Info className="size-4.5 text-[var(--brand)]" aria-hidden />, ring: "bg-[var(--brand)]/10" },
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -60,7 +60,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       <div
         aria-live="polite"
-        className="pointer-events-none fixed inset-x-0 bottom-4 z-[100] flex flex-col items-center gap-2 px-4 sm:items-end sm:pr-6"
+        style={{ bottom: "var(--notify-bottom)" }}
+        className="pointer-events-none fixed inset-x-0 z-[100] flex flex-col items-center gap-2 px-4 sm:items-end sm:pr-6"
       >
         <AnimatePresence>
           {toasts.map((toast) => (
@@ -93,7 +94,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               {!reduce && (
                 <motion.span
                   aria-hidden
-                  className="absolute bottom-0 left-0 h-0.5 bg-[#0052FF]"
+                  className="absolute bottom-0 left-0 h-0.5 bg-[var(--brand)]"
                   initial={{ width: "100%" }}
                   animate={{ width: 0 }}
                   transition={{ duration: DURATION / 1000, ease: "linear" }}
