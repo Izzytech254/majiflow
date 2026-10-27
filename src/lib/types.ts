@@ -1,4 +1,4 @@
-export type OrderStatus = "pending" | "confirmed" | "in-transit" | "delivered" | "cancelled";
+export type OrderStatus = "pending" | "confirmed" | "accepted" | "preparing" | "rider_assigned" | "in-transit" | "out_for_delivery" | "delivered" | "cancelled";
 
 export interface NavItem {
   label: string;
@@ -148,3 +148,5 @@ export interface Testimonial {
   content: string;
   avatar: string;
 }
+
+export type FulfillmentActor = "customer" | "station" | "rider" | "admin";

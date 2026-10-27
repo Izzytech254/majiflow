@@ -98,13 +98,12 @@ export async function getPayment(paymentId: string) {
 }
 
 export async function requestRefund(input: any, amount?: number) {
-  void input;
-  void amount;
+  void input; void amount;
   return { ok: true, id: "r1", status: "pending", refunds: [] };
 }
 
-export async function confirmRefund(input: any) {
-  void input;
+export async function confirmRefund(input: any, _maybe?: any) {
+  void input; void _maybe;
   return { ok: true, id: "r1", status: "succeeded", providerReference: "ref1" };
 }
 
