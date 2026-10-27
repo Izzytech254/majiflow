@@ -130,16 +130,18 @@ export function parseDarajaCallback(body: unknown): { orderId?: string; outcome?
 
 export async function reconcilePayment(paymentId: string, _ctx?: unknown) {
   void _ctx;
-  const status = await getPaymentStatus(paymentId);
+  const status: any = await getPaymentStatus(paymentId);
   if (!status) return null;
   return {
     id: paymentId,
+    paymentId: paymentId,
     orderIds: [],
     amount: 0,
-    status: status.status || status.payment?.status || "pending",
+    status: status?.status || status?.payment?.status || "unpaid",
     method: "mpesa",
     failureReason: null,
     providerReceipt: null,
+    providerReference: null,
     updatedAt: new Date().toISOString(),
   };
 }
