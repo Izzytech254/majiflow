@@ -142,8 +142,9 @@ export async function reconcilePayment(paymentId: string, _ctx?: any) {
   };
 }
 
-export async function createPaymentForOrders(input: InitiatePaymentInput) {
-  return initiatePayment(input);
+export async function createPaymentForOrders(input: InitiatePaymentInput): Promise<any> {
+  const res = await initiatePayment(input);
+  return { payment: res.payment || res, ...res };
 }
 
 export { normalizePhone };
@@ -161,7 +162,7 @@ export function adminKeyOk(key: string | null | undefined): boolean {
   return key === expected;
 }
 
-export async function recordPaymentTransition(input: any) {
-  void input;
+export async function recordPaymentTransition(input: any, maybe?: any) {
+  void input; void maybe;
   return { ok: true };
 }
