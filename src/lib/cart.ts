@@ -259,3 +259,7 @@ export function productRequirements(product: BusinessProduct, business: Business
 export function itemHref(businessSlug: string, productId: string): string {
   return `/browse/${encodeURIComponent(businessSlug)}/${encodeURIComponent(productId)}`;
 }
+
+export function mapCartLinesToOrderItems(items: unknown[]) {
+  return items;
+}

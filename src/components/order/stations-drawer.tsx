@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, ChevronRight, Clock3, MapPin, Store, X } from "lucide-react";
@@ -10,9 +10,15 @@ import { useBrowseContext } from "@/components/order/browse-context";
 import { useOrderSession } from "@/components/order/order-session-provider";
 import { useMotionSafe } from "@/lib/motion";
 import { useFocusTrap } from "@/lib/use-focus-trap";
-import { CITIES } from "@/lib/constants";
-import { discoverStations } from "@/lib/station-discovery";
 import { cn } from "@/lib/utils";
+import type { Business } from "@/lib/types";
+
+interface NearbyStationResult {
+  station: Business;
+  distanceKm?: number;
+  etaMinutes?: number;
+  delivers?: boolean;
+}
 
 export function StationsDrawer({
   open,
@@ -29,31 +35,56 @@ export function StationsDrawer({
   const { hydrated: sessionHydrated } = useOrderSession();
   const { reduce, transition } = useMotionSafe();
   const panelRef = useFocusTrap<HTMLElement>(open);
+  const [stations, setStations] = useState<NearbyStationResult[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const hasCoordinates =
     typeof location?.lat === "number" &&
     Number.isFinite(location.lat) &&
     typeof location.lng === "number" &&
     Number.isFinite(location.lng);
-  const city = CITIES.find((item) => item.toLowerCase() === location?.city?.toLowerCase()) ?? "All cities";
-  const stations = useMemo(() => {
-    const nearby = location
-      ? discoverStations({
-          city,
-          location: hasCoordinates ? { lat: location.lat!, lng: location.lng! } : null,
-          byDistance: hasCoordinates,
-        }).results.slice(0, 8)
-      : [];
 
-    if (!selectedStation || nearby.some(({ business }) => business.id === selectedStation.id)) {
-      return nearby;
+  useEffect(() => {
+    if (!open || !hasCoordinates) {
+      setStations([]);
+      return;
     }
+    let cancelled = false;
+    setLoading(true);
+    const params = new URLSearchParams({
+      lat: String(location!.lat),
+      lng: String(location!.lng),
+    });
+    fetch(`/api/stations/nearby?${params.toString()}`, { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data: { stations?: Business[] }) => {
+        if (cancelled) return;
+        const list = Array.isArray(data.stations) ? data.stations : [];
+        const results: NearbyStationResult[] = list.map((station: any) => ({
+          station,
+          distanceKm: typeof station.distanceKm === "number" ? station.distanceKm : undefined,
+          etaMinutes: typeof station.etaMinutes === "number" ? station.etaMinutes : station.avgDeliveryMinutes,
+          delivers: true,
+        }));
+        setStations(results);
+      })
+      .catch(() => {
+        if (!cancelled) setStations([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, hasCoordinates, location?.lat, location?.lng]);
 
-    const selected = discoverStations({ city: selectedStation.city }).results.find(
-      ({ business }) => business.id === selectedStation.id
-    );
-    return selected ? [selected, ...nearby] : nearby;
-  }, [location, city, hasCoordinates, selectedStation]);
+  const list = useMemo(() => {
+    if (!selectedStation) return stations;
+    if (stations.some(({ station }) => station.id === selectedStation.id)) return stations;
+    const selected: NearbyStationResult = { station: selectedStation, delivers: true };
+    return [selected, ...stations];
+  }, [stations, selectedStation]);
 
   useEffect(() => {
     if (!open) return;
@@ -144,7 +175,12 @@ export function StationsDrawer({
                   <MapPin className="size-4" aria-hidden /> Set Location
                 </Button>
               </div>
-            ) : stations.length === 0 ? (
+            ) : loading ? (
+              <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 text-sm text-muted-foreground">
+                <ButtonLoader className="size-7" />
+                Finding nearby stations…
+              </div>
+            ) : list.length === 0 ? (
               <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-7 py-8 text-center">
                 <span className="flex size-16 items-center justify-center rounded-full bg-brand/10 text-brand">
                   <Store className="size-8" aria-hidden />
@@ -172,13 +208,13 @@ export function StationsDrawer({
                   </button>
                 </div>
                 <ul className="flex flex-col gap-2" aria-label="Nearby water stations">
-                  {stations.map(({ business, distanceKm, etaMinutes, open: isOpen }) => {
-                    const selected = selectedStation?.id === business.id;
+                  {list.map(({ station, distanceKm, etaMinutes }) => {
+                    const selected = selectedStation?.id === station.id;
                     return (
-                      <li key={business.id}>
+                      <li key={station.id}>
                         <button
                           type="button"
-                          onClick={() => selectStation(business.id)}
+                          onClick={() => selectStation(station.id)}
                           aria-pressed={selected}
                           className={cn(
                             "flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors",
@@ -191,18 +227,16 @@ export function StationsDrawer({
                             <Store className="size-5" aria-hidden />
                           </span>
                           <span className="min-w-0 flex-1">
-                            <span className="block truncate text-sm font-semibold text-foreground">{business.name}</span>
+                            <span className="block truncate text-sm font-semibold text-foreground">{station.name}</span>
                             <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
-                              <span className={isOpen ? "text-success" : "text-muted-foreground"}>
-                                {isOpen ? "Open" : "Closed"}
-                              </span>
+                              <span className="text-success">Open</span>
                               {distanceKm !== undefined && (
                                 <span className="inline-flex items-center gap-1">
                                   <MapPin className="size-3" aria-hidden /> {distanceKm < 1 ? "<1 km" : `${distanceKm.toFixed(1)} km`}
                                 </span>
                               )}
                               <span className="inline-flex items-center gap-1">
-                                <Clock3 className="size-3" aria-hidden /> ~{etaMinutes ?? business.avgDeliveryMinutes} min
+                                <Clock3 className="size-3" aria-hidden /> ~{etaMinutes ?? station.avgDeliveryMinutes} min
                               </span>
                             </span>
                           </span>

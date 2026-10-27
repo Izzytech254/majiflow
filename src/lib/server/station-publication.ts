@@ -2,7 +2,6 @@ import { and, eq } from "drizzle-orm";
 import { getDatabase } from "@/lib/server/db";
 import { businesses, businessApplications, subscriptions } from "@/lib/server/db/schema";
 import { evaluateSubscriptionEligibility, type SubscriptionRecord } from "@/lib/server/subscriptions";
-import { businesses as seededBusinesses, getBusiness as getSeededBusiness } from "@/lib/data/businesses";
 import type { Business } from "@/lib/types";
 import bioWaterCover from "@/assets/images/business/bio-water-kasarani.webp";
 
@@ -73,15 +72,6 @@ export interface StationPublicationEligibilityResult {
   };
 }
 
-/**
- * Authoritative, pure publication gate:
- * 1. The linked application is approved.
- * 2. The business listing is complete.
- * 3. The subscription is either an eligible unexpired trial or an eligible active paid subscription.
- *
- * All eligibility decisions (owner overview, public browse, detail pages, sitemap,
- * and publishBusiness) run through this single function so the rules cannot drift.
- */
 export function evaluateStationPublicationEligibility(
   business: { isComplete: boolean } | null | undefined,
   application: { status: string } | null | undefined,
@@ -144,10 +134,6 @@ export function evaluateStationPublicationEligibility(
   };
 }
 
-/**
- * Authoritative single server-side gate checking business existence, application
- * approval, listing completeness and subscription eligibility.
- */
 export async function checkStationPublicationEligibility(
   businessId: string,
   now = new Date()
@@ -184,10 +170,6 @@ export async function checkStationPublicationEligibility(
   );
 }
 
-/**
- * Publishes a business after enforcing the authoritative publication gate.
- * The business will not be published unless all three conditions are satisfied.
- */
 export async function publishBusiness(
   businessId: string,
   ownerUserId: string,
@@ -233,10 +215,6 @@ export interface ListingUpdates {
   longitude?: number | string | null;
 }
 
-/**
- * Validates and completes a business listing using genuinely existing schema fields.
- * Validates that all required operational fields are present and valid before setting isComplete = true.
- */
 export async function completeBusinessListing(
   businessId: string,
   ownerUserId: string,
@@ -350,9 +328,6 @@ export async function completeBusinessListing(
   return completed;
 }
 
-/**
- * Unpublishes a business.
- */
 export async function unpublishBusiness(businessId: string, ownerUserId: string) {
   const { db } = await getDatabase();
 
@@ -379,17 +354,6 @@ export async function unpublishBusiness(businessId: string, ownerUserId: string)
   return updated;
 }
 
-/**
- * Authoritative database query for published, eligible stations.
- * Joins businesses, businessApplications, and subscriptions, and strictly verifies:
- * - isPublished is true
- * - isComplete is true
- * - application status is approved
- * - subscription qualifies through evaluateSubscriptionEligibility(now)
- *
- * Throws when the database is unreachable so callers can distinguish an
- * infrastructure failure from a genuinely empty directory.
- */
 async function queryEligiblePublishedDatabaseBusinesses(now: Date) {
   const { db } = await getDatabase();
 
@@ -416,10 +380,6 @@ async function queryEligiblePublishedDatabaseBusinesses(now: Date) {
   });
 }
 
-/**
- * Safe wrapper around the authoritative query for callers that only need
- * results and treat database failures as "no database stations".
- */
 export async function getEligiblePublishedDatabaseBusinesses(now = new Date()) {
   try {
     return await queryEligiblePublishedDatabaseBusinesses(now);
@@ -428,9 +388,6 @@ export async function getEligiblePublishedDatabaseBusinesses(now = new Date()) {
   }
 }
 
-/**
- * Adapts database and application rows into the public Business interface.
- */
 export function mapDatabaseBusinessToPublic(
   business: typeof businesses.$inferSelect,
   application: typeof businessApplications.$inferSelect,
@@ -469,11 +426,6 @@ export function mapDatabaseBusinessToPublic(
   };
 }
 
-/**
- * Retrieves a public station by slug.
- * Excludes any database station that fails the eligibility check.
- * Preserves seeded demo stations when not found or database is unreachable.
- */
 export async function getPublicStationBySlug(slug: string, now = new Date()): Promise<Business | null> {
   try {
     const { db } = await getDatabase();
@@ -505,34 +457,21 @@ export async function getPublicStationBySlug(slug: string, now = new Date()): Pr
       return mapDatabaseBusinessToPublic(record.business, record.application, record.subscription);
     }
   } catch {
-    // Database unreachable or table uninitialized - fall through to seeded stations
+    // Database unreachable or table uninitialized
   }
 
-  return getSeededBusiness(slug) ?? null;
+  return null;
 }
 
-/**
- * Retrieves all publicly browsable station slugs for sitemap or discovery.
- * Includes seeded stations and eligible published database stations.
- * Ineligible database stations are excluded.
- */
 export async function getPublicStationSlugs(now = new Date()): Promise<string[]> {
   try {
     const eligibleDb = await queryEligiblePublishedDatabaseBusinesses(now);
-    const dbSlugs = eligibleDb.map((row) => row.business.slug);
-    const seededSlugs = seededBusinesses.map((b) => b.slug);
-    return Array.from(new Set([...seededSlugs, ...dbSlugs]));
+    return eligibleDb.map((row) => row.business.slug);
   } catch {
-    return seededBusinesses.map((b) => b.slug);
+    return [];
   }
 }
 
-/**
- * Retrieves all publicly browsable stations for the browse page.
- * Combines seeded demo stations with eligible, published database stations.
- * Ineligible database stations are excluded.
- * Distinguishes real empty results from database/service failure.
- */
 export async function getPublicStations(
   now = new Date()
 ): Promise<{ stations: Business[]; databaseAvailable: boolean }> {
@@ -541,15 +480,13 @@ export async function getPublicStations(
     const dbStations = eligibleDb.map(({ business, application, subscription }) =>
       mapDatabaseBusinessToPublic(business, application, subscription)
     );
-    const seededSlugs = new Set(seededBusinesses.map((b) => b.slug));
-    const uniqueDbStations = dbStations.filter((s) => !seededSlugs.has(s.slug));
     return {
-      stations: [...seededBusinesses, ...uniqueDbStations],
+      stations: dbStations,
       databaseAvailable: true,
     };
   } catch {
     return {
-      stations: [...seededBusinesses],
+      stations: [],
       databaseAvailable: false,
     };
   }

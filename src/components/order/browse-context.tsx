@@ -13,7 +13,6 @@ import { usePathname } from "next/navigation";
 import type { Business, DeliveryAddress } from "@/lib/types";
 import type { CartLine } from "@/lib/cart";
 import { cartStationId } from "@/lib/cart";
-import { businesses } from "@/lib/data/businesses";
 import { useCart } from "@/components/order/cart-provider";
 import { useOrderSession } from "@/components/order/order-session-provider";
 
@@ -102,19 +101,15 @@ export function BrowseContextProvider({ children }: { children: ReactNode }) {
   const { items, addItem, updateQuantity } = useCart();
   const [journey, setJourney] = useState<BrowseJourneyState>(DEFAULT_JOURNEY);
   const [hydrated, setHydrated] = useState(false);
+  const [selectedStation, setSelectedStation] = useState<Business | null>(null);
   const onBrowseRoute = pathname === "/browse" || pathname.startsWith("/browse/");
   const selectedId = onBrowseRoute
     ? session.stationId ?? cartStationId(items)
     : cartStationId(items) ?? session.stationId;
-  const selectedStation = selectedId
-    ? businesses.find((business) => business.id === selectedId) ?? null
-    : null;
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- restore the saved Browse step and order choices */
     setJourney(readJourney());
     setHydrated(true);
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
   useEffect(() => {
@@ -125,6 +120,25 @@ export function BrowseContextProvider({ children }: { children: ReactNode }) {
       /* noop */
     }
   }, [journey, hydrated]);
+
+  useEffect(() => {
+    if (!selectedId) {
+      setSelectedStation(null);
+      return;
+    }
+    let cancelled = false;
+    fetch(`/api/stations/${encodeURIComponent(selectedId)}`, { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: Business | null) => {
+        if (!cancelled) setSelectedStation(data ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setSelectedStation(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedId]);
 
   const routeStep = resolveRouteStep(pathname);
   const currentStep = routeStep ?? journey.currentStep;
@@ -199,7 +213,7 @@ export function BrowseContextProvider({ children }: { children: ReactNode }) {
 }
 
 export function useBrowseContext(): BrowseContextValue {
-  const context = useContext(BrowseContext);
-  if (!context) throw new Error("useBrowseContext must be used within BrowseContextProvider");
-  return context;
+  const ctx = useContext(BrowseContext);
+  if (!ctx) throw new Error("useBrowseContext must be used within BrowseContextProvider");
+  return ctx;
 }

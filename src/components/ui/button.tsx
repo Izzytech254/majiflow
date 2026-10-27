@@ -44,18 +44,37 @@ const buttonVariants = cva(
 export interface ButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  /** Shows a thin brand-coloured ring and fades the label out. */
   loading?: boolean;
-  /** Swaps the ring for a tick once the action has succeeded. */
   success?: boolean;
+  asChild?: boolean;
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    { className, variant, size, type = "button", loading = false, success = false, disabled, children, ...props },
+    { className, variant, size, type = "button", loading = false, success = false, disabled, children, asChild = false, ...props },
     ref
   ) => {
     const busy = loading || success;
+    if (asChild && children && typeof children === "object" && !Array.isArray(children)) {
+      const child = children as any;
+      const childProps = child.props || {};
+      return (
+        <button
+          ref={ref}
+          type={type}
+          disabled={disabled || loading}
+          aria-busy={loading || undefined}
+          className={cn(buttonVariants({ variant, size }), className, childProps.className)}
+          {...props}
+          onClick={(e) => {
+            childProps.onClick?.(e);
+            props.onClick?.(e);
+          }}
+        >
+          {childProps.children}
+        </button>
+      );
+    }
     return (
       <button
         ref={ref}
