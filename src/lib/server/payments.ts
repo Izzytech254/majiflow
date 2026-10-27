@@ -79,7 +79,7 @@ export async function initiatePayment(input: InitiatePaymentInput): Promise<any>
 
 export async function getPaymentStatus(paymentId: string): Promise<any | null> {
   void paymentId;
-  return { paymentId, status: "pending" };
+  return { paymentId, status: "pending", payment: { paymentId, status: "pending" } };
 }
 
 export function sumOrderTotals(ordersList: Order[]): { subtotal: number; deliveryFee: number; total: number } {
@@ -93,8 +93,8 @@ export async function findPaymentForOrder(orderId: string) {
   return null;
 }
 
-export async function getPayment(paymentId: string) {
-  return getPaymentStatus(paymentId);
+export async function getPayment(paymentId: string): Promise<any> {
+  const s = await getPaymentStatus(paymentId); return s;
 }
 
 export async function requestRefund(input: any, amount?: number) {
