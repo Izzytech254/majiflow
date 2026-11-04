@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { CheckCircle2, MapPin, Navigation, Package, Phone, RefreshCw } from "lucide-react";
+import { Banknote, CheckCircle2, MapPin, Navigation, Package, Phone, RefreshCw } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { ErrorState, LoadingState } from "@/components/ui/feedback";
 import { OrderStatusBadge } from "@/components/ui/order-status-badge";
-import { formatPhone } from "@/lib/format";
+import { formatKES, formatPhone } from "@/lib/format";
 import type { RiderOrderView } from "@/lib/server/fulfillment";
 
 type Load =
@@ -141,7 +141,7 @@ export function RiderDelivery({ token }: { token: string }) {
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
             <a
               href={`tel:${order.customerPhone}`}
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border bg-white px-4 text-sm font-semibold text-foreground hover:bg-slate-50"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border bg-white px-4 text-sm font-semibold text-foreground hover:bg-muted"
               aria-label={`Call ${order.customerName} on ${formatPhone(order.customerPhone)}`}
             >
               <Phone className="size-4" aria-hidden /> Call customer
@@ -150,7 +150,7 @@ export function RiderDelivery({ token }: { token: string }) {
               href={mapsUrl(order)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border bg-white px-4 text-sm font-semibold text-foreground hover:bg-slate-50"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border bg-white px-4 text-sm font-semibold text-foreground hover:bg-muted"
             >
               <Navigation className="size-4" aria-hidden /> Directions
             </a>
@@ -170,6 +170,19 @@ export function RiderDelivery({ token }: { token: string }) {
           ))}
         </ul>
       </section>
+
+      {order.collectAmount !== null && !delivered && (
+        <section
+          aria-label="Payment to collect"
+          className="mt-4 flex items-center gap-3 rounded-2xl border border-warning/40 bg-warning/10 p-5"
+        >
+          <Banknote className="size-6 shrink-0 text-warning" aria-hidden />
+          <p className="text-sm text-foreground">
+            <span className="block font-display text-xl">Collect {formatKES(order.collectAmount)}</span>
+            Pay on delivery: take cash or M-Pesa before handing over. Marking it delivered records it paid.
+          </p>
+        </section>
+      )}
 
       <div className="mt-6">
         {order.status === "rider_assigned" && (

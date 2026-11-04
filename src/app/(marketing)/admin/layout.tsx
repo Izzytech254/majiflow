@@ -1,6 +1,10 @@
+import { AdminNav } from "@/components/admin/admin-nav";
 import { AdminSignIn, AdminSignOut } from "@/components/admin/admin-session";
 import { Container } from "@/components/ui/container";
 import { hasAdminSession } from "@/lib/server/admin";
+
+/** Private pages: never indexed. */
+export const metadata = { robots: { index: false, follow: false } };
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -17,7 +21,8 @@ export default async function AdminLayout({ children }: LayoutProps) {
   }
   return (
     <>
-      <Container className="flex justify-end pt-6">
+      <Container className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3 pt-6">
+        <AdminNav />
         <AdminSignOut />
       </Container>
       {children}

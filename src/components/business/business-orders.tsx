@@ -37,6 +37,8 @@ type Row = {
   total: number;
   status: OrderStatus;
   paid: boolean;
+  /** Paid up front, or paid on delivery: either way the station may accept it now. */
+  acceptable: boolean;
   time: string;
   min: string;
 };
@@ -52,6 +54,7 @@ function toRow(o: Order): Row {
     total: o.total,
     status: o.status,
     paid: o.paymentState === "success",
+    acceptable: o.paymentState === "success" || o.payment === "cod",
     time: new Date(o.placedAt).toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit" }),
     min: formatRelativeTime(o.placedAt),
   };
@@ -187,7 +190,7 @@ export function BusinessOrders() {
       )}
 
       {note && (
-        <div role="status" className="flex items-center justify-between rounded-xl border border-success/25 bg-transparent/5 px-4 py-3 text-sm text-success">
+        <div role="status" className="flex items-center justify-between rounded-xl border border-success/25 bg-success/5 px-4 py-3 text-sm text-success">
           <span className="flex items-center gap-2">
             <Check className="size-4" aria-hidden /> {note}
           </span>
@@ -206,7 +209,7 @@ export function BusinessOrders() {
             className={cn(
               "shrink-0 rounded-xl border px-4 py-2 text-sm font-medium transition-colors",
               tab === t.id
-                ? "border-[var(--brand)] bg-transparent/8 text-[var(--brand)]"
+                ? "border-[var(--brand)] bg-brand/10 text-[var(--brand)]"
                 : "border-border bg-white text-muted-foreground hover:text-foreground"
             )}
             aria-pressed={tab === t.id}
@@ -276,7 +279,7 @@ export function BusinessOrders() {
                       <X className="size-3.5" aria-hidden /> Reject
                     </Button>
                   )}
-                  {o.status === "pending" && !o.paid ? (
+                  {o.status === "pending" && !o.acceptable ? (
                     <span className="text-xs text-warning" title="Accept once M-Pesa confirms the payment">
                       Awaiting payment
                     </span>
@@ -293,7 +296,7 @@ export function BusinessOrders() {
                   ) : o.status === "preparing" ? (
                     <Link
                       href={`/business/orders/${o.id}`}
-                      className="inline-flex h-9 items-center rounded-md border border-border bg-white px-3.5 text-sm font-medium text-foreground hover:bg-slate-50"
+                      className="inline-flex h-9 items-center rounded-md border border-border bg-white px-3.5 text-sm font-medium text-foreground hover:bg-muted"
                     >
                       Assign rider
                     </Link>

@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "
 import {
   ArrowLeft, Building2, Check, CreditCard, MapPin, MapPinCheck, Navigation, PartyPopper, Store, TriangleAlert } from "lucide-react";
 import { Container } from "@/components/ui/container";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/toast";
@@ -449,15 +449,11 @@ export function BusinessRegister() {
           </dl>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <Link href="/business">
-              <Button size="lg" className="group w-full sm:w-auto">
-                Open my dashboard
-              </Button>
+            <Link href="/business" className={buttonVariants({ size: "lg", className: "group w-full sm:w-auto" })}>
+              Open my dashboard
             </Link>
-            <Link href="/business">
-              <Button size="lg" variant="secondary" className="w-full sm:w-auto">
-                Take the tour first
-              </Button>
+            <Link href="/business" className={buttonVariants({ variant: "secondary", size: "lg", className: "w-full sm:w-auto" })}>
+              Take the tour first
             </Link>
           </div>
         </div>
@@ -489,9 +485,9 @@ export function BusinessRegister() {
                 className={cn(
                   "flex size-9 items-center justify-center rounded-full font-mono text-xs font-semibold",
                   i < step
-                    ? "bg-foreground text-white"
+                    ? "bg-[var(--brand)] text-white"
                     : i === step
-                      ? "bg-transparent/10 text-[var(--brand)] ring-2 ring-[var(--brand)]/25"
+                      ? "bg-brand/10 text-[var(--brand)] ring-2 ring-[var(--brand)]/25"
                       : "bg-muted text-muted-foreground"
                 )}
               >
@@ -511,7 +507,7 @@ export function BusinessRegister() {
                 <Building2 className="size-5 text-[var(--brand)]" aria-hidden /> Tell us about the business
               </h2>
               {ownerSession === "other" && (
-                <div className="rounded-2xl border border-warning/25 bg-transparent/5 p-4">
+                <div className="rounded-2xl border border-warning/25 bg-warning/10 p-4">
                   <p className="text-sm font-semibold text-foreground">You are signed in as a customer</p>
                   <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                     Business applications must belong to a separate business owner account.
@@ -576,7 +572,7 @@ export function BusinessRegister() {
                 <Field label="Phone (M-Pesa)" required error={errors.phone}>
                   <Input
                     type="tel"
-                    placeholder="+254 712 345 678"
+                    placeholder="07XX XXX XXX"
                     value={draft.phone}
                     onChange={(e) => update("phone", e.target.value)}
                     invalid={Boolean(errors.phone)}
@@ -601,7 +597,7 @@ export function BusinessRegister() {
                   What do you sell?<span className="text-[var(--brand)]"> *</span>
                 </p>
                 <div role="group" aria-label="What do you sell?" className="flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--brand)]/30 bg-transparent/5 px-3 py-1.5 text-sm font-medium text-[var(--brand)]">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--brand)]/30 bg-brand/5 px-3 py-1.5 text-sm font-medium text-[var(--brand)]">
                     <Check className="size-3.5" aria-hidden /> Water refills
                   </span>
                   {EXTRA_SERVICES.map((service) => {
@@ -620,7 +616,7 @@ export function BusinessRegister() {
                         className={cn(
                           "rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
                           on
-                            ? "border-[var(--brand)] bg-transparent/10 text-[var(--brand)]"
+                            ? "border-[var(--brand)] bg-brand/10 text-[var(--brand)]"
                             : "border-border bg-white text-muted-foreground hover:border-[var(--brand)]/40 hover:text-[var(--brand)]"
                         )}
                       >
@@ -642,7 +638,7 @@ export function BusinessRegister() {
                     className={cn(
                       "rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
                       draft.sellsOther.includes("Other")
-                        ? "border-[var(--brand)] bg-transparent/10 text-[var(--brand)]"
+                        ? "border-[var(--brand)] bg-brand/10 text-[var(--brand)]"
                         : "border-border bg-white text-muted-foreground hover:border-[var(--brand)]/40 hover:text-[var(--brand)]"
                     )}
                   >
@@ -728,12 +724,12 @@ export function BusinessRegister() {
                 <div
                   className={cn(
                     "rounded-2xl border p-4",
-                    draft.location ? "border-success/40 bg-transparent/5" : "border-border bg-white"
+                    draft.location ? "border-success/40 bg-success/5" : "border-border bg-white"
                   )}
                 >
                   {draft.location ? (
                     <div className="flex items-start gap-3">
-                      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-transparent/15 text-success">
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-success-soft text-success">
                         <MapPinCheck className="size-5" aria-hidden />
                       </span>
                       <div className="min-w-0 flex-1">
@@ -767,7 +763,7 @@ export function BusinessRegister() {
                   ) : (
                     <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex items-start gap-3">
-                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-transparent/10 text-[var(--brand)]">
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-[var(--brand)]">
                           <MapPin className="size-5" aria-hidden />
                         </span>
                         <div>
@@ -881,7 +877,7 @@ export function BusinessRegister() {
               <h2 className="flex items-center gap-2 font-display text-xl text-foreground">
                 <CreditCard className="size-5 text-[var(--brand)]" aria-hidden /> How should we bill you?
               </h2>
-              <div className="rounded-2xl border border-[var(--brand)]/25 bg-transparent/5 p-5">
+              <div className="rounded-2xl border border-[var(--brand)]/25 bg-brand/5 p-5">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="font-display text-lg text-foreground">{selected.name} plan</p>
@@ -899,7 +895,7 @@ export function BusinessRegister() {
               <Field label="M-Pesa number for billing" hint="Optional - you can add it later.">
                 <Input
                   type="tel"
-                  placeholder="+254 712 345 678"
+                  placeholder="07XX XXX XXX"
                   value={draft.billingPhone}
                   onChange={(e) => update("billingPhone", e.target.value)}
                   autoComplete="tel"

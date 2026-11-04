@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Bell, CheckCheck, CheckCircle2, Clock, Truck, XCircle } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { EmptyState, LoadingState } from "@/components/ui/feedback";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/toast";
 import { AccountError, AccountPageHeader, useAccountResource } from "@/components/account/account-ui";
@@ -149,9 +149,7 @@ export function NotificationsPage() {
                 title="No notifications yet"
                 description="When you place an order, its status updates will show up here."
                 action={
-                  <Link href="/browse">
-                    <Button>Browse stations</Button>
-                  </Link>
+                  <Link href="/browse" className={buttonVariants()}>Browse stations</Link>
                 }
               />
             ) : (
@@ -169,7 +167,7 @@ export function NotificationsPage() {
                           unread ? "border-[var(--brand)]/40" : "border-border"
                         )}
                       >
-                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-black">
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-cta-soft text-[var(--brand)]">
                           <Icon className="size-5" aria-hidden />
                         </span>
                         <div className="min-w-0 flex-1">

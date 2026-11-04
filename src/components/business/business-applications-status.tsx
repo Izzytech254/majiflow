@@ -4,7 +4,7 @@ import Link from "next/link";
 import * as React from "react";
 import { ClipboardCheck, RefreshCw } from "lucide-react";
 import { Badge, type BadgeProps } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/feedback";
 
 type ApplicationStatus = "submitted" | "under_review" | "approved" | "rejected";
@@ -70,7 +70,7 @@ export function BusinessApplicationsStatus() {
         message={error}
         action={
           error.includes("required") ? (
-            <Link href="/login"><Button>Sign in</Button></Link>
+            <Link href="/login" className={buttonVariants()}>Sign in</Link>
           ) : (
             <Button onClick={() => void load()}><RefreshCw className="size-4" aria-hidden /> Try again</Button>
           )
@@ -85,7 +85,7 @@ export function BusinessApplicationsStatus() {
         icon={<ClipboardCheck className="size-6" aria-hidden />}
         title="No applications yet"
         description="Submit your business details to start your owner application."
-        action={<Link href="/business/register"><Button>Start an application</Button></Link>}
+        action={<Link href="/business/register" className={buttonVariants()}>Start an application</Link>}
       />
     );
   }
@@ -110,7 +110,7 @@ export function BusinessApplicationsStatus() {
             <div><dt className="text-muted-foreground">Plan</dt><dd className="font-medium capitalize text-foreground">{application.plan}</dd></div>
           </dl>
           {application.status === "rejected" && application.rejectionReason && (
-            <p className="mt-4 rounded-xl bg-transparent/5 p-3 text-sm text-foreground">
+            <p className="mt-4 rounded-xl bg-brand/5 p-3 text-sm text-foreground">
               <span className="font-semibold">Reason: </span>{application.rejectionReason}
             </p>
           )}

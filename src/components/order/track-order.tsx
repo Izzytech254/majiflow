@@ -4,12 +4,12 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Bike, CheckCircle2, Clock, Inbox, MapPin, Phone, RefreshCcw, ShieldCheck, Smartphone, Truck, XCircle } from "lucide-react";
 import { Container } from "@/components/ui/container";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { OrderStatusBadge, PAYMENT_STATE_META } from "@/components/ui/order-status-badge";
+import { OrderStatusBadge, paymentMeta } from "@/components/ui/order-status-badge";
 import { LoadingState, ErrorState } from "@/components/ui/feedback";
 import { OrderMap, type MapPoint } from "@/components/ui/order-map";
-import { businesses } from "@/lib/data/businesses";
+import { useStations } from "@/components/order/stations-provider";
 import { CITY_COORDS, ESTATE_COORDS } from "@/lib/constants";
 import { useCart } from "@/components/order/cart-provider";
 import { useFlyToCart } from "@/components/order/fly-to-cart";
@@ -20,6 +20,7 @@ import { isActiveStatus } from "@/lib/order-status";
 import { formatKES, formatPhone } from "@/lib/format";
 import type { Order, OrderStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { OrderTotalsList } from "@/components/shared/order-totals";
 
 const STEPS: { status: OrderStatus; label: string; desc: string }[] = [
   { status: "accepted", label: "Order received", desc: "The station confirmed your order." },
@@ -45,6 +46,7 @@ function moneyMessage(order: Order): string {
 }
 
 export function TrackOrderPage({ id }: { id: string }) {
+  const businesses = useStations();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const { addItem } = useCart();
@@ -96,11 +98,15 @@ export function TrackOrderPage({ id }: { id: string }) {
       <Container className="py-20">
         <ErrorState
           title="Order not found"
-          message="We couldn't find that order on this device. Check the link, or browse for a station to place a new order."
+          message="We couldn't find that order. Check the link from your SMS, or sign in to see every order on your account."
           action={
-            <Link href="/browse">
-              <Button size="lg">Browse stations</Button>
-            </Link>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link href="/account/orders" className={buttonVariants({ size: "lg" })}>My orders</Link>
+              <Link href="/login" className={buttonVariants({ size: "lg", variant: "secondary" })}>
+                Sign in
+              </Link>
+              <Link href="/browse" className={buttonVariants({ size: "lg", variant: "ghost" })}>Browse stations</Link>
+            </div>
           }
         />
       </Container>
@@ -111,7 +117,7 @@ export function TrackOrderPage({ id }: { id: string }) {
   const delivered = order.status === "delivered";
   const active = isActiveStatus(order.status);
   const reachedIndex = STEPS.findIndex((step) => step.status === order.status);
-  const payment = PAYMENT_STATE_META[order.paymentState];
+  const payment = paymentMeta(order);
   const rider = order.rider && (order.status === "rider_assigned" || order.status === "out_for_delivery") ? order.rider : null;
 
   const stationPoint = (() => {
@@ -134,7 +140,12 @@ export function TrackOrderPage({ id }: { id: string }) {
       children: <RefreshCcw className="size-5" aria-hidden />,
       onDone: () => {
         order.items.forEach((item) =>
-          addItem({ businessId: order.businessId, productId: item.productId, quantity: item.quantity })
+          addItem({
+            businessId: order.businessId,
+            productId: item.productId,
+            quantity: item.quantity,
+            ...(item.optionId ? { optionId: item.optionId } : {}),
+          })
         );
         toast({
           kind: "success",
@@ -150,7 +161,7 @@ export function TrackOrderPage({ id }: { id: string }) {
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-            <span className={cn("size-1.5 rounded-full animate-pulse-dot", cancelled ? "bg-foreground" : "bg-foreground")} />
+            <span className={cn("size-1.5 rounded-full animate-pulse-dot", cancelled ? "bg-danger" : "bg-foreground")} />
             Order tracking · {order.orderNumber}
           </p>
           <h1 className="mt-2 font-display text-3xl text-foreground sm:text-4xl">
@@ -166,7 +177,7 @@ export function TrackOrderPage({ id }: { id: string }) {
       </div>
 
       {cancelled && (
-        <div className="mb-10 flex items-start gap-4 rounded-2xl border border-danger/25 bg-transparent/10 p-6">
+        <div className="mb-10 flex items-start gap-4 rounded-2xl border border-danger/25 bg-danger/10 p-6">
           <XCircle className="mt-0.5 size-6 shrink-0 text-danger" aria-hidden />
           <div>
             <h2 className="font-display text-lg text-danger">
@@ -181,10 +192,8 @@ export function TrackOrderPage({ id }: { id: string }) {
               {moneyMessage(order)} Try another station nearby - there are usually several with water ready now.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
-              <Link href="/browse">
-                <Button className="group">
-                  Find another station
-                </Button>
+              <Link href="/browse" className={buttonVariants({ className: "group" })}>
+                Find another station
               </Link>
               <Button variant="secondary" onClick={(e) => reorder(e.currentTarget)}>
                 <RefreshCcw className="size-4" aria-hidden /> Retry this order elsewhere
@@ -202,7 +211,7 @@ export function TrackOrderPage({ id }: { id: string }) {
               <h2 className="flex items-center gap-2.5 font-display text-lg text-foreground">
                 <MapPin className="size-5 text-[var(--brand)]" aria-hidden /> Live tracking
               </h2>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
                 {live ? "Updating live" : order.consent?.location ? "Waiting for your location" : "Station & address"}
               </span>
             </div>
@@ -265,7 +274,7 @@ export function TrackOrderPage({ id }: { id: string }) {
                         {step.label}
                         <span className="sr-only">{current ? " (current step)" : reached ? " (done)" : " (upcoming)"}</span>
                       </p>
-                      <p className={cn("mt-1 text-sm leading-relaxed", reached ? "text-muted-foreground" : "text-muted-foreground/60")}>
+                      <p className={cn("mt-1 text-sm leading-relaxed", reached ? "text-muted-foreground" : "text-muted-foreground")}>
                         {step.desc}
                       </p>
                     </div>
@@ -285,7 +294,7 @@ export function TrackOrderPage({ id }: { id: string }) {
               </p>
               <a
                 href={`tel:${rider.phone}`}
-                className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border bg-white px-4 text-sm font-semibold text-foreground hover:bg-slate-50"
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border bg-white px-4 text-sm font-semibold text-foreground hover:bg-muted"
                 aria-label={`Call ${rider.name} on ${formatPhone(rider.phone)}`}
               >
                 <Phone className="size-4" aria-hidden /> {formatPhone(rider.phone)}
@@ -294,7 +303,7 @@ export function TrackOrderPage({ id }: { id: string }) {
           )}
 
           {order.status === "pending" && (
-            <div className="mt-6 flex items-start gap-3 rounded-xl border border-warning/25 bg-transparent/10 p-4">
+            <div className="mt-6 flex items-start gap-3 rounded-xl border border-warning/25 bg-warning/10 p-4">
               <Inbox className="mt-0.5 size-5 shrink-0 text-warning" aria-hidden />
               <p className="text-sm leading-relaxed text-foreground/85">
                 {order.paymentState === "success" ? (
@@ -320,9 +329,12 @@ export function TrackOrderPage({ id }: { id: string }) {
             <h2 className="font-display text-lg text-foreground">Order details</h2>
             <ul className="mt-4 space-y-2.5">
               {order.items.map((item) => (
-                <li key={item.productId} className="flex items-center justify-between gap-3 text-sm">
+                <li key={`${item.productId}-${item.optionId ?? ""}`} className="flex items-center justify-between gap-3 text-sm">
                   <span className="min-w-0 truncate text-muted-foreground">
                     {item.quantity} × {item.name}
+                    {item.optionLabel && (
+                      <span className="block text-xs font-medium text-[var(--brand)]">{item.optionLabel}</span>
+                    )}
                   </span>
                   <span className="shrink-0 font-semibold text-foreground">
                     {formatKES(item.unitPrice * item.quantity)}
@@ -330,22 +342,17 @@ export function TrackOrderPage({ id }: { id: string }) {
                 </li>
               ))}
             </ul>
-            <dl className="mt-4 space-y-1.5 border-t border-border pt-4 text-sm">
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Subtotal</dt>
-                <dd className="text-foreground">{formatKES(order.subtotal)}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Delivery</dt>
-                <dd className="text-foreground">
-                  {order.deliveryFee === 0 ? "Free" : formatKES(order.deliveryFee)}
-                </dd>
-              </div>
-              <div className="flex items-center justify-between border-t border-border pt-2">
-                <dt className="font-semibold text-foreground">Total</dt>
-                <dd className="font-display text-xl text-foreground">{formatKES(order.total)}</dd>
-              </div>
-            </dl>
+            <OrderTotalsList
+              totals={{
+                subtotal: order.subtotal,
+                deliveryFee: order.deliveryFee,
+                deposit: order.deposit ?? 0,
+                total: order.total,
+              }}
+              pickup={order.fulfilment === "pickup"}
+              className="mt-4 space-y-1.5 border-t border-border pt-4"
+              totalClassName="font-display text-xl"
+            />
             <div className="mt-4 flex items-center justify-between rounded-lg bg-muted/60 px-3.5 py-2.5">
               <span className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Smartphone className="size-4 text-[var(--brand)]" aria-hidden /> {order.payment === "mpesa" ? "M-Pesa" : "Card"}

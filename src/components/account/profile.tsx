@@ -16,7 +16,7 @@ import {
   User,
 } from "lucide-react";
 import { Container } from "@/components/ui/container";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Field, Input } from "@/components/ui/field";
 import { Dialog } from "@/components/ui/dialog";
@@ -125,10 +125,10 @@ export function ProfilePage() {
           <div aria-hidden className="pointer-events-none absolute inset-0 bg-radial-glow" />
           <div
             aria-hidden
-            className="pointer-events-none absolute -right-16 -top-20 size-56 rounded-full bg-transparent/10 blur-3xl"
+            className="pointer-events-none absolute -right-16 -top-20 size-56 rounded-full bg-brand/10 blur-3xl"
           />
           <div className="relative">
-            <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-neutral-100 text-black shadow-accent">
+            <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-cta-soft text-[var(--brand)] shadow-accent">
               <User className="size-7" aria-hidden />
             </span>
             <h1 className="mt-5 font-display text-2xl text-foreground">Set up your profile</h1>
@@ -136,15 +136,11 @@ export function ProfilePage() {
               Sign in to save your delivery details and check out in two taps.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <Link href="/login">
-                <Button size="lg" className="w-full sm:w-auto">
-                  Sign in
-                </Button>
+              <Link href="/login" className={buttonVariants({ size: "lg", className: "w-full sm:w-auto" })}>
+                Sign in
               </Link>
-              <Link href="/register">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                  Create account
-                </Button>
+              <Link href="/register" className={buttonVariants({ variant: "outline", size: "lg", className: "w-full sm:w-auto" })}>
+                Create account
               </Link>
             </div>
           </div>
@@ -288,7 +284,7 @@ export function ProfilePage() {
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-radial-glow" />
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-20 -top-24 size-64 rounded-full bg-transparent/10 blur-3xl"
+          className="pointer-events-none absolute -right-20 -top-24 size-64 rounded-full bg-brand/10 blur-3xl"
         />
         <div className="relative flex flex-wrap items-start justify-between gap-5">
           <div className="flex items-start gap-4">
@@ -301,7 +297,7 @@ export function ProfilePage() {
               </h1>
               <p className="mt-1.5 text-sm text-muted-foreground">
                 {profile.phone || "No phone yet"}
-                <span className="px-1.5 text-muted-foreground/50">·</span>
+                <span className="px-1.5 text-muted-foreground">·</span>
                 {profile.email || "No email yet"}
               </p>
               <div className="mt-3">
@@ -325,8 +321,8 @@ export function ProfilePage() {
       </section>
 
       {!complete && !editing && (
-        <div className="mt-4 flex items-start gap-3 rounded-xl border border-[var(--brand)]/20 bg-white/5 p-4">
-          <AlertCircle className="mt-0.5 size-5 shrink-0 text-black" aria-hidden />
+        <div className="mt-4 flex items-start gap-3 rounded-xl border border-[var(--brand)]/20 bg-brand/5 p-4">
+          <AlertCircle className="mt-0.5 size-5 shrink-0 text-[var(--brand)]" aria-hidden />
           <p className="text-sm text-foreground/85">
             <strong className="font-semibold text-foreground">Finish your profile.</strong> Share your
             delivery location so riders find you quickly - no manual address needed.
@@ -356,7 +352,7 @@ export function ProfilePage() {
                   value={form.phone}
                   invalid={Boolean(errors.phone)}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  placeholder="+254 7XX XXX XXX"
+                  placeholder="07XX XXX XXX"
                   autoComplete="tel"
                 />
               </Field>
@@ -408,8 +404,8 @@ export function ProfilePage() {
 
       {/* Danger zone */}
       <section className="mt-8 overflow-hidden rounded-2xl border border-danger/25 bg-white shadow-card">
-        <div className="flex items-center gap-2.5 border-b border-danger/15 bg-transparent/10 px-6 py-4">
-          <span className="flex size-9 items-center justify-center rounded-lg bg-transparent-soft text-danger" aria-hidden>
+        <div className="flex items-center gap-2.5 border-b border-danger/15 bg-danger/10 px-6 py-4">
+          <span className="flex size-9 items-center justify-center rounded-lg bg-danger-soft text-danger" aria-hidden>
             <Trash2 className="size-4.5" />
           </span>
           <h2 className="font-display text-lg text-danger">Delete account</h2>
@@ -457,8 +453,8 @@ export function ProfilePage() {
 
 function CardHeader({ icon, title }: { icon: React.ReactNode; title: string }) {
   return (
-    <h2 className="flex items-center gap-2.5 font-display text-lg text-black">
-      <span className="flex size-9 items-center justify-center rounded-lg bg-transparent/10 text-black" aria-hidden>
+    <h2 className="flex items-center gap-2.5 font-display text-lg text-foreground">
+      <span className="flex size-9 items-center justify-center rounded-lg bg-brand/10 text-[var(--brand)]" aria-hidden>
         {icon}
       </span>
       {title}
@@ -510,10 +506,10 @@ function LocationCard({
       <CardHeader icon={<MapPin className="size-4.5" aria-hidden />} title="Delivery location" />
       <div className="mt-5">
         {location ? (
-          <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-success/25 bg-white/5 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-success/25 bg-success/5 p-4">
             <div className="flex items-start gap-3">
               <span
-                className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-transparent-soft text-success"
+                className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-success-soft text-success"
                 aria-hidden
               >
                 <MapPinCheck className="size-4.5" />
@@ -556,7 +552,7 @@ function LocationCard({
           <div className="rounded-xl border border-dashed border-border bg-muted/30 p-5">
             <div className="flex items-start gap-3">
               <span
-                className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-transparent/10 text-black"
+                className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-[var(--brand)]"
                 aria-hidden
               >
                 <Navigation className="size-5" />

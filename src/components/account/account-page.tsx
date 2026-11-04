@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Bell, Clock, MapPin, PackageCheck, Plus, Recycle, RotateCcw, Wallet } from "lucide-react";
 import { Container } from "@/components/ui/container";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { OrderStatusBadge } from "@/components/ui/order-status-badge";
 import { EmptyState } from "@/components/ui/feedback";
@@ -63,8 +63,8 @@ export function AccountPage() {
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-radial-glow" />
         <div className="relative flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="inline-flex items-center gap-2 rounded-full border border-success/25 bg-transparent-soft px-3 py-1 font-mono text-[11px] uppercase tracking-[0.18em] text-success">
-              <span aria-hidden className="size-1.5 rounded-full bg-foreground animate-pulse-dot" /> Signed in
+            <p className="inline-flex items-center gap-2 rounded-full border border-success/25 bg-success-soft px-3 py-1 font-mono text-[11px] uppercase tracking-[0.18em] text-success">
+              <span aria-hidden className="size-1.5 rounded-full bg-success animate-pulse-dot" /> Signed in
             </p>
             <h1 className="mt-3 font-display text-3xl text-foreground sm:text-4xl">Habari, {firstName}</h1>
             <p className="mt-2 text-sm text-muted-foreground">
@@ -81,9 +81,7 @@ export function AccountPage() {
                 </Button>
               </Link>
             )}
-            <Link href="/browse">
-              <Button>Order water</Button>
-            </Link>
+            <Link href="/browse" className={buttonVariants()}>Order water</Link>
           </div>
         </div>
       </section>
@@ -98,7 +96,7 @@ export function AccountPage() {
             {summary
               ? stats.map((s) => (
                   <div key={s.label} className="rounded-2xl border border-border bg-white p-4 shadow-card sm:p-5">
-                    <span className="flex size-9 items-center justify-center rounded-lg bg-transparent/10 text-[var(--brand)]">
+                    <span className="flex size-9 items-center justify-center rounded-lg bg-brand/10 text-[var(--brand)]">
                       <s.icon className="size-4.5" aria-hidden />
                     </span>
                     <p className="mt-3 font-display text-2xl text-foreground">{s.value}</p>
@@ -130,9 +128,7 @@ export function AccountPage() {
                   <h2 id="recent-orders" className="font-display text-xl text-foreground">
                     Recent orders
                   </h2>
-                  <Link href="/account/orders">
-                    <Button variant="secondary" size="sm">View all</Button>
-                  </Link>
+                  <Link href="/account/orders" className={buttonVariants({ variant: "secondary", size: "sm" })}>View all</Link>
                 </div>
                 {!summary ? (
                   <div className="mt-4 space-y-3" role="status" aria-label="Loading orders">
@@ -147,9 +143,7 @@ export function AccountPage() {
                       title="No orders yet"
                       description="Once you place your first order it shows up here with live tracking."
                       action={
-                        <Link href="/browse">
-                          <Button>Find your station</Button>
-                        </Link>
+                        <Link href="/browse" className={buttonVariants()}>Find your station</Link>
                       }
                     />
                   </div>
@@ -170,9 +164,7 @@ export function AccountPage() {
                 <h2 id="saved-addresses" className="font-display text-xl text-foreground">
                   Saved addresses
                 </h2>
-                <Link href="/account/addresses">
-                  <Button variant="secondary" size="sm">Manage</Button>
-                </Link>
+                <Link href="/account/addresses" className={buttonVariants({ variant: "secondary", size: "sm" })}>Manage</Link>
               </div>
               <div className="mt-4 flex flex-col gap-3">
                 {!summary ? (
@@ -182,9 +174,9 @@ export function AccountPage() {
                     href="/account/addresses"
                     className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-white p-8 text-center transition-colors hover:border-[var(--brand)]/40"
                   >
-                    <Plus className="size-6 text-black" aria-hidden />
+                    <Plus className="size-6 text-[var(--brand)]" aria-hidden />
                     <p className="text-sm font-medium text-muted-foreground">No saved addresses yet</p>
-                    <p className="text-xs text-muted-foreground/70">Save your estate and building for one-tap reordering.</p>
+                    <p className="text-xs text-muted-foreground">Save your estate and building for one-tap reordering.</p>
                   </Link>
                 ) : (
                   <>
@@ -211,7 +203,7 @@ export function AccountPage() {
               </div>
 
               {lastOrder && (
-                <div className="mt-6 rounded-2xl border border-[var(--brand)]/20 bg-transparent/5 p-5">
+                <div className="mt-6 rounded-2xl border border-[var(--brand)]/20 bg-brand/5 p-5">
                   <p className="font-mono text-[11px] uppercase tracking-widest text-[var(--brand)]">Quick reorder</p>
                   <p className="mt-1.5 text-sm text-foreground/85">
                     Your last order was <strong className="font-semibold">{itemsSummary(lastOrder)}</strong> from{" "}

@@ -5,6 +5,11 @@ stations. Customers browse stations near them, build a cart with a per-station
 delivery fee, check out, and track the delivery; stations get a storefront and a
 dashboard to take orders, manage their catalogue and see their numbers.
 
+Customers sign in with their phone number (a one-time code by SMS) or, for
+existing accounts, email and password. The header keeps the current order type
+visible everywhere: delivery to a saved or pinned address, pickup from the
+station, or sending water to someone else.
+
 Business identity and onboarding data is prepared for hosted Neon PostgreSQL.
 Orders remain in the existing JSON store until a separate order migration is
 planned.
@@ -12,14 +17,20 @@ planned.
 ## Features
 
 ### Customers
-- Browse and search refill stations by city, estate or name.
-- Station pages with products, prices, delivery fee, opening hours and live
-  open/closed status.
-- A cart that groups items by station and charges each station's own delivery
-  fee and free-delivery minimum.
-- Checkout with M-Pesa or card, a saved profile and delivery addresses, and
-  optional live-location sharing for the rider.
+- Phone-first sign-in with a 6-digit SMS code, plus the original email and
+  password for existing accounts.
+- Browse stations near you on a map, search by city, estate or name, and see
+  which stations deliver to you (with ETA and any nearby discount).
+- Station pages with products, prices, options (empty-can swap or new can with
+  a refundable deposit), delivery fee, opening hours and live open/closed
+  status.
+- One station per cart, with that station's delivery fee and free-delivery
+  minimum, plus delivery or pickup.
+- Checkout with M-Pesa or card, a saved profile and delivery addresses, or a
+  pinned location for a rider; optional live-location sharing.
 - Order tracking from placed through accepted, out for delivery and delivered.
+- A local cart and order context that survive reloads, and an offline banner
+  instead of a failed page.
 
 ### Stations
 - A dashboard with an overview, orders, products, customers, analytics,
@@ -76,12 +87,28 @@ All variables are optional; without them the app runs and logs to stderr.
 
 | Variable | Purpose |
 | --- | --- |
-| `MF_DATA_DIR` | Directory for `orders.json`. Defaults to `.data` in the repo. Point it at a mounted volume in production. |
+| `MF_DATA_DIR` | Development and tests only: keep orders and payments in JSON files in this directory instead of Postgres. Never set it in production. |
+| `MF_DB_POOL_MAX` | Database connections per server instance (default 5). Keep it small on serverless and use Neon's pooled (`-pooler`) host. |
+| `CRON_SECRET` | Authorizes the daily retention sweep at `/api/cron/retention` (Vercel Cron sends it automatically). |
 | `MF_ALERT_WEBHOOK_URL` | Where order, payment, notification, store and geocode failures are POSTed. Without it, failures go to stderr only. |
 | `MF_NOTIFY_WEBHOOK_URL` | Provider that sends order-status messages to customers. |
 | `MF_ADMIN_KEY` | Signs admins in at `/admin` and authorizes admin APIs (refunds, linking an approved owner to a station via `POST /api/admin/applications/[id]/approve`). Without it, admin access is disabled. |
 | `NEXT_PUBLIC_SITE_URL` | Absolute site URL used for metadata. Defaults to `http://localhost:3000`. |
 | `DATABASE_URL` | Neon PostgreSQL connection string. Keep it in `.env.local` or your deployment provider's secret manager. |
+| `MF_OTP_SECRET` | HMAC key for hashing phone sign-in codes at rest. Set a random value in every deployed environment. |
+| `MF_SMS_PROVIDER` | `dev` (log the code), `africastalking` or `twilio`. Inferred from the credentials below when unset. |
+| `MF_SMS_DEV_ECHO` | Set to `0` to stop logging dev codes to the server console. |
+| `MF_SMS_WEBHOOK_URL` | Generic SMS provider: receives `{ to, message }`. |
+| `MF_SMS_AT_USERNAME`, `MF_SMS_AT_API_KEY`, `MF_SMS_SENDER` | Africa's Talking credentials and sender id. |
+| `MF_SMS_TWILIO_ACCOUNT_SID`, `MF_SMS_TWILIO_AUTH_TOKEN`, `MF_SMS_TWILIO_FROM` | Twilio credentials and sender. |
+
+### Phone sign-in and SMS
+
+Phone sign-in is on by default. Without SMS credentials the code is written to
+the server console and returned as `devCode` in development, so the flow stays
+testable. Set `MF_OTP_SECRET` (and a provider, directly or through credentials)
+before going live. Codes last 10 minutes, allow five attempts, and can be
+re-requested after 60 seconds; only one code is live per number and purpose.
 
 ### Neon database setup
 
@@ -91,6 +118,8 @@ All variables are optional; without them the app runs and logs to stderr.
    file or its value.
 3. Generate migrations after schema changes with `pnpm db:generate`.
 4. Apply committed migrations to the configured database with `pnpm db:migrate`.
+   `0007` adds phone sign-in and saved order preferences; `0008` adds the
+   notify-me list for stations that do not deliver to an area yet.
 
 The Drizzle CLI loads `DATABASE_URL` from `.env.local` when it is not already
 set in the environment. The database client is server-only. Neon credentials
@@ -134,12 +163,31 @@ POST /api/auth/login      # { "email": "...", "password": "..." } -> sets mf_ses
 Both are required for the `/admin` pages. Without a valid `MF_ADMIN_KEY`, all
 admin sessions fail closed and `/admin` stays behind the key prompt.
 
+### What the console shows
+
+| Page | Purpose |
+| --- | --- |
+| `/admin` | KPIs for the last 7, 30 or 90 days (orders, delivered value, delivery rate, new customers), daily charts, top stations, payment split, order outcomes, cash still to collect on pay-on-delivery orders, and alerts for pending applications and published stations customers cannot see. |
+| `/admin/stations` | Every station in any state (live, published but not visible, ready, setting up, suspended), with why it is not visible, plan, products, 30-day orders and value. Suspend (with a reason) or reinstate; a suspended station leaves browse and checkout at once. |
+| `/admin/users` | Search accounts by name, email or phone and filter by role. Each account shows its orders and stations, and can be disabled (signs it out everywhere and blocks sign-in) or restored. Operations accounts cannot be disabled from the console. |
+| `/admin/orders`, `/admin/applications` | Live order feed and business application review. |
+
+CSV exports: `GET /api/admin/export?kind=stations|users|orders&days=30`. Writes
+and exports need the admin key session *and* an operations account.
+
 ## Data
 
-Orders are persisted as JSON in `MF_DATA_DIR` (default `.data/orders.json`).
-Reads and writes are serialized through a single queue, and orders are validated
-server-side (totals are recomputed, never trusted from the client). Tests point
-`MF_DATA_DIR` at a fresh temporary directory so they never touch real orders.
+Stations, products, customers, addresses, preferences, phone codes, orders
+and payments live in Neon PostgreSQL. Orders and payments are stored as JSON
+documents beside indexed columns (`src/lib/server/doc-store.ts`); every change
+to one record is a row-locked transaction, and orders are validated
+server-side (totals are recomputed, never trusted from the client).
+
+Without `DATABASE_URL`, development falls back to JSON files in `.data/`;
+production refuses to start the order store without a database. Unit tests set
+`MF_DATA_DIR` to a temporary directory. The Postgres backend has its own test,
+`src/lib/server/doc-store.postgres.test.ts`, which runs when
+`MF_TEST_DATABASE_URL` points at a throwaway migrated database.
 
 ## Project structure
 
@@ -149,7 +197,7 @@ src/
   components/          UI by area: home, shared, order, business, account, admin, ui
   lib/
     data/              seeded stations, plans and FAQs
-    server/            database foundation and file-backed order store
+    server/            database, order and payment stores, auth, payments
     analytics.ts       station analytics (pure functions)
     business-hours.ts  opening hours and availability
     pricing.ts         cart totals
@@ -158,12 +206,16 @@ src/
 
 ## Deploying
 
-The app is stateless apart from the order file, so any Node host works:
+The app keeps all state in Postgres, so it runs on Vercel or any Node host:
 
-1. Set `MF_DATA_DIR` to a persistent volume.
-2. Set `MF_ALERT_WEBHOOK_URL` (and `MF_NOTIFY_WEBHOOK_URL` if you have a
+1. Set `DATABASE_URL` (Neon pooled host), `NEXT_PUBLIC_SITE_URL`,
+   `MF_ADMIN_KEY`, `MF_OTP_SECRET`, `CRON_SECRET` and an SMS provider.
+2. Apply migrations before each release: `pnpm db:migrate`.
+3. Set `MF_ALERT_WEBHOOK_URL` (and `MF_NOTIFY_WEBHOOK_URL` if you have a
    messaging provider) so failures and status changes are reported.
-3. Build and run:
+4. `vercel.json` schedules the daily retention sweep. On another host, call
+   `GET /api/cron/retention` daily with `Authorization: Bearer $CRON_SECRET`.
+5. Build and run:
 
 ```bash
 pnpm install --frozen-lockfile
@@ -183,6 +235,9 @@ offline fallback. The worker is registered in production builds only.
 
 - Path alias `@/*` → `./src/*`.
 - No em-dashes; JSX uses `&apos;` for apostrophes.
+- The order context (delivery/pickup, address, last station) is this device's
+  `mf:orderSession`; signed-in customers also sync it to
+  `/api/account/preferences` so a new device resumes where they left off.
 - Tests use `vi.useFakeTimers({ toFake: ["Date"] })` with `vi.setSystemTime`,
   because the order guard reads the wall clock.
 - `AGENTS.md` is generated by `next dev`; do not hand-edit it.

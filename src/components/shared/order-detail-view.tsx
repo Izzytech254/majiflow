@@ -3,18 +3,18 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Clock, MapPin, Phone, Radio, Truck } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { OrderStatusBadge, PAYMENT_STATE_META } from "@/components/ui/order-status-badge";
+import { OrderStatusBadge, paymentMeta } from "@/components/ui/order-status-badge";
 import { LoadingState, ErrorState } from "@/components/ui/feedback";
 import { OrderMap, type MapPoint } from "@/components/ui/order-map";
 import { FulfilmentPanel } from "@/components/shared/fulfilment-panel";
 import { fetchOrder, fetchOrderLocation, type OrderLocationSnapshot } from "@/lib/orders";
 import { isActiveStatus } from "@/lib/order-status";
-import { businesses } from "@/lib/data/businesses";
+import { useStations } from "@/components/order/stations-provider";
 import { CITY_COORDS, ESTATE_COORDS } from "@/lib/constants";
 import { formatKES, formatPhone } from "@/lib/format";
-import type { FulfillmentActor, Order, OrderStatus, OrderTimelineEntry } from "@/lib/types";
+import type { Business, FulfillmentActor, Order, OrderStatus, OrderTimelineEntry } from "@/lib/types";
 
 const TIMELINE_LABEL: Record<OrderStatus, string> = {
   pending: "Order placed",
@@ -48,7 +48,7 @@ function addressPoint(order: Order): MapPoint {
   return { ...coords, label: order.address.estate || "Delivery address" };
 }
 
-function stationPoint(order: Order): MapPoint | undefined {
+function stationPoint(order: Order, businesses: readonly Business[]): MapPoint | undefined {
   const station = businesses.find((b) => b.id === order.businessId);
   return station ? { lat: station.lat, lng: station.lng, label: station.name } : undefined;
 }
@@ -74,6 +74,7 @@ export function OrderDetailView({
   backLabel: string;
   actor: "station" | "admin";
 }) {
+  const businesses = useStations();
   const [order, setOrder] = useState<Order | null>(null);
   const [snapshot, setSnapshot] = useState<OrderLocationSnapshot | null>(null);
   const [fetchedAt, setFetchedAt] = useState(0);
@@ -112,9 +113,7 @@ export function OrderDetailView({
           title="Order not available"
           message="This order does not exist, or it belongs to another station."
           action={
-            <Link href={backHref}>
-              <Button size="lg">{backLabel}</Button>
-            </Link>
+            <Link href={backHref} className={buttonVariants({ size: "lg" })}>{backLabel}</Link>
           }
         />
       </div>
@@ -161,8 +160,8 @@ export function OrderDetailView({
               <MapPin className="size-5 text-[var(--brand)]" aria-hidden /> Live tracking
             </h2>
             <span
-              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[10px] uppercase tracking-widest ${
-                liveFresh ? "bg-transparent-soft text-success" : "bg-muted text-muted-foreground"
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[11px] uppercase tracking-widest ${
+                liveFresh ? "bg-success-soft text-success" : "bg-muted text-muted-foreground"
               }`}
             >
               <Radio className={`size-3 ${liveFresh ? "animate-pulse-dot" : ""}`} aria-hidden />
@@ -179,7 +178,7 @@ export function OrderDetailView({
           </div>
 
           <OrderMap
-            station={stationPoint(order)}
+            station={stationPoint(order, businesses)}
             address={addressPoint(order)}
             location={live}
             history={history}
@@ -210,9 +209,12 @@ export function OrderDetailView({
             <h2 className="font-display text-lg text-foreground">Order details</h2>
             <ul className="mt-4 space-y-2.5">
               {order.items.map((item) => (
-                <li key={item.productId} className="flex items-center justify-between gap-3 text-sm">
+                <li key={`${item.productId}-${item.optionId ?? ""}`} className="flex items-center justify-between gap-3 text-sm">
                   <span className="min-w-0 truncate text-muted-foreground">
                     {item.quantity} × {item.name}
+                    {item.optionLabel && (
+                      <span className="block text-xs font-medium text-[var(--brand)]">{item.optionLabel}</span>
+                    )}
                   </span>
                   <span className="shrink-0 font-semibold text-foreground">
                     {formatKES(item.unitPrice * item.quantity)}
@@ -226,9 +228,17 @@ export function OrderDetailView({
                 <dd className="text-foreground">{formatKES(order.subtotal)}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted-foreground">Delivery</dt>
+                <dt className="text-muted-foreground">
+                  {order.fulfilment === "pickup" ? "Collection" : "Delivery"}
+                </dt>
                 <dd className="text-foreground">{order.deliveryFee === 0 ? "Free" : formatKES(order.deliveryFee)}</dd>
               </div>
+              {order.deposit ? (
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">Refundable deposit</dt>
+                  <dd className="text-foreground">{formatKES(order.deposit)}</dd>
+                </div>
+              ) : null}
               <div className="flex items-center justify-between border-t border-border pt-2">
                 <dt className="font-semibold text-foreground">Total</dt>
                 <dd className="font-display text-xl text-foreground">{formatKES(order.total)}</dd>
@@ -238,8 +248,8 @@ export function OrderDetailView({
               <span className="text-xs text-muted-foreground">
                 Paid via {order.payment === "mpesa" ? "M-Pesa" : "Card"}
               </span>
-              <Badge variant={PAYMENT_STATE_META[order.paymentState].tone}>
-                {PAYMENT_STATE_META[order.paymentState].label}
+              <Badge variant={paymentMeta(order).tone}>
+                {paymentMeta(order).label}
               </Badge>
             </div>
           </section>

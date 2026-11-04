@@ -3,6 +3,7 @@ import {
   doublePrecision,
   index,
   integer,
+  jsonb,
   numeric,
   pgEnum,
   pgTable,
@@ -37,15 +38,21 @@ export const users = pgTable(
   "users",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    email: varchar("email", { length: 320 }).notNull(),
+    /** Optional: phone-first customers sign in with an SMS code and never set one. */
+    email: varchar("email", { length: 320 }),
     name: varchar("name", { length: 120 }).notNull(),
+    /** Kenyan mobile number in local form (07XXXXXXXXX / 01XXXXXXXXX). */
     phone: varchar("phone", { length: 20 }),
-    passwordHash: text("password_hash").notNull(),
+    /** Optional: phone-first customers have no password. */
+    passwordHash: text("password_hash"),
     role: userRole("role").default("customer").notNull(),
+    /** Set by operations to block sign-in; existing sessions stop working at once. */
+    disabledAt: timestamp("disabled_at", { withTimezone: true }),
     ...timestamps,
   },
   (table) => ({
     emailUnique: uniqueIndex("users_email_unique").on(table.email),
+    phoneUnique: uniqueIndex("users_phone_unique").on(table.phone),
   })
 );
 
@@ -101,11 +108,48 @@ export const businesses = pgTable(
     name: varchar("name", { length: 160 }).notNull(),
     isComplete: boolean("is_complete").default(false).notNull(),
     isPublished: boolean("is_published").default(false).notNull(),
+    /** WeeklyOperatingHours: a missing day means unknown, null means closed. */
+    openingHours: jsonb("opening_hours"),
+    /** Orders at or above this subtotal deliver free; 0 means never free. */
+    freeDeliveryAbove: numeric("free_delivery_above", { precision: 10, scale: 2 }).default("0").notNull(),
+    /** Set by operations to take a station off browse and checkout. */
+    suspendedAt: timestamp("suspended_at", { withTimezone: true }),
+    suspensionReason: varchar("suspension_reason", { length: 300 }),
     ...timestamps,
   },
   (table) => ({
     applicationUnique: uniqueIndex("businesses_application_unique").on(table.applicationId),
     slugUnique: uniqueIndex("businesses_slug_unique").on(table.slug),
+  })
+);
+
+/** What a station sells. Prices here are the ones checkout validates against. */
+export const businessProducts = pgTable(
+  "business_products",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    businessId: uuid("business_id")
+      .notNull()
+      .references(() => businesses.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 120 }).notNull(),
+    description: varchar("description", { length: 500 }).notNull(),
+    category: varchar("category", { length: 24 }).notNull(),
+    unit: varchar("unit", { length: 24 }).notNull(),
+    price: numeric("price", { precision: 10, scale: 2 }).notNull(),
+    oldPrice: numeric("old_price", { precision: 10, scale: 2 }),
+    stock: integer("stock").default(0).notNull(),
+    stockLow: integer("stock_low").default(10).notNull(),
+    /** Key into the bundled product photos (can, bottle, glass, dispenser). */
+    image: varchar("image", { length: 24 }).default("bottle").notNull(),
+    popular: boolean("popular").default(false).notNull(),
+    /** ProductOption[]: choices such as handing back an empty can. */
+    options: jsonb("options"),
+    isVisible: boolean("is_visible").default(true).notNull(),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    ...timestamps,
+  },
+  (table) => ({
+    businessIdx: index("business_products_business_id_idx").on(table.businessId, table.sortOrder),
   })
 );
 
@@ -144,8 +188,53 @@ export const customerPreferences = pgTable("customer_preferences", {
   orderUpdates: boolean("order_updates").default(true).notNull(),
   marketing: boolean("marketing").default(false).notNull(),
   notificationsReadAt: timestamp("notifications_read_at", { withTimezone: true }),
+  /** Last fulfilment the customer chose ("delivery" | "pickup"). */
+  fulfilment: varchar("fulfilment", { length: 10 }),
+  /** Station the customer ordered from last, so we can preselect it. */
+  lastStationId: varchar("last_station_id", { length: 180 }),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+export const authOtpCodes = pgTable(
+  "auth_otp_codes",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    /** Kenyan mobile number in E.164 form (254XXXXXXXXX). */
+    phone: varchar("phone", { length: 20 }).notNull(),
+    /** HMAC of the code, never the code itself. */
+    codeHash: varchar("code_hash", { length: 64 }).notNull(),
+    purpose: varchar("purpose", { length: 16 }).notNull(),
+    attempts: integer("attempts").default(0).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    consumedAt: timestamp("consumed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    phonePurposeIdx: index("auth_otp_codes_phone_purpose_idx").on(table.phone, table.purpose),
+  })
+);
+
+export const stationInterest = pgTable(
+  "station_interest",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    /** Signed-in customer, when there is one. */
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+    /** Kenyan mobile number in E.164 form (254XXXXXXXXX). */
+    phone: varchar("phone", { length: 20 }),
+    /** Free-text area the customer asked about, e.g. "Kawangware". */
+    area: varchar("area", { length: 120 }),
+    latitude: doublePrecision("latitude"),
+    longitude: doublePrecision("longitude"),
+    /** Station they asked about, when the customer picked one. */
+    businessId: varchar("business_id", { length: 180 }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    phoneIdx: index("station_interest_phone_idx").on(table.phone),
+    areaIdx: index("station_interest_area_idx").on(table.area),
+  })
+);
 
 export const subscriptions = pgTable(
   "subscriptions",
@@ -168,3 +257,63 @@ export const subscriptions = pgTable(
     businessUnique: uniqueIndex("subscriptions_business_id_unique").on(table.businessId),
   })
 );
+
+/**
+ * Customer orders. The whole order document lives in `data`; the columns
+ * beside it are copies of the fields the app filters on, kept in step by the
+ * order store on every write.
+ */
+export const orders = pgTable(
+  "orders",
+  {
+    id: varchar("id", { length: 80 }).primaryKey(),
+    /** The checkout attempt that created the order, so a retry never duplicates it. */
+    idempotencyKey: varchar("idempotency_key", { length: 160 }),
+    orderNumber: varchar("order_number", { length: 24 }).notNull(),
+    businessId: varchar("business_id", { length: 180 }).notNull(),
+    customerUserId: varchar("customer_user_id", { length: 80 }),
+    customerPhone: varchar("customer_phone", { length: 20 }),
+    status: varchar("status", { length: 24 }).notNull(),
+    riderTokenHash: varchar("rider_token_hash", { length: 64 }),
+    placedAt: timestamp("placed_at", { withTimezone: true }).notNull(),
+    data: jsonb("data").notNull(),
+    ...timestamps,
+  },
+  (table) => ({
+    idempotencyUnique: uniqueIndex("orders_idempotency_key_unique").on(table.idempotencyKey),
+    orderNumberUnique: uniqueIndex("orders_order_number_unique").on(table.orderNumber),
+    businessIdx: index("orders_business_id_idx").on(table.businessId, table.placedAt),
+    customerIdx: index("orders_customer_user_id_idx").on(table.customerUserId),
+    phoneIdx: index("orders_customer_phone_idx").on(table.customerPhone),
+    statusIdx: index("orders_status_idx").on(table.status),
+    riderTokenIdx: index("orders_rider_token_hash_idx").on(table.riderTokenHash),
+  })
+);
+
+/** Payment attempts and their refunds, one document per payment. */
+export const payments = pgTable(
+  "payments",
+  {
+    id: varchar("id", { length: 80 }).primaryKey(),
+    idempotencyKey: varchar("idempotency_key", { length: 240 }).notNull(),
+    checkoutRequestId: varchar("checkout_request_id", { length: 120 }),
+    status: varchar("status", { length: 16 }).notNull(),
+    orderIds: text("order_ids").array().notNull(),
+    refundIds: text("refund_ids").array().notNull(),
+    data: jsonb("data").notNull(),
+    ...timestamps,
+  },
+  (table) => ({
+    idempotencyUnique: uniqueIndex("payments_idempotency_key_unique").on(table.idempotencyKey),
+    checkoutRequestUnique: uniqueIndex("payments_checkout_request_id_unique").on(table.checkoutRequestId),
+    orderIdsIdx: index("payments_order_ids_idx").using("gin", table.orderIds),
+    refundIdsIdx: index("payments_refund_ids_idx").using("gin", table.refundIds),
+  })
+);
+
+/** Fixed-window request counters shared by every server instance (see rate-limit.ts). */
+export const rateLimits = pgTable("rate_limits", {
+  key: varchar("key", { length: 200 }).primaryKey(),
+  windowStart: timestamp("window_start", { withTimezone: true }).notNull(),
+  count: integer("count").notNull(),
+});

@@ -1,11 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
+import { Fraunces, Inter, JetBrains_Mono, Pacifico, Poppins } from "next/font/google";
 import { Providers } from "@/components/providers";
+import { Footer } from "@/components/footer/site-footer";
 import { PwaRegister } from "@/components/pwa-register";
 import { SplashLoader } from "@/components/motion/splash-loader";
 import { TopProgressBar } from "@/components/motion/top-progress-bar";
 import { SPLASH_SESSION_KEY } from "@/config/loader";
+import { connection } from "next/server";
 import { SITE_URL } from "@/lib/constants";
+import { reportFailure } from "@/lib/monitoring";
+import { listStations } from "@/lib/server/catalog";
 import "./globals.css";
 
 const inter = Inter({
@@ -26,6 +30,21 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   display: "swap",
   weight: ["500", "600"],
+});
+
+const wordmark = Poppins({
+  variable: "--font-wordmark",
+  subsets: ["latin"],
+  display: "swap",
+  weight: "800",
+  style: "italic",
+});
+
+const script = Pacifico({
+  variable: "--font-script",
+  subsets: ["latin"],
+  display: "swap",
+  weight: "400",
 });
 
 
@@ -52,7 +71,6 @@ export const metadata: Metadata = {
   authors: [{ name: "MajiFlow" }],
   creator: "MajiFlow",
   publisher: "MajiFlow",
-  alternates: { canonical: "/" },
   robots: {
     index: true,
     follow: true,
@@ -68,7 +86,6 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "MajiFlow",
     locale: "en_KE",
-    url: "/",
     title: "MajiFlow - Clean water, delivered simply",
     description:
       "Order clean drinking water from refill stations near you. Compare prices, pay with M-Pesa, and track your delivery.",
@@ -90,21 +107,41 @@ export const viewport: Viewport = {
 };
 
 /**
- * Runs before the first paint. On a repeat visit inside the same session the
- * splash is hidden outright, so the page appears straight away without the
- * splash flashing back on screen.
+ * Runs before the first paint. The splash only greets a first visit to the
+ * home page: deep links (an order tracking or rider link from an SMS,
+ * checkout, a station page) and repeat visits in the same session show the
+ * page straight away.
  */
-const splashGateScript = `try{if(sessionStorage.getItem(${JSON.stringify(
+const splashGateScript = `try{if(location.pathname!=="/"||sessionStorage.getItem(${JSON.stringify(
   SPLASH_SESSION_KEY
 )})==="1"){document.documentElement.setAttribute("data-splash","off")}}catch(e){}`;
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+/**
+ * The station catalog every page shares. Rendered per request (the query
+ * itself is cached briefly) so a newly published station or price shows up
+ * without a redeploy. If the catalog cannot load, pages still render and
+ * browse shows its empty state.
+ */
+async function loadCatalog() {
+  await connection();
+  try {
+    return await listStations();
+  } catch (error) {
+    await reportFailure("store", "Could not load the station catalog.", {
+      reason: error instanceof Error ? error.message : "unknown",
+    });
+    return [];
+  }
+}
+
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const stations = await loadCatalog();
   return (
     <html
       lang="en"
       data-scroll-behavior="smooth"
       suppressHydrationWarning
-      className={`${inter.variable} ${fraunces.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${fraunces.variable} ${jetbrainsMono.variable} ${wordmark.variable} ${script.variable} h-full antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: splashGateScript }} />
@@ -115,6 +152,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </noscript>
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[300] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-foreground focus:shadow-card"
+        >
+          Skip to content
+        </a>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -141,7 +184,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             }),
           }}
         />
-        <Providers>{children}</Providers>
+        <Providers stations={stations}>{children}</Providers>
+        <Footer />
         <PwaRegister />
         <TopProgressBar />
         <SplashLoader />

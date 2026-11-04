@@ -1,13 +1,11 @@
 import type { NextRequest } from "next/server";
 import { reportFailure } from "@/lib/monitoring";
 import { getOptionalCustomer } from "@/lib/server/auth";
-import { applyOrderRetention, createOrder, listOrders, publicOrder, staffOrder, validateOrder } from "@/lib/server/order-store";
+import { createOrder, listOrders, publicOrder, staffOrder, validateOrder } from "@/lib/server/order-store";
 import { asStaff } from "@/lib/server/staff-http";
+import { getOrderableStation } from "@/lib/server/catalog";
 
 export const dynamic = "force-dynamic";
-
-const RETENTION_SWEEP_MS = 60 * 60 * 1000;
-let lastRetentionSweep = 0;
 
 /**
  * Order feed for station staff (their own stations only) and the platform
@@ -20,12 +18,10 @@ export async function GET(request: NextRequest) {
     if (principal.kind === "station" && businessId && !principal.stationIds.includes(businessId)) {
       return Response.json({ error: "You can only view orders for your own station." }, { status: 403 });
     }
-    if (Date.now() - lastRetentionSweep > RETENTION_SWEEP_MS) {
-      lastRetentionSweep = Date.now();
-      await applyOrderRetention().catch(() => undefined);
-    }
     const orders = await listOrders({
       businessId,
+      // A station account only ever reads its own stations' orders.
+      businessIds: principal.kind === "station" ? principal.stationIds : undefined,
       status: searchParams.get("status") ?? undefined,
       phone: searchParams.get("phone") ?? undefined,
     });
@@ -42,7 +38,17 @@ export async function POST(request: Request) {
   } catch {
     return Response.json({ error: "Invalid JSON body" }, { status: 400 });
   }
-  const { order, errors } = validateOrder(body);
+  const businessId = (body as Record<string, unknown> | null)?.businessId;
+  let station;
+  try {
+    station = typeof businessId === "string" && businessId.trim() ? await getOrderableStation(businessId.trim()) : null;
+  } catch (error) {
+    await reportFailure("store", "Could not load the station for an order.", {
+      reason: error instanceof Error ? error.message : "unknown",
+    });
+    return Response.json({ error: "We could not reach this station right now. Please try again." }, { status: 503 });
+  }
+  const { order, errors } = validateOrder(body, station);
   if (!order || errors) {
     return Response.json(
       {

@@ -1,9 +1,9 @@
 import { PageHero } from "@/components/shared/page-hero";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Stagger, StaggerItem } from "@/components/ui/animated-section";
-import { MapPin, Store, PackagePlus, ShoppingCart, ClipboardList, Bell } from "lucide-react";
+import { MapPin, Store, PackagePlus, ShoppingCart, ClipboardList } from "lucide-react";
 import Link from "next/link";
 
 const customerSteps = [
@@ -20,36 +20,32 @@ const customerSteps = [
   {
     icon: PackagePlus,
     title: "Build your cart",
-    text: "Cans, bottles and dispensers in one cart, delivery totalled per station.",
+    text: "Cans, bottles and dispensers from one station, with its delivery fee shown up front.",
   },
   {
     icon: ShoppingCart,
     title: "Checkout and pay",
-    text: "Pay with M-Pesa or card and get a confirmation.",
+    text: "Place the order and pay when it arrives, by cash or M-Pesa.",
   },
   {
     icon: ClipboardList,
     title: "Follow the order",
     text: "Track it from pending to delivered.",
   },
-  {
-    icon: Bell,
-    title: "Recurring orders, coming soon",
-    text: "A refill schedule with reminders is on the roadmap.",
-  },
 ];
 
 const faqItems = [
   { q: "Is anything actually delivered?", a: "Yes. Orders are accepted and delivered by the station you choose, and you can follow every stage." },
-  { q: "Is there a free-delivery minimum?", a: "Yes, per station. Some waive the delivery fee above a set amount, shown on the station page." },
+  { q: "Is there a free-delivery minimum?", a: "Yes, each station sets its own. Some waive the delivery fee above a set amount, shown on the station page and in your cart." },
   { q: "What if something goes wrong?", a: "Open the order to see its status and contact the station, or reach support from the contact page." },
-  { q: "Can I pay cash on delivery?", a: "Orders are prepaid by M-Pesa or card at checkout." },
+  { q: "Can I pay cash on delivery?", a: "Yes. Pay the rider by cash or M-Pesa when your water arrives, or pay at the counter when you collect." },
 ];
 
 export const metadata = {
   title: "How it works",
   description:
-    "Compare refill stations, build a cart, pay with M-Pesa and follow your delivery from checkout to your door.",
+    "Compare refill stations, build a cart, pay on delivery and follow your order from checkout to your door.",
+  alternates: { canonical: "/how-it-works" },
 };
 
 export default function HowItWorks() {
@@ -66,15 +62,11 @@ export default function HowItWorks() {
         description="Compare stations, place an order and follow it to your door."
       >
         <div className="flex flex-col items-center gap-3 sm:flex-row">
-          <Link href="/browse">
-            <Button size="lg" variant="secondary" className="group w-full sm:w-auto">
-              Browse stations
-            </Button>
+          <Link href="/browse" className={buttonVariants({ variant: "secondary", size: "lg", className: "group w-full sm:w-auto" })}>
+            Browse stations
           </Link>
-          <Link href="/business">
-            <Button size="lg" variant="secondary" className="w-full sm:w-auto">
-              Open the dashboard
-            </Button>
+          <Link href="/business" className={buttonVariants({ variant: "secondary", size: "lg", className: "w-full sm:w-auto" })}>
+            Open the dashboard
           </Link>
         </div>
       </PageHero>
@@ -86,7 +78,7 @@ export default function HowItWorks() {
               <StaggerItem key={s.title}>
                 <div className="group flex h-full flex-col rounded-2xl border border-border bg-card p-7 shadow-card">
                   <div className="flex items-center justify-between">
-                    <span className="flex size-12 items-center justify-center rounded-xl bg-neutral-100 text-black">
+                    <span className="flex size-12 items-center justify-center rounded-xl bg-cta-soft text-[var(--brand)]">
                       <s.icon className="size-5" aria-hidden />
                     </span>
                     <span className="font-mono text-sm font-bold text-[var(--brand)]/40">0{i + 1}</span>

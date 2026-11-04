@@ -3,9 +3,9 @@ import { BarChart3, Coins, PackagePlus, Store, Users } from "lucide-react";
 import { PageHero } from "@/components/shared/page-hero";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Stagger, StaggerItem } from "@/components/ui/animated-section";
-import { businesses } from "@/lib/data/businesses";
+import { listStations } from "@/lib/server/catalog";
 import { cn } from "@/lib/utils";
 
 const pillars = [
@@ -22,7 +22,7 @@ const pillars = [
   {
     icon: Coins,
     title: "Payments that settle to you",
-    text: "Customers pay by M-Pesa or card, matched to each order.",
+    text: "Customers pay on delivery by cash or M-Pesa, recorded against each order.",
   },
   {
     icon: Users,
@@ -41,23 +41,29 @@ const pillars = [
   },
 ];
 
-const productsInCatalogue = businesses.reduce((total, b) => total + b.products.length, 0);
-const citiesCovered = new Set(businesses.map((b) => b.city)).size;
-
-const numbers = [
-  { value: `${businesses.length}`, label: "stations live" },
-  { value: `${productsInCatalogue}`, label: "products in the catalogue" },
-  { value: `${citiesCovered}`, label: "cities covered" },
-  { value: "14", label: "day free trial on every plan" },
-];
+/** Live platform numbers. A count that is still zero is left out rather than shown. */
+async function platformNumbers() {
+  const stations = await listStations().catch(() => []);
+  const counts = [
+    { count: stations.length, label: "stations live" },
+    { count: stations.reduce((total, b) => total + b.products.length, 0), label: "products in the catalogue" },
+    { count: new Set(stations.map((b) => b.city)).size, label: "cities covered" },
+  ];
+  return [
+    ...counts.filter(({ count }) => count > 0).map(({ count, label }) => ({ value: `${count}`, label })),
+    { value: "14", label: "day free trial on every plan" },
+  ];
+}
 
 export const metadata = {
   title: "For businesses",
   description:
     "A storefront, a dashboard and simple monthly pricing for water refill businesses. Start with a 14-day free trial.",
+  alternates: { canonical: "/for-business" },
 };
 
-export default function ForBusiness() {
+export default async function ForBusiness() {
+  const numbers = await platformNumbers();
   return (
     <>
       <PageHero
@@ -71,15 +77,11 @@ export default function ForBusiness() {
         description="A storefront, a dashboard and simple monthly pricing."
       >
         <div className="mt-2 flex flex-col items-center gap-3 sm:flex-row">
-          <Link href="/business/register">
-            <Button size="lg" className="group w-full sm:w-auto">
-              Create your station
-            </Button>
+          <Link href="/business/register" className={buttonVariants({ size: "lg", className: "group w-full sm:w-auto" })}>
+            Create your station
           </Link>
-          <Link href="/business">
-            <Button size="lg" variant="secondary" className="w-full sm:w-auto">
-              Open the dashboard
-            </Button>
+          <Link href="/business" className={buttonVariants({ variant: "secondary", size: "lg", className: "w-full sm:w-auto" })}>
+            Open the dashboard
           </Link>
         </div>
       </PageHero>
@@ -112,7 +114,7 @@ export default function ForBusiness() {
             {pillars.map((p) => (
               <StaggerItem key={p.title}>
                 <div className="group flex h-full flex-col rounded-2xl border border-border bg-card p-7 shadow-card">
-                  <span className="flex size-12 items-center justify-center rounded-xl bg-neutral-100 text-black">
+                  <span className="flex size-12 items-center justify-center rounded-xl bg-cta-soft text-[var(--brand)]">
                     <p.icon className="size-5" aria-hidden />
                   </span>
                   <h3 className="mt-6 font-display text-xl text-foreground">{p.title}</h3>
@@ -165,10 +167,8 @@ export default function ForBusiness() {
             ))}
           </Stagger>
           <div className="mt-10 text-center">
-            <Link href="/business/register">
-              <Button size="lg" className="group">
-                Create your station
-              </Button>
+            <Link href="/business/register" className={buttonVariants({ size: "lg", className: "group" })}>
+              Create your station
             </Link>
           </div>
         </Container>

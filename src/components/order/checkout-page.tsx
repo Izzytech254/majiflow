@@ -6,17 +6,17 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Transition } from "framer-motion";
 import {
-  AlertCircle, ArrowLeft, CheckCircle2, CreditCard, MapPin, Navigation, RefreshCcw, ShieldCheck, Smartphone, Truck, User } from "lucide-react";
+  AlertCircle, ArrowLeft, Banknote, CheckCircle2, CreditCard, MapPin, Navigation, RefreshCcw, ShieldCheck, Smartphone, Store, User } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { LoadingState } from "@/components/ui/feedback";
 import { OrderMap } from "@/components/ui/order-map";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
 import { useCart } from "@/components/order/cart-provider";
-import { OrderTypeBar } from "@/components/order/order-type-bar";
+import { useOrderSession } from "@/components/order/order-session-provider";
 import { useCustomer, type CustomerProfile } from "@/components/order/customer-provider";
 import { useToast } from "@/components/ui/toast";
-import { businesses } from "@/lib/data/businesses";
+import { useStations } from "@/components/order/stations-provider";
 import { CITIES, ESTATES } from "@/lib/constants";
 import { formatKES } from "@/lib/format";
 import { computeCartTotals } from "@/lib/pricing";
@@ -35,6 +35,8 @@ import type { DeliveryAddress, Order, PaymentMethod } from "@/lib/types";
 import { ButtonLoader } from "@/components/ui/button-loader";
 import { MpesaWait } from "@/components/motion/mpesa-wait";
 import { SuccessCheck } from "@/components/motion/success-check";
+import { OrderTotalsList } from "@/components/shared/order-totals";
+import { SendWaterSummary } from "@/components/order/send-water-summary";
 
 type PayState = "idle" | "working" | "awaiting-provider" | "failed" | "stale";
 type FieldErrors = Record<string, string>;
@@ -120,10 +122,15 @@ export function CheckoutPage() {
 }
 
 function CheckoutForm() {
+  const businesses = useStations();
   const router = useRouter();
   const { items, clear, hydrated: cartHydrated } = useCart();
   const { profile, loggedIn, saveProfileDetails } = useCustomer();
+  const { fulfilment } = useOrderSession();
   const { toast } = useToast();
+  // Collection from the station: no delivery fee, and the order is collected
+  // at the station's own address.
+  const pickup = fulfilment === "pickup";
 
   const [name, setName] = useState(profile.name);
   const [phone, setPhone] = useState(profile.phone);
@@ -138,7 +145,7 @@ function CheckoutForm() {
   const [location, setLocation] = useState<CapturedLocation | null>(prefill.location);
   const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
-  const [method, setMethod] = useState<PaymentMethod>("mpesa");
+  const [chosenMethod, setMethod] = useState<PaymentMethod>("cod");
   const [saveProfile, setSaveProfile] = useState(readConsent);
   const [shareLocation, setShareLocation] = useState(true);
   const [smsUpdates, setSmsUpdates] = useState(true);
@@ -176,30 +183,38 @@ function CheckoutForm() {
     };
   }, []);
 
-  const cart = useMemo(() => resolveCart(items, businesses), [items]);
+  const cart = useMemo(() => resolveCart(items, businesses), [items, businesses]);
   const rows = cart.orderable;
+  // M-Pesa up front only where every station in the cart offers it on this
+  // deployment; pay on delivery is always there.
+  const mpesaOffered = rows.length > 0 && rows.every((r) => r.business!.acceptsMpesa);
+  const method: PaymentMethod = chosenMethod === "mpesa" && mpesaOffered ? "mpesa" : "cod";
   const cartProblems = cart.problems;
 
   const totals = computeCartTotals(
     rows.map((r) => ({
       businessId: r.business!.id,
       quantity: r.line.quantity,
-      unitPrice: r.product!.price,
+      unitPrice: r.unitPrice,
+      deposit: r.deposit,
     })),
-    businesses
+    pickup
+      ? businesses.map((b) => ({ id: b.id, deliveryFee: 0, freeDeliveryAbove: 0 }))
+      : businesses
   );
-  const { subtotal, deliveryFee, total } = totals;
+  const { total } = totals;
   const totalsByStation = new Map(totals.groups.map((group) => [group.businessId, group]));
+  const station = rows[0]?.business;
 
   const savedAddress = defaultAddress(profile);
-  const profileComplete = Boolean(
-    profile.name && profile.phone && profile.email && typeof savedAddress?.lat === "number"
-  );
+  const profileComplete = Boolean(profile.name && profile.phone && typeof savedAddress?.lat === "number");
 
   const signature = useMemo(
     () =>
       [
-        rows.map((r) => `${r.line.businessId}:${r.line.productId}:${r.line.quantity}`).join(","),
+        rows
+          .map((r) => `${r.line.businessId}:${r.line.productId}:${r.line.optionId ?? ""}:${r.line.quantity}`)
+          .join(","),
         name.trim(),
         phone.trim(),
         email.trim(),
@@ -210,9 +225,10 @@ function CheckoutForm() {
         floor.trim(),
         notes.trim(),
         method,
+        fulfilment,
         location ? `${location.lat},${location.lng}` : "",
       ].join("|"),
-    [rows, name, phone, email, city, estate, street, building, floor, notes, method, location]
+    [rows, name, phone, email, city, estate, street, building, floor, notes, method, fulfilment, location]
   );
 
   const ensureAttemptKey = () => {
@@ -239,11 +255,16 @@ function CheckoutForm() {
       errs.phone = "Use a Kenyan number, e.g. 07XX XXX XXX or +254 7XX….";
     }
     if (!city) errs.city = "Choose your town.";
-    if (!estate.trim()) errs.estate = "Choose a recognised estate - riders use these to navigate.";
+    // A collected order is collected at the station, so it needs no address.
+    if (!pickup && !estate.trim())
+      errs.estate = "Tell us your area - riders use it to navigate.";
     if (notes.length > 500) errs.notes = "Directions must be under 500 characters.";
-    if (saveProfile) {
-      if (!email.trim()) errs.email = "Add your email to save it to your profile.";
-      else if (!EMAIL_RE.test(email.trim())) errs.email = "Enter a valid email address.";
+    // A phone-first customer has no email, so an empty field is fine. An
+    // account that already has one cannot leave it blank.
+    if (email.trim() && !EMAIL_RE.test(email.trim())) {
+      errs.email = "Enter a valid email address.";
+    } else if (!email.trim() && profile.email && saveProfile) {
+      errs.email = "Your email is your sign-in and can't be left blank.";
     }
     return errs;
   };
@@ -462,9 +483,14 @@ function CheckoutForm() {
           const stationTotals = totalsByStation.get(station.id);
           const groupSubtotal =
             stationTotals?.subtotal ??
-            group.reduce((s, r) => s + (r.product?.price ?? 0) * r.line.quantity, 0);
-          const groupFee =
-            stationTotals?.deliveryFee ?? (groupSubtotal >= station.freeDeliveryAbove ? 0 : station.deliveryFee);
+            group.reduce((s, r) => s + r.unitPrice * r.line.quantity, 0);
+          const groupFee = pickup
+            ? 0
+            : (stationTotals?.deliveryFee ??
+              (groupSubtotal >= station.freeDeliveryAbove ? 0 : station.deliveryFee));
+          const groupDeposit =
+            stationTotals?.deposit ??
+            group.reduce((s, r) => s + r.deposit * r.line.quantity, 0);
           const order: Order = {
             id: `order-${attemptKey}-${station.id}`,
             orderNumber: generateOrderNumber(),
@@ -476,36 +502,108 @@ function CheckoutForm() {
               productId: r.product!.id,
               name: r.product!.name,
               quantity: r.line.quantity,
-              unitPrice: r.product!.price,
+              unitPrice: r.unitPrice,
+              ...(r.option
+                ? { optionId: r.option.id, optionLabel: r.option.label, deposit: r.deposit }
+                : {}),
             })),
             subtotal: groupSubtotal,
             deliveryFee: groupFee,
-            total: stationTotals?.total ?? groupSubtotal + groupFee,
+            deposit: groupDeposit,
+            total: stationTotals?.total ?? groupSubtotal + groupFee + groupDeposit,
+            fulfilment,
             payment: method,
             paymentState: "pending",
             status: "pending",
-            address: {
-              label: "Delivery",
-              estate: addrEstate || addrBuilding || "Estate on file",
-              street: addrStreet.trim() || undefined,
-              city: addrCity || undefined,
-              building: addrBuilding || undefined,
-              floor: floor || undefined,
-              landmark: notes.trim() || undefined,
-              notes: notes || undefined,
-              phone,
-              lat: coords?.lat,
-              lng: coords?.lng,
-              accuracy: coords?.accuracy,
-              locationAt: coords?.at,
-            },
+            address: pickup
+              ? {
+                  label: "Pickup",
+                  estate: station.name,
+                  city: station.city,
+                  notes: `Collect from ${station.name}`,
+                  phone,
+                  lat: station.lat,
+                  lng: station.lng,
+                }
+              : {
+                  label: "Delivery",
+                  estate: addrEstate || addrBuilding || "Area on file",
+                  street: addrStreet.trim() || undefined,
+                  city: addrCity || undefined,
+                  building: addrBuilding || undefined,
+                  floor: floor || undefined,
+                  landmark: notes.trim() || undefined,
+                  notes: notes || undefined,
+                  phone,
+                  lat: coords?.lat,
+                  lng: coords?.lng,
+                  accuracy: coords?.accuracy,
+                  locationAt: coords?.at,
+                },
             placedAt: new Date().toISOString(),
-            eta: "≈ 50 min",
+            eta: pickup ? "Ready to collect" : "≈ 50 min",
             consent: { location: shareLocation, smsUpdates, updatedAt: new Date().toISOString() },
           };
           created.push(await createOrder(order));
         }
         orderIdsRef.current = created.map((o) => o.id);
+      }
+
+      /** The orders are in: save what the customer asked us to, then take them to tracking. */
+      const completeCheckout = async (created: Order[], first: Order, title: string, message: string) => {
+
+          if (shareLocation && coords) {
+            await Promise.all(
+              created.map((o) =>
+                postLocation(o.id, {
+                  lat: coords!.lat,
+                  lng: coords!.lng,
+                  accuracy: coords!.accuracy,
+                  at: coords!.at,
+                })
+              )
+            );
+          }
+          setLastOrder(first);
+          clear();
+          if (saveProfile) {
+            saveProfileDetails({
+              name,
+              phone,
+              email: email.trim() || undefined,
+              address: {
+                label: "Home",
+                estate: addrEstate,
+                street: addrStreet.trim() || undefined,
+                city: addrCity || undefined,
+                building: addrBuilding.trim() || undefined,
+                floor: floor.trim() || undefined,
+                landmark: notes.trim() || undefined,
+                phone,
+                lat: coords?.lat,
+                lng: coords?.lng,
+                accuracy: coords?.accuracy,
+                locationAt: coords?.at,
+              },
+            });
+          }
+          setPayState("idle");
+          toast({ kind: "success", title, message });
+          window.setTimeout(() => router.push(`/order/${first.id}`), 1600);
+      };
+
+      if (method === "cod") {
+        // Pay on delivery: nothing to charge now. The station sees the order at once.
+        const first = created[0];
+        await completeCheckout(
+          created,
+          first,
+          "Order placed",
+          created.length > 1
+            ? `${created.length} orders placed. Pay each station when your water arrives.`
+            : `Order ${first.orderNumber} is with ${first.businessName}. Pay when it ${pickup ? "is ready to collect" : "arrives"}.`
+        );
+        return;
       }
 
       const payable = created.reduce((s, o) => s + o.total, 0);
@@ -541,51 +639,14 @@ function CheckoutForm() {
           if (fresh) confirmed.push(fresh);
         }
         const first = confirmed[0] ?? created[0];
-        if (shareLocation && coords) {
-          await Promise.all(
-            created.map((o) =>
-              postLocation(o.id, {
-                lat: coords!.lat,
-                lng: coords!.lng,
-                accuracy: coords!.accuracy,
-                at: coords!.at,
-              })
-            )
-          );
-        }
-        setLastOrder(first);
-        clear();
-        if (saveProfile) {
-          saveProfileDetails({
-            name,
-            phone,
-            email: email.trim() || undefined,
-            address: {
-              label: "Home",
-              estate: addrEstate,
-              street: addrStreet.trim() || undefined,
-              city: addrCity || undefined,
-              building: addrBuilding.trim() || undefined,
-              floor: floor.trim() || undefined,
-              landmark: notes.trim() || undefined,
-              phone,
-              lat: coords?.lat,
-              lng: coords?.lng,
-              accuracy: coords?.accuracy,
-              locationAt: coords?.at,
-            },
-          });
-        }
-        setPayState("idle");
-        toast({
-          kind: "success",
-          title: "Payment confirmed",
-          message:
-            confirmed.length > 1
-              ? `${confirmed.length} orders paid (${formatKES(payable)}). Start with ${first.orderNumber} - ${first.businessName}.`
-              : `Order ${first.orderNumber} is paid and with ${first.businessName}. Track it now.`,
-        });
-        window.setTimeout(() => router.push(`/order/${first.id}`), 1600);
+        await completeCheckout(
+          created,
+          first,
+          "Payment confirmed",
+          confirmed.length > 1
+            ? `${confirmed.length} orders paid (${formatKES(payable)}). Start with ${first.orderNumber} - ${first.businessName}.`
+            : `Order ${first.orderNumber} is paid and with ${first.businessName}. Track it now.`
+        );
       } else if (outcome === "pending") {
         // Poll budget spent but the provider may still confirm late.
         setPayState("stale");
@@ -638,13 +699,9 @@ function CheckoutForm() {
             Thanks for ordering. We&apos;ll text you as it moves along, and you can follow it live from here.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href={`/order/${lastOrder.id}`}>
-              <Button size="lg" className="w-full sm:w-auto">Track order</Button>
-            </Link>
-            <Link href="/browse">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                Continue browsing
-              </Button>
+            <Link href={`/order/${lastOrder.id}`} className={buttonVariants({ size: "lg", className: "w-full sm:w-auto" })}>Track order</Link>
+            <Link href="/browse" className={buttonVariants({ variant: "outline", size: "lg", className: "w-full sm:w-auto" })}>
+              Continue browsing
             </Link>
           </div>
         </div>
@@ -689,7 +746,6 @@ function CheckoutForm() {
 
   return (
     <>
-      <OrderTypeBar />
       <Container className="py-14 pb-32 lg:py-20">
       <div className="mb-8">
         <Link
@@ -699,7 +755,7 @@ function CheckoutForm() {
           <ArrowLeft className="size-4" aria-hidden /> Back to cart
         </Link>
         <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-          <span className="size-1.5 rounded-full bg-foreground animate-pulse-dot" /> 2 of 2 · Delivery & payment
+          <span className="size-1.5 rounded-full bg-foreground animate-pulse-dot" /> Delivery & payment
         </p>
         <h1 className="mt-2 font-display text-3xl text-foreground sm:text-4xl">Finish your order</h1>
       </div>
@@ -714,7 +770,7 @@ function CheckoutForm() {
         {/* Delivery details */}
         <div className="flex min-w-0 flex-col gap-8">
           {loggedIn && !profileComplete && (
-            <div className="flex items-start gap-3 rounded-2xl border border-[var(--brand)]/20 bg-transparent/5 p-4">
+            <div className="flex items-start gap-3 rounded-2xl border border-[var(--brand)]/20 bg-brand/5 p-4">
               <AlertCircle className="mt-0.5 size-5 shrink-0 text-[var(--brand)]" aria-hidden />
               <p className="text-sm text-foreground/85">
                 <strong className="font-semibold text-foreground">Finish your profile</strong> to
@@ -731,6 +787,7 @@ function CheckoutForm() {
                 <User className="size-4.5" />
               </span>
               <div>
+                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Step 1</p>
                 <h2 className="font-display text-lg text-foreground">Contact</h2>
                 <p className="text-xs text-muted-foreground">Who we call when your water arrives.</p>
               </div>
@@ -755,16 +812,16 @@ function CheckoutForm() {
                   invalid={Boolean(touch && errors.phone)}
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+254 7XX XXX XXX"
+                  placeholder="07XX XXX XXX"
                   autoComplete="tel"
                 />
               </Field>
               <div className="sm:col-span-2">
                 <Field
                   label="Email"
-                  required={saveProfile}
+                  required={Boolean(saveProfile && profile.email)}
                   error={touch ? errors.email : undefined}
-                  hint={saveProfile ? undefined : "Shown on your receipt when provided."}
+                  hint={saveProfile ? undefined : "Optional - we text you about your order."}
                 >
                   <Input
                     name="email"
@@ -783,18 +840,38 @@ function CheckoutForm() {
           <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
             <div className="flex items-center gap-3">
               <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-cta-soft text-[var(--brand)]" aria-hidden>
-                <MapPin className="size-4.5" />
+                {pickup ? <Store className="size-4.5" /> : <MapPin className="size-4.5" />}
               </span>
               <div>
-                <h2 className="font-display text-lg text-foreground">Delivery</h2>
-                <p className="text-xs text-muted-foreground">Pin the spot so the rider finds you first time.</p>
+                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Step 2</p>
+                <h2 className="font-display text-lg text-foreground">
+                  {pickup ? "Collection" : "Delivery"}
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  {pickup
+                    ? "Collect at the station - no delivery fee, no rider needed."
+                    : "Pin the spot so the rider finds you first time."}
+                </p>
               </div>
             </div>
+            {pickup && station && (
+              <div className="mt-5 rounded-xl border border-border bg-muted/30 p-4">
+                <p className="text-sm font-semibold text-foreground">{station.name}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {station.city} · {station.tagline}
+                </p>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  We&apos;ll text you the moment your water is filled and ready to collect.
+                </p>
+              </div>
+            )}
+            {!pickup && (
+            <>
             <div className="mt-5 rounded-xl border border-border bg-muted/30 p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-start gap-3">
                   <span
-                    className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-transparent/10 text-[var(--brand)]"
+                    className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-[var(--brand)]"
                     aria-hidden
                   >
                     <MapPin className="size-4.5" />
@@ -919,6 +996,8 @@ function CheckoutForm() {
                 </Field>
               </div>
             </div>
+            </>
+            )}
           </section>
 
           {/* Payment method */}
@@ -928,32 +1007,36 @@ function CheckoutForm() {
                 <ShieldCheck className="size-4.5" />
               </span>
               <div>
+                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Step 3</p>
                 <h2 className="font-display text-lg text-foreground">Payment</h2>
-                <p className="text-xs text-muted-foreground">Money is only released when the station accepts.</p>
+                <p className="text-xs text-muted-foreground">
+                  {mpesaOffered ? "Pay when your water arrives, or pay now with M-Pesa." : "Pay when your water arrives."}
+                </p>
               </div>
             </div>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               <PaymentOption
-                selected={method === "mpesa"}
-                onSelect={() => setMethod("mpesa")}
-                icon={<Smartphone className="size-5" aria-hidden />}
-                title="M-Pesa"
-                subtitle="STK push to your phone"
-                badge="Fastest"
+                selected={method === "cod"}
+                onSelect={() => setMethod("cod")}
+                icon={<Banknote className="size-5" aria-hidden />}
+                title={pickup ? "Pay at the station" : "Pay on delivery"}
+                subtitle={pickup ? "Cash or M-Pesa at the counter" : "Cash or M-Pesa to the rider"}
               />
-              <PaymentOption
-                selected={method === "card"}
-                onSelect={() => setMethod("card")}
-                icon={<CreditCard className="size-5" aria-hidden />}
-                title="Card"
-                subtitle="Visa & Mastercard"
-              />
+              {mpesaOffered && (
+                <PaymentOption
+                  selected={method === "mpesa"}
+                  onSelect={() => setMethod("mpesa")}
+                  icon={<Smartphone className="size-5" aria-hidden />}
+                  title="M-Pesa now"
+                  subtitle="STK push to your phone"
+                />
+              )}
             </div>
             <p className="mt-4 flex items-start gap-2 text-xs leading-relaxed text-muted-foreground">
               <ShieldCheck className="mt-0.5 size-4 shrink-0 text-success" aria-hidden />
-              Payment is released to the station only after your order is accepted. Failed or
-              rejected orders are refunded automatically. Card numbers and M-Pesa PINs are never
-              stored on your profile.
+              {method === "cod"
+                ? "You pay the station directly when your order is handed over. Nothing is charged now."
+                : "If the station rejects or cancels a paid order, we start a refund to your M-Pesa and show its progress on the order page. M-Pesa PINs are never seen or stored."}
             </p>
           </section>
         </div>
@@ -961,36 +1044,30 @@ function CheckoutForm() {
         {/* Summary + pay */}
         <div className="h-fit min-w-0 rounded-2xl border border-border bg-white p-6 shadow-layered lg:sticky lg:top-24">
           <h2 className="font-display text-xl text-foreground">Your order</h2>
+          <SendWaterSummary className="mt-4" />
           <ul className="mt-4 space-y-2.5">
             {rows.map((r) => (
-              <li key={`${r.line.businessId}-${r.line.productId}`} className="flex items-center justify-between gap-3 text-sm">
+              <li
+                key={`${r.line.businessId}-${r.line.productId}-${r.line.optionId ?? ""}`}
+                className="flex items-start justify-between gap-3 text-sm"
+              >
                 <span className="min-w-0 truncate text-muted-foreground">
                   {r.line.quantity} × {r.product!.name}
+                  {r.option && (
+                    <span className="block text-xs font-medium text-[var(--brand)]">{r.option.label}</span>
+                  )}
                 </span>
                 <span className="shrink-0 font-semibold text-foreground">
-                  {formatKES((r.product?.price ?? 0) * r.line.quantity)}
+                  {formatKES(r.unitPrice * r.line.quantity)}
                 </span>
               </li>
             ))}
           </ul>
-          <dl className="mt-4 space-y-2 border-t border-border pt-4 text-sm">
-            <div className="flex justify-between">
-              <dt className="text-muted-foreground">Subtotal</dt>
-              <dd className="font-semibold text-foreground">{formatKES(subtotal)}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="inline-flex items-center gap-1.5 text-muted-foreground">
-                <Truck className="size-4" aria-hidden /> Delivery
-              </dt>
-              <dd className="font-semibold text-foreground">
-                {deliveryFee === 0 ? <span className="text-success">Free</span> : formatKES(deliveryFee)}
-              </dd>
-            </div>
-            <div className="flex items-center justify-between border-t border-border pt-3">
-              <dt className="font-semibold text-foreground">Total</dt>
-              <dd className="font-display text-2xl text-foreground">{formatKES(total)}</dd>
-            </div>
-          </dl>
+          <OrderTotalsList
+            totals={totals}
+            pickup={pickup}
+            className="mt-4 space-y-2 border-t border-border pt-4"
+          />
 
           <label className="mt-5 flex cursor-pointer items-start gap-2.5 rounded-xl border border-border bg-muted/30 p-3">
             <input
@@ -1067,13 +1144,13 @@ function CheckoutForm() {
               <Button
                 type="submit"
                 size="lg"
-                className="group mt-4 w-full bg-orange-500 hover:bg-orange-600 text-white shadow-[0_4px_14px_-4px_rgb(249,115,22)]"
+                className="group mt-4 w-full bg-[var(--brand)] hover:bg-[var(--cta-hover)] text-white shadow-accent"
                 disabled={stationBlockers.length > 0}
               >
-                {method === "mpesa" ? `Pay ${formatKES(total)} with M-Pesa` : `Pay ${formatKES(total)} by card`}
+                {method === "mpesa" ? `Pay ${formatKES(total)} with M-Pesa` : `Place order · ${formatKES(total)}`}
               </Button>
-              <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                You&apos;ll confirm on your phone
+              <p className="mt-3 text-center font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+                {method === "mpesa" ? "You'll confirm on your phone" : pickup ? "Pay when you collect" : "Pay when it arrives"}
               </p>
             </>
           )}
@@ -1116,11 +1193,11 @@ function CheckoutForm() {
               <Button
                 type="button"
                 size="lg"
-                className="group mt-4 w-full bg-orange-500 hover:bg-orange-600 text-white shadow-[0_4px_14px_-4px_rgb(249,115,22)]"
+                className="group mt-4 w-full bg-[var(--brand)] hover:bg-[var(--cta-hover)] text-white shadow-accent"
                 onClick={startPayment}
                 disabled={submitting || stationBlockers.length > 0}
               >
-                {method === "mpesa" ? "Retry M-Pesa payment" : "Retry card payment"}
+                Retry M-Pesa payment
               </Button>
             </div>
           )}
@@ -1130,10 +1207,10 @@ function CheckoutForm() {
       {/* Mobile: the total and the pay action stay reachable without scrolling
           back up to the summary card. */}
       {payState === "idle" && (
-        <div className="fixed inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-40 border-t border-border bg-white/95 px-4 pb-3 pt-3 backdrop-blur lg:hidden">
+        <div className="fixed inset-x-0 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-40 border-t border-border bg-white/95 px-4 pb-3 pt-3 backdrop-blur lg:hidden">
           <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
                 Total
               </p>
               <p className="font-display text-xl leading-tight text-foreground">
@@ -1144,9 +1221,9 @@ function CheckoutForm() {
               type="submit"
               form="checkout-form"
               disabled={stationBlockers.length > 0}
-              className="shrink-0 rounded-xl bg-orange-500 px-6 py-3.5 text-sm font-semibold text-white shadow-[0_4px_14px_-4px_rgb(249,115,22)] transition-colors hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+              className="shrink-0 rounded-xl bg-[var(--brand)] px-6 py-3.5 text-sm font-semibold text-white shadow-accent transition-colors hover:bg-[var(--cta-hover)] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {method === "mpesa" ? "Pay with M-Pesa" : "Pay by card"}
+              {method === "mpesa" ? "Pay with M-Pesa" : "Place order"}
             </button>
           </div>
         </div>
@@ -1196,7 +1273,7 @@ function PaymentOption({
       aria-pressed={selected}
       className={`flex items-center gap-3.5 rounded-xl border p-4 text-left transition-all min-h-[64px] ${
         selected
-          ? "border-[var(--brand)] bg-transparent/5 ring-2 ring-[var(--brand)]/20"
+          ? "border-[var(--brand)] bg-brand/5 ring-2 ring-[var(--brand)]/20"
           : "border-border bg-white hover:border-[var(--brand)]/40"
       }`}
     >
@@ -1207,7 +1284,7 @@ function PaymentOption({
         <span className="flex items-center gap-2">
           <span className="text-sm font-semibold text-foreground">{title}</span>
           {badge && (
-            <span className="rounded-full bg-transparent-soft px-2 py-0.5 font-mono text-[10px] font-semibold uppercase text-success">
+            <span className="rounded-full bg-success-soft px-2 py-0.5 font-mono text-[11px] font-semibold uppercase text-success">
               {badge}
             </span>
           )}
@@ -1287,7 +1364,7 @@ function PaymentOverlay({
       exit={r ? { opacity: 0 } : { opacity: 0 }}
       transition={overlayTransition}
     >
-      <div className="absolute inset-0 bg-transparent/70 backdrop-blur-sm" aria-hidden />
+      <div className="absolute inset-0 bg-ink/70 backdrop-blur-sm" aria-hidden />
       <motion.div
         role="dialog"
         aria-modal="true"
@@ -1376,7 +1453,7 @@ function PaymentOverlay({
             </div>
             {testMode && (
               <div className="mt-2 w-full rounded-xl border border-dashed border-warning/60 bg-warning/5 p-4">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-warning">
+                <p className="font-mono text-[11px] uppercase tracking-widest text-warning">
                   Development mode - no real charge
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">

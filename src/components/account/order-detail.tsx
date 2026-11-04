@@ -4,11 +4,11 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowLeft, MapPin, Navigation, PackageX, RotateCcw, XCircle } from "lucide-react";
 import { Container } from "@/components/ui/container";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog } from "@/components/ui/dialog";
 import { EmptyState, LoadingState } from "@/components/ui/feedback";
-import { ORDER_STATUS_META, OrderStatusBadge, PAYMENT_STATE_META } from "@/components/ui/order-status-badge";
+import { ORDER_STATUS_META, OrderStatusBadge, paymentMeta } from "@/components/ui/order-status-badge";
 import { useToast } from "@/components/ui/toast";
 import { AccountError, AccountPageHeader, useAccountResource, useReorder } from "@/components/account/account-ui";
 import { ACTIVE_STATUSES } from "@/lib/account";
@@ -59,9 +59,7 @@ export function OrderDetailPage({ id }: { id: string }) {
             title="Order not found"
             description="This order doesn't exist or belongs to a different account."
             action={
-              <Link href="/account/orders">
-                <Button>See your orders</Button>
-              </Link>
+              <Link href="/account/orders" className={buttonVariants()}>See your orders</Link>
             }
           />
         ) : (
@@ -73,7 +71,7 @@ export function OrderDetailPage({ id }: { id: string }) {
 
   const { order, cancelBlockReason } = resource.data;
   const active = ACTIVE_STATUSES.includes(order.status);
-  const payment = PAYMENT_STATE_META[order.paymentState];
+  const payment = paymentMeta(order);
   const timeline = [...(order.timeline ?? [])].reverse();
 
   const cancel = async () => {
@@ -116,9 +114,12 @@ export function OrderDetailPage({ id }: { id: string }) {
             </h2>
             <ul className="mt-3 divide-y divide-border">
               {order.items.map((item) => (
-                <li key={item.productId} className="flex items-center justify-between gap-3 py-3 text-sm">
+                <li key={`${item.productId}-${item.optionId ?? ""}`} className="flex items-center justify-between gap-3 py-3 text-sm">
                   <span className="text-foreground">
                     {item.quantity} × {item.name}
+                    {item.optionLabel && (
+                      <span className="block text-xs font-medium text-[var(--brand)]">{item.optionLabel}</span>
+                    )}
                   </span>
                   <span className="font-medium text-foreground">{formatKES(item.unitPrice * item.quantity)}</span>
                 </li>
@@ -130,9 +131,15 @@ export function OrderDetailPage({ id }: { id: string }) {
                 <dd>{formatKES(order.subtotal)}</dd>
               </div>
               <div className="flex justify-between text-muted-foreground">
-                <dt>Delivery</dt>
+                <dt>{order.fulfilment === "pickup" ? "Collection" : "Delivery"}</dt>
                 <dd>{order.deliveryFee ? formatKES(order.deliveryFee) : "Free"}</dd>
               </div>
+              {order.deposit ? (
+                <div className="flex justify-between text-muted-foreground">
+                  <dt>Refundable deposit</dt>
+                  <dd>{formatKES(order.deposit)}</dd>
+                </div>
+              ) : null}
               <div className="flex justify-between font-bold text-foreground">
                 <dt>Total</dt>
                 <dd>{formatKES(order.total)}</dd>
@@ -180,10 +187,8 @@ export function OrderDetailPage({ id }: { id: string }) {
             </h2>
             <div className="flex flex-col gap-2">
               {active && (
-                <Link href={`/order/${order.id}`}>
-                  <Button className="w-full">
-                    <Navigation className="size-4" aria-hidden /> Track live
-                  </Button>
+                <Link href={`/order/${order.id}`} className={buttonVariants({ className: "w-full" })}>
+                  <Navigation className="size-4" aria-hidden /> Track live
                 </Link>
               )}
               <Button
